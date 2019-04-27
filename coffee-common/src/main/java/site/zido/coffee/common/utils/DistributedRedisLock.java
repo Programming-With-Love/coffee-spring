@@ -17,7 +17,7 @@ import java.util.concurrent.locks.Lock;
  *
  * @author zido
  */
-public class DistributedReentrantLock implements Lock, Serializable {
+public class DistributedRedisLock implements Lock, Serializable {
     private static final long serialVersionUID = -8954727144655510783L;
     private static final String LOCK_SUCCESS = "OK";
     private static final String SET_WITH_EXPIRE_TIME = "PX";
@@ -29,15 +29,15 @@ public class DistributedReentrantLock implements Lock, Serializable {
     private TimeUnit unit;
     private String value;
 
-    public DistributedReentrantLock(String key, Jedis jedis) {
+    public DistributedRedisLock(String key, Jedis jedis) {
         this(key, jedis, 100, TimeUnit.SECONDS);
     }
 
-    public DistributedReentrantLock(String key, StringRedisTemplate template) {
+    public DistributedRedisLock(String key, StringRedisTemplate template) {
         this(key, template, 100, TimeUnit.SECONDS);
     }
 
-    public DistributedReentrantLock(String key, Jedis jedis, long timeout, TimeUnit unit) {
+    public DistributedRedisLock(String key, Jedis jedis, long timeout, TimeUnit unit) {
         this.key = key;
         this.jedis = jedis;
         this.timeout = timeout;
@@ -45,7 +45,7 @@ public class DistributedReentrantLock implements Lock, Serializable {
         initValue();
     }
 
-    public DistributedReentrantLock(String key, StringRedisTemplate template, long timeout, TimeUnit unit) {
+    public DistributedRedisLock(String key, StringRedisTemplate template, long timeout, TimeUnit unit) {
         final RedisConnection connection = template.getConnectionFactory().getConnection();
         if (!(connection instanceof JedisConnection)) {
             throw new UnsupportedOperationException("except jedis");
