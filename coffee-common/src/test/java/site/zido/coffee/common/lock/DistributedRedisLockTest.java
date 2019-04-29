@@ -4,6 +4,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.Slf4JLoggingSystem;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;
@@ -27,17 +29,18 @@ public class DistributedRedisLockTest {
 
     @Test
     public void testLock() {
+        System.setProperty("-Dorg.slf4j.simpleLogger.defaultLogLevel","debug");
         JedisPoolConfig config = new JedisPoolConfig();
         JedisConnectionFactory factory = new JedisConnectionFactory(config);
         factory.setPort(6380);
         factory.afterPropertiesSet();
-        DistributedRedisLock lock = new DistributedRedisLock("test", factory, 10, TimeUnit.SECONDS);
+        DistributedRedisLock lock = new DistributedRedisLock("test", factory, 10, TimeUnit.SECONDS,false);
         lock.lock();
         //加锁后，无法再次拿到锁
         Assert.assertFalse(lock.tryLock());
         lock.unlock();
         //解锁后能够正常拿到锁
         Assert.assertTrue(lock.tryLock());
-        lock.unlock();
+        DistributedRedisLock.releaseAll();
     }
 }

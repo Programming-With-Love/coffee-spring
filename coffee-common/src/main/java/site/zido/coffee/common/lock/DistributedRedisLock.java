@@ -39,7 +39,19 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
     private RedisConnectionFactory connectionFactory;
     private byte[] value;
 
-    public DistributedRedisLock(String key, RedisConnectionFactory connectionFactory, long timeout, TimeUnit unit) {
+    public DistributedRedisLock(String key,
+                                RedisConnectionFactory connectionFactory,
+                                long timeout,
+                                TimeUnit unit) {
+        this(key,connectionFactory,timeout,unit,true);
+    }
+
+    public DistributedRedisLock(String key,
+                                RedisConnectionFactory connectionFactory,
+                                long timeout,
+                                TimeUnit unit,
+                                boolean isSpringBean) {
+        super(isSpringBean);
         this.connectionFactory = connectionFactory;
         this.key = key;
         this.key_bytes = key.getBytes(USE_CHARSET);

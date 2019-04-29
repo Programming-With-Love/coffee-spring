@@ -24,18 +24,20 @@ import java.util.concurrent.locks.Lock;
  */
 public abstract class AbstractDistributedLock implements Lock, Serializable, DisposableBean {
     private static final Set<AbstractDistributedLock> CONTAINER = new HashSet<>();
+    private static final Logger log = LoggerFactory.getLogger("distributed lock manager");
 
 
     static {
         //收到结束信号进行扫尾回收
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            Logger log = LoggerFactory.getLogger("distributed lock shutdown hooks");
-            log.debug("try release distributed locks:number[{}]", CONTAINER.size());
-            for (AbstractDistributedLock lock : CONTAINER) {
-                lock.destroy();
-            }
-            log.debug("release distributed locks finished");
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(AbstractDistributedLock::releaseAll));
+    }
+
+    public static void releaseAll(){
+        log.debug("try release distributed locks:number[{}]", CONTAINER.size());
+        for (AbstractDistributedLock lock : CONTAINER) {
+            lock.destroy();
+        }
+        log.debug("release distributed locks finished");
     }
 
     private final boolean isSpringBean;
