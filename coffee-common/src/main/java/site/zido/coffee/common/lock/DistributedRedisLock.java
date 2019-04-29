@@ -5,7 +5,6 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.RedisConnectionUtils;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.util.Assert;
 import site.zido.coffee.common.utils.IdWorker;
 
@@ -16,8 +15,9 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 分布式锁,基于redis实现,非公平锁
+ * 分布式锁,基于redis实现,非公平锁，不可重入锁
  *
+ * TODO 是否实现可重入锁需要讨论，涉及到分布式调用时需要传播
  * @author zido
  */
 public class DistributedRedisLock extends AbstractDistributedLock implements Serializable, InitializingBean {
@@ -30,16 +30,12 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
     private static final byte[] DEL_SCRIPT_BYTES = DEL_SCRIPT.getBytes(USE_CHARSET);
     private static final byte[] ADD_SCRIPT_BYTES = ADD_SCRIPT.getBytes(USE_CHARSET);
     private static final byte[] SET_WITH_EXPIRE_TIME_BYTES = SET_WITH_EXPIRE_TIME.getBytes(USE_CHARSET);
-    private static final DefaultRedisScript<String> REDIS_SCRIPT;
-
-    static {
-        REDIS_SCRIPT = new DefaultRedisScript<>();
-        REDIS_SCRIPT.setResultType(String.class);
-    }
+    private static final DistributedLockFactory.IdCreator DEFAULT_ID_CREATER = () -> IdWorker.nextId() + "";
 
     private final String key;
     private final byte[] key_bytes;
     private final byte[] timeout_bytes;
+    private DistributedLockFactory.IdCreator idCreator = DEFAULT_ID_CREATER;
     private RedisConnectionFactory connectionFactory;
     private byte[] value;
 
@@ -56,7 +52,7 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
         try {
             this.value = connection.get(key_bytes);
             if (null == this.value || this.value.length == 0) {
-                this.value = (IdWorker.nextId() + "").getBytes(USE_CHARSET);
+                this.value = idCreator.create().getBytes(USE_CHARSET);
             }
         } finally {
             RedisConnectionUtils.releaseConnection(connection, connectionFactory);
@@ -119,6 +115,10 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
         return key;
     }
 
+    public void setIdCreator(DistributedLockFactory.IdCreator idCreator) {
+        this.idCreator = idCreator;
+    }
+
     @Override
     public void afterPropertiesSet() {
         if (this.key_bytes == null || this.key_bytes.length == 0) {
@@ -128,5 +128,6 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
             throw new IllegalArgumentException("value can't be null or blank");
         }
         Assert.notNull(connectionFactory, "redis connection factory can't be null");
+        Assert.notNull(idCreator,"id creator can't be null");
     }
 }

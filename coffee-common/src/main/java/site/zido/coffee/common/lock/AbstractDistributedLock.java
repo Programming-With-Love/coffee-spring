@@ -25,7 +25,9 @@ import java.util.concurrent.locks.Lock;
 public abstract class AbstractDistributedLock implements Lock, Serializable, DisposableBean {
     private static final Set<AbstractDistributedLock> CONTAINER = new HashSet<>();
 
+
     static {
+        //收到结束信号进行扫尾回收
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Logger log = LoggerFactory.getLogger("distributed lock shutdown hooks");
             log.debug("try release distributed locks:number[{}]", CONTAINER.size());
@@ -36,11 +38,24 @@ public abstract class AbstractDistributedLock implements Lock, Serializable, Dis
         }));
     }
 
+    private final boolean isSpringBean;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AtomicBoolean unlocked = new AtomicBoolean(false);
 
+    /**
+     * 默认认为此分布式锁生命周期由spring进行管理，非正常关闭导致的未解锁会由spring负责扫尾解锁工作
+     */
     protected AbstractDistributedLock() {
-        CONTAINER.add(this);
+        this(true);
+    }
+
+    /**
+     * 如果是非spring bean创建的情况，非正常关闭导致的未解锁会由jvm退出信号负责扫尾解锁工作
+     *
+     * @param isSpringBean 是否是spring的bean
+     */
+    protected AbstractDistributedLock(boolean isSpringBean) {
+        this.isSpringBean = isSpringBean;
     }
 
     @Override
@@ -80,8 +95,15 @@ public abstract class AbstractDistributedLock implements Lock, Serializable, Dis
 
     @Override
     public boolean tryLock() {
-        unlocked.set(false);
-        return doTryLock();
+        boolean result = doTryLock();
+        //保证只有当前拿到锁的线程能够修改unlock
+        if (result) {
+            unlocked.set(false);
+            if (!isSpringBean) {
+                CONTAINER.add(this);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -102,7 +124,9 @@ public abstract class AbstractDistributedLock implements Lock, Serializable, Dis
     public void unlock() {
         if (unlocked.compareAndSet(false, true)) {
             doUnlock();
-            CONTAINER.remove(this);
+            if (!isSpringBean) {
+                CONTAINER.remove(this);
+            }
         }
     }
 
