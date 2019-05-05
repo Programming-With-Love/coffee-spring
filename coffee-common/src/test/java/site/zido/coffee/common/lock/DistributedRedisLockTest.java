@@ -4,8 +4,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.boot.logging.LogLevel;
-import org.springframework.boot.logging.Slf4JLoggingSystem;
+import org.slf4j.impl.SimpleLogger;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;
@@ -29,7 +28,7 @@ public class DistributedRedisLockTest {
 
     @Test
     public void testLock() {
-        System.setProperty("-Dorg.slf4j.simpleLogger.defaultLogLevel","debug");
+        System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
         JedisPoolConfig config = new JedisPoolConfig();
         JedisConnectionFactory factory = new JedisConnectionFactory(config);
         factory.setPort(6380);

@@ -30,12 +30,12 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
     private static final byte[] DEL_SCRIPT_BYTES = DEL_SCRIPT.getBytes(USE_CHARSET);
     private static final byte[] ADD_SCRIPT_BYTES = ADD_SCRIPT.getBytes(USE_CHARSET);
     private static final byte[] SET_WITH_EXPIRE_TIME_BYTES = SET_WITH_EXPIRE_TIME.getBytes(USE_CHARSET);
-    private static final DistributedLockFactory.IdCreator DEFAULT_ID_CREATER = () -> IdWorker.nextId() + "";
+    private static final DistributedLockFactory.IdCreator DEFAULT_ID_CREATOR = () -> IdWorker.nextId() + "";
 
     private final String key;
     private final byte[] key_bytes;
     private final byte[] timeout_bytes;
-    private DistributedLockFactory.IdCreator idCreator = DEFAULT_ID_CREATER;
+    private DistributedLockFactory.IdCreator idCreator = DEFAULT_ID_CREATOR;
     private RedisConnectionFactory connectionFactory;
     private byte[] value;
 
