@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式锁,基于redis实现,非公平锁，不可重入锁
  *
- * 是否实现可重入锁需要讨论，涉及到分布式调用时需要传播
  * @author zido
  */
 public class DistributedRedisLock extends AbstractDistributedLock implements Serializable, InitializingBean {
@@ -30,20 +29,29 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
     private static final byte[] DEL_SCRIPT_BYTES = DEL_SCRIPT.getBytes(USE_CHARSET);
     private static final byte[] ADD_SCRIPT_BYTES = ADD_SCRIPT.getBytes(USE_CHARSET);
     private static final byte[] SET_WITH_EXPIRE_TIME_BYTES = SET_WITH_EXPIRE_TIME.getBytes(USE_CHARSET);
-    private static final DistributedLockFactory.IdCreator DEFAULT_ID_CREATOR = () -> IdWorker.nextId() + "";
 
     private final String key;
-    private final byte[] key_bytes;
-    private final byte[] timeout_bytes;
-    private DistributedLockFactory.IdCreator idCreator = DEFAULT_ID_CREATOR;
+    private long timeout;
+    private TimeUnit unit;
+    private transient byte[] keyBytes;
+    private transient byte[] timeoutBytes;
+    private transient volatile boolean initialized = false;
     private RedisConnectionFactory connectionFactory;
     private byte[] value;
 
+    /**
+     * 默认情况下采用spring方式管理lock,也就是由spring负责回收生命周期
+     *
+     * @param key               key
+     * @param connectionFactory redis 连接
+     * @param timeout           timeout
+     * @param unit              timeunit
+     */
     public DistributedRedisLock(String key,
                                 RedisConnectionFactory connectionFactory,
                                 long timeout,
                                 TimeUnit unit) {
-        this(key,connectionFactory,timeout,unit,true);
+        this(key, connectionFactory, timeout, unit, true);
     }
 
     public DistributedRedisLock(String key,
@@ -54,17 +62,16 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
         super(isSpringBean);
         this.connectionFactory = connectionFactory;
         this.key = key;
-        this.key_bytes = key.getBytes(USE_CHARSET);
-        this.timeout_bytes = (unit.toMillis(timeout) + "").getBytes();
-        initValue();
+        this.timeout = timeout;
+        this.unit = unit;
     }
 
     private void initValue() {
         RedisConnection connection = RedisConnectionUtils.getConnection(connectionFactory);
         try {
-            this.value = connection.get(key_bytes);
+            this.value = connection.get(keyBytes);
             if (null == this.value || this.value.length == 0) {
-                this.value = idCreator.create().getBytes(USE_CHARSET);
+                this.value = (IdWorker.nextId() + "").getBytes(USE_CHARSET);
             }
         } finally {
             RedisConnectionUtils.releaseConnection(connection, connectionFactory);
@@ -73,11 +80,12 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
 
     @Override
     public boolean doTryLock() {
+        Assert.isTrue(initialized, "lock not initialized; call afterPropertiesSet() before using it");
         byte[][] keysAndArgs = new byte[4][];
-        keysAndArgs[0] = this.key_bytes;
+        keysAndArgs[0] = this.keyBytes;
         keysAndArgs[1] = this.value;
         keysAndArgs[2] = SET_WITH_EXPIRE_TIME_BYTES;
-        keysAndArgs[3] = timeout_bytes;
+        keysAndArgs[3] = timeoutBytes;
         RedisConnection connection = RedisConnectionUtils.getConnection(connectionFactory);
         try {
             //结果应该是OK字符串的byte数组
@@ -93,9 +101,10 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
 
     @Override
     public void doUnlock() {
+        Assert.isTrue(initialized, "lock not initialized; call afterPropertiesSet() before using it");
         //结果可能是0或者1，但是不需要有失败判定
         byte[][] keysAndArgs = new byte[2][];
-        keysAndArgs[0] = this.key_bytes;
+        keysAndArgs[0] = this.keyBytes;
         keysAndArgs[1] = this.value;
         RedisConnection connection = RedisConnectionUtils.getConnection(connectionFactory);
         try {
@@ -107,7 +116,7 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(this.key_bytes);
+        return Arrays.hashCode(this.keyBytes);
     }
 
     @Override
@@ -119,7 +128,7 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
             return false;
         }
         DistributedRedisLock that = (DistributedRedisLock) o;
-        return Arrays.equals(key_bytes, that.key_bytes);
+        return Arrays.equals(keyBytes, that.keyBytes);
     }
 
     @Override
@@ -127,19 +136,13 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
         return key;
     }
 
-    public void setIdCreator(DistributedLockFactory.IdCreator idCreator) {
-        this.idCreator = idCreator;
-    }
-
     @Override
     public void afterPropertiesSet() {
-        if (this.key_bytes == null || this.key_bytes.length == 0) {
-            throw new IllegalArgumentException("key can't be null or blank");
-        }
-        if (this.value == null || this.value.length == 0) {
-            throw new IllegalArgumentException("value can't be null or blank");
-        }
+        Assert.hasLength(this.key, "key can't be blank");
         Assert.notNull(connectionFactory, "redis connection factory can't be null");
-        Assert.notNull(idCreator,"id creator can't be null");
+        this.keyBytes = key.getBytes(USE_CHARSET);
+        this.timeoutBytes = (unit.toMillis(timeout) + "").getBytes(USE_CHARSET);
+        initValue();
+        initialized = true;
     }
 }

@@ -11,10 +11,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 public class DistributedLockFactory {
-    private Map<MultiKey,Lock> lockCache = new ConcurrentHashMap<>();
+    private Map<MultiKey, Lock> lockCache = new ConcurrentHashMap<>();
     private RedisConnectionFactory redisConnectionFactory;
     private Charset charset;
-    private IdCreator idCreator;
 
     public RedisConnectionFactory getRedisConnectionFactory() {
         return redisConnectionFactory;
@@ -32,24 +31,8 @@ public class DistributedLockFactory {
         this.charset = charset;
     }
 
-    public void setIdCreator(IdCreator idCreator) {
-        this.idCreator = idCreator;
-    }
-
-    public IdCreator getIdCreator() {
-        return idCreator;
-    }
-
-    public interface IdCreator {
-        String create();
-    }
-
-    public Lock getLock(String key, long timeout, TimeUnit unit){
-        return lockCache.computeIfAbsent(new MultiKey(key, timeout, unit), multiKey -> {
-            DistributedRedisLock lock = new DistributedRedisLock(key, redisConnectionFactory, timeout, unit);
-            lock.setIdCreator(DistributedLockFactory.this.idCreator);
-            return lock;
-        });
+    public Lock getLock(String key, long timeout, TimeUnit unit) {
+        return lockCache.computeIfAbsent(new MultiKey(key, timeout, unit), multiKey -> new DistributedRedisLock(key, redisConnectionFactory, timeout, unit));
     }
 
     static class MultiKey {
@@ -58,8 +41,8 @@ public class DistributedLockFactory {
         private TimeUnit unit;
 
         MultiKey(String key, long timeout, TimeUnit unit) {
-            Assert.hasLength(key,"lock key can't be null or empty");
-            Assert.state(timeout > 0,"超时时间还必须大于0");
+            Assert.hasLength(key, "lock key can't be null or empty");
+            Assert.state(timeout > 0, "超时时间还必须大于0");
             this.key = key;
             this.timeout = timeout;
             this.unit = unit;
