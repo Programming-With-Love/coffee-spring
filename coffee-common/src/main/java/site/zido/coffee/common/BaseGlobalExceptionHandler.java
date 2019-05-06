@@ -28,7 +28,7 @@ public abstract class BaseGlobalExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseGlobalExceptionHandler.class);
     private static final String HANDLE_EXCEPTION_TEMPLATE = "handle %s,url:%s,caused by:";
 
-    protected Result handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
+    protected Result<?> handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
         Iterator<ConstraintViolation<?>> iterator = constraintViolations.iterator();
         if (iterator.hasNext()) {
@@ -46,30 +46,30 @@ public abstract class BaseGlobalExceptionHandler {
         return Result.error(CommonErrorCode.INVALID_PARAMETERS);
     }
 
-    protected Result handleConstraintViolationException(HttpMessageNotReadableException e, HttpServletRequest request) {
+    protected Result<?> handleConstraintViolationException(HttpMessageNotReadableException e, HttpServletRequest request) {
         return Result.error(CommonErrorCode.INVALID_PARAMETERS, e.getMessage());
     }
 
-    protected Result handleBindException(BindException e, HttpServletRequest request) {
+    protected Result<?> handleBindException(BindException e, HttpServletRequest request) {
         BindingResult bindingResult = e.getBindingResult();
         return parseBindingResult(bindingResult);
     }
 
-    protected Result handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    protected Result<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         return parseBindingResult(e.getBindingResult());
     }
 
-    protected Result handleRuntimeException(RuntimeException e, HttpServletRequest request) {
+    protected Result<?> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         logWithTemplate(e.getClass().getName(), request, e);
         return Result.error(CommonErrorCode.UNKNOWN, e.getMessage());
     }
 
-    protected Result handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request) {
+    protected Result<?> handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request) {
         LOGGER.warn("business error:" + e.getMessage());
         return Result.error(e.getCode(), e.getMessage());
     }
 
-    private Result parseBindingResult(BindingResult bindingResult) {
+    private Result<?> parseBindingResult(BindingResult bindingResult) {
         List<FieldError> errors = bindingResult.getFieldErrors();
         if (errors.size() > 0) {
             //仅获取第一个异常

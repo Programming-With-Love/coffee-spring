@@ -6,6 +6,7 @@ package site.zido.coffee.common.exceptions;
  * @author zido
  */
 public class CommonBusinessException extends RuntimeException {
+    private static final long serialVersionUID = -8246671096687096493L;
     private int code;
     private String msg;
 

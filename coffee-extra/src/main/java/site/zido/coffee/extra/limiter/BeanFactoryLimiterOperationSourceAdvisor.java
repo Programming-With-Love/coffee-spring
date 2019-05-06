@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
  * @author zido
  */
 public class BeanFactoryLimiterOperationSourceAdvisor extends AbstractBeanFactoryPointcutAdvisor {
+    private static final long serialVersionUID = 3093592396602137911L;
     private LimiterOperationSource limiterOperationSource;
     private final StaticMethodMatcherPointcut pointcut = new StaticMethodMatcherPointcut() {
         @Override

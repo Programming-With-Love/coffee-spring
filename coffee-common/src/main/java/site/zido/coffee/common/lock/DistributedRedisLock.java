@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式锁,基于redis实现,非公平锁，不可重入锁
  *
- * TODO 是否实现可重入锁需要讨论，涉及到分布式调用时需要传播
+ * 是否实现可重入锁需要讨论，涉及到分布式调用时需要传播
  * @author zido
  */
 public class DistributedRedisLock extends AbstractDistributedLock implements Serializable, InitializingBean {

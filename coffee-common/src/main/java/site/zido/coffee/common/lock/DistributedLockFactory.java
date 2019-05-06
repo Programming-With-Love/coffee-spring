@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.function.Function;
 
 public class DistributedLockFactory {
     private Map<MultiKey,Lock> lockCache = new ConcurrentHashMap<>();

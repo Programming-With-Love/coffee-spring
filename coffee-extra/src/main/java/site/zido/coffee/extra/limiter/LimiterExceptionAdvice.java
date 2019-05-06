@@ -10,7 +10,7 @@ import site.zido.coffee.common.pojo.Result;
 @Order(0)
 public class LimiterExceptionAdvice {
     @ExceptionHandler(LimiterException.class)
-    public Result handleLimiterException(LimiterException e) {
+    public Result<?> handleLimiterException(LimiterException e) {
         return Result.error(CommonErrorCode.LIMIT, e.getMessage());
     }
 }

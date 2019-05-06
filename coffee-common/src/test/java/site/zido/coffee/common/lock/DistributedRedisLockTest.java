@@ -4,8 +4,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.boot.logging.LogLevel;
-import org.springframework.boot.logging.Slf4JLoggingSystem;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;

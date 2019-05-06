@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
  * @author zido
  */
 public class LimiterException extends RuntimeException {
+    private static final long serialVersionUID = -8703559654766706392L;
     /**
      * 限制的key
      */

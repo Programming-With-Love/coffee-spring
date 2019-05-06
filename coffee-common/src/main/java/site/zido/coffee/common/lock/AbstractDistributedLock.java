@@ -23,6 +23,7 @@ import java.util.concurrent.locks.Lock;
  * @author zido
  */
 public abstract class AbstractDistributedLock implements Lock, Serializable, DisposableBean {
+    private static final long serialVersionUID = -4560451450005316185L;
     private static final Set<AbstractDistributedLock> CONTAINER = new HashSet<>();
     private static final Logger log = LoggerFactory.getLogger("distributed lock manager");
 
