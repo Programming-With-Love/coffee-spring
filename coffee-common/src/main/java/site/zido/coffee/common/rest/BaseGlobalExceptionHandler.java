@@ -1,8 +1,8 @@
-package site.zido.coffee.common;
+package site.zido.coffee.common.rest;
 
 
+import site.zido.coffee.common.CommonErrorCode;
 import site.zido.coffee.common.exceptions.CommonBusinessException;
-import site.zido.coffee.common.pojo.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageNotReadableException;

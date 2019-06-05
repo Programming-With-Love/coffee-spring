@@ -1,7 +1,7 @@
 package site.zido.coffee.extra.limiter;
 
-import site.zido.coffee.common.utils.SystemClock;
 import org.springframework.data.redis.core.RedisTemplate;
+import site.zido.coffee.common.utils.SystemClock;
 
 import java.util.concurrent.TimeUnit;
 
@@ -41,12 +41,14 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
         String prefixedKey = prefix + key;
         Long expire = template.getExpire(prefixedKey, TimeUnit.MILLISECONDS);
         //redis集群可能无法准确过期，用ttl判断更准确
-        //如果值永久有效将永远无法有效获取
-        if (expire == -1) {
-            throw new IllegalStateException(String.format("键[%s]永久有效，需要排查", prefixedKey));
-        }
-        if (expire > 0) {
-            return new LastItem(expire, TimeUnit.MILLISECONDS);
+        if (expire != null) {
+            //如果值永久有效将永远无法有效获取
+            if (expire == -1) {
+                throw new IllegalStateException(String.format("键[%s]永久有效，需要排查", prefixedKey));
+            }
+            if (expire > 0) {
+                return new LastItem(expire, TimeUnit.MILLISECONDS);
+            }
         }
         createTag(key, now, timeout, unit);
         return null;

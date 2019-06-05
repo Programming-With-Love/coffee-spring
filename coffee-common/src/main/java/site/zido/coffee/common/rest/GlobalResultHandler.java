@@ -1,6 +1,5 @@
 package site.zido.coffee.common.rest;
 
-import site.zido.coffee.common.pojo.Result;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -16,23 +15,29 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  */
 @RestControllerAdvice
 public class GlobalResultHandler implements ResponseBodyAdvice<Object> {
+    private HttpResponseBodyFactory factory;
+
+    public GlobalResultHandler(HttpResponseBodyFactory factory) {
+        this.factory = factory;
+    }
+
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return returnType.getMethod().getReturnType() != Result.class;
+        return !factory.isExceptedClass(returnType.getMethod().getReturnType());
     }
 
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
-            Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+                                  Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         OriginalResponse methodAnnotation = returnType.getMethodAnnotation(OriginalResponse.class);
         if (methodAnnotation != null || returnType.getDeclaringClass().getAnnotation(OriginalResponse.class) != null) {
             return body;
         }
         Class<?> returnClass = returnType.getMethod().getReturnType();
-        if (body instanceof Result || (returnClass.equals(String.class) && body == null)) {
+        if (returnClass.equals(String.class) && body == null) {
             return body;
         }
-        return Result.success(body);
+        return factory.success(body);
     }
 
 }

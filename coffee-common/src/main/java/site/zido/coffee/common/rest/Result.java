@@ -1,4 +1,4 @@
-package site.zido.coffee.common.pojo;
+package site.zido.coffee.common.rest;
 
 
 import site.zido.coffee.common.CommonErrorCode;
@@ -37,33 +37,20 @@ public class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> error(int code, String message) {
-        Result<T> result = new Result<>();
-        result.success = false;
-        result.code = code;
-        result.message = message;
-        return result;
+        return error(code, message, null);
     }
 
     public static <T> Result<T> error(int code) {
+        return error(code, null);
+    }
+
+    public static <T> Result<T> error(int code, String message, T data) {
         Result<T> result = new Result<>();
-        result.success = false;
         result.code = code;
-        return result;
-    }
-
-    public static <T> Result<T> error(String msg) {
-        Result<T> result = new Result<>();
         result.success = false;
-        result.message = msg;
+        result.message = message;
+        result.result = data;
         return result;
-    }
-
-    public static <T> Result<T> print(boolean success) {
-        if(success){
-            return success();
-        }else{
-            return error();
-        }
     }
 
     public T getResult() {

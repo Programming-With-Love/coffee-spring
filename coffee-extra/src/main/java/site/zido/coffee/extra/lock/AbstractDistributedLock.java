@@ -1,4 +1,4 @@
-package site.zido.coffee.common.lock;
+package site.zido.coffee.extra.lock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

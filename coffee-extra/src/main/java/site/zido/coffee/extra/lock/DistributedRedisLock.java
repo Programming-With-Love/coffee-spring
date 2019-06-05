@@ -1,4 +1,4 @@
-package site.zido.coffee.common.lock;
+package site.zido.coffee.extra.lock;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.connection.RedisConnection;

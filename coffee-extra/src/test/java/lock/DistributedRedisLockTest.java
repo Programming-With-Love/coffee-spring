@@ -1,4 +1,4 @@
-package site.zido.coffee.common.lock;
+package lock;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -8,6 +8,7 @@ import org.slf4j.impl.SimpleLogger;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;
+import site.zido.coffee.extra.lock.DistributedRedisLock;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

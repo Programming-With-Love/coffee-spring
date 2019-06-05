@@ -1,4 +1,4 @@
-package site.zido.coffee.common;
+package site.zido.coffee.common.rest;
 
 
 import org.springframework.core.annotation.Order;
@@ -8,7 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import site.zido.coffee.common.exceptions.CommonBusinessException;
-import site.zido.coffee.common.pojo.Result;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;

@@ -18,10 +18,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import site.zido.coffee.common.GlobalExceptionAdvice;
-import site.zido.coffee.common.pojo.Result;
-import site.zido.coffee.common.rest.GlobalResultHandler;
-import site.zido.coffee.common.rest.StringToResultHttpMessageConverter;
+import site.zido.coffee.common.rest.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -44,9 +41,15 @@ public class CommonAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(GlobalResultHandler.class)
-    public GlobalResultHandler handler() {
+    public GlobalResultHandler handler(HttpResponseBodyFactory factory) {
         LOGGER.debug("Set global result to wrap " + Result.class);
-        return new GlobalResultHandler();
+        return new GlobalResultHandler(factory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(HttpResponseBodyFactory.class)
+    public HttpResponseBodyFactory bodyFactory() {
+        return new DefaultHttpResponseBodyFactory();
     }
 
     /**

@@ -4,7 +4,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import site.zido.coffee.common.CommonErrorCode;
-import site.zido.coffee.common.pojo.Result;
+import site.zido.coffee.common.rest.Result;
 
 @RestControllerAdvice
 @Order(0)

@@ -1,7 +1,5 @@
 package site.zido.coffee.common.rest;
 
-import site.zido.coffee.common.pojo.Result;
-
 import java.lang.annotation.*;
 
 /**

@@ -1,4 +1,4 @@
-package site.zido.coffee.common.validations.validations;
+package site.zido.coffee.common.validations;
 
 
 import javax.validation.Constraint;
