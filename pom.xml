@@ -12,6 +12,7 @@
         <module>coffee-common</module>
         <module>coffee-extra</module>
         <module>coffee-spring-boot-starter</module>
+        <module>coffee-auth</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
