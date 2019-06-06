@@ -37,7 +37,7 @@ public class CommonAutoConfiguration {
     /**
      * 全局响应体封装类
      *
-     * @return result handler
+     * @return result annotations
      */
     @Bean
     @ConditionalOnMissingBean(GlobalResultHandler.class)

@@ -8,7 +8,7 @@ public enum LoginMode {
     /**
      * 帐号密码
      */
-    ACCOUNT_PASSWORD,
+    USERNAME_PASSWORD,
     /**
      * 自动登录(需要在适用的环境，比如在公众号中微信自动登录)
      */

@@ -1,11 +1,8 @@
 package site.zido.coffee.configurations;
 
-public class GlobalProperties {
-    /**
-     * 是否需要先注册后登录
-     */
-    private boolean registerPre;
+import site.zido.coffee.entity.EntityUser;
 
+public class GlobalProperties {
     /**
      * 登录模式
      */
@@ -14,7 +11,10 @@ public class GlobalProperties {
     /**
      * 是否需要单点登录
      */
-    private boolean sso;
+    private boolean sso = false;
 
-
+    /**
+     * 用户实体类
+     */
+    private Class<?> userClass = EntityUser.class;
 }
