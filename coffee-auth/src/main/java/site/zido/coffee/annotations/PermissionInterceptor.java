@@ -9,6 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +25,9 @@ public class PermissionInterceptor implements HandlerInterceptor {
         }
         HandlerMethod method = (HandlerMethod) handler;
         AuthVal authVal = determinerAuth(method);
-        //TODO
+        Collection<String> requiredPermissions = authVal.getPermissions();
+        Collection<String> requiredRoles = authVal.getRoles();
+
         return true;
     }
 

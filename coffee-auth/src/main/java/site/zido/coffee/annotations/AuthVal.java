@@ -1,14 +1,13 @@
 package site.zido.coffee.annotations;
 
-import org.springframework.web.method.HandlerMethod;
-
+import java.util.Collection;
 import java.util.Set;
 
 public class AuthVal {
-    private Set<String> roles;
-    private Set<String> permissions;
+    private Collection<String> roles;
+    private Collection<String> permissions;
 
-    public Set<String> getRoles() {
+    public Collection<String> getRoles() {
         return roles;
     }
 
@@ -16,7 +15,7 @@ public class AuthVal {
         this.roles = roles;
     }
 
-    public Set<String> getPermissions() {
+    public Collection<String> getPermissions() {
         return permissions;
     }
 
