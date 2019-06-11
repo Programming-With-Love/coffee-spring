@@ -1,6 +1,6 @@
-package site.zido.coffee.configurations;
+package site.zido.coffee.auth.configurations;
 
-import site.zido.coffee.entity.EntityUser;
+import site.zido.coffee.auth.entity.EntityUser;
 
 public class GlobalProperties {
     /**

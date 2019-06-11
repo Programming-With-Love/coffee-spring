@@ -1,4 +1,4 @@
-package site.zido.coffee.configurations;
+package site.zido.coffee.auth.configurations;
 
 /**
  * 实体关联的相关属性

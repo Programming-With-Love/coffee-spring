@@ -1,4 +1,4 @@
-package site.zido.coffee.configurations;
+package site.zido.coffee.auth.configurations;
 
 import java.lang.reflect.Field;
 

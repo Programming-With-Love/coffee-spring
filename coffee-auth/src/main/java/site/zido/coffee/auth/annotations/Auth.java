@@ -1,4 +1,4 @@
-package site.zido.coffee.annotations;
+package site.zido.coffee.auth.annotations;
 
 import org.springframework.core.annotation.AliasFor;
 
