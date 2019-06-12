@@ -3,6 +3,11 @@ package site.zido.coffee.auth.entity;
 import java.io.Serializable;
 import java.util.Collection;
 
+/**
+ * user
+ *
+ * @author zido
+ */
 public interface IUser extends Serializable {
 
     Object key();
