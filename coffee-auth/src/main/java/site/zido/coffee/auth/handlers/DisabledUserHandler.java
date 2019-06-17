@@ -4,6 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public interface DisabledUserRestHandler {
+public interface DisabledUserHandler {
     void handle(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }
