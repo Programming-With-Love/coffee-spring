@@ -1,7 +1,5 @@
 package site.zido.coffee.auth.entity;
 
-import site.zido.coffee.auth.core.GrantedAuthority;
-
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -12,19 +10,17 @@ import java.util.Collection;
  */
 public interface IUser extends Serializable {
 
-    Object key();
+    /**
+     * 角色
+     *
+     * @return roles
+     */
+    Collection<String> roles();
 
-    String getUsername();
-
-    String getPassword();
-
-    Collection<? extends GrantedAuthority> getAuthorities();
-
-    boolean isAccountNonExpired();
-
-    boolean isAccountNonLocked();
-
-    boolean isCredentialsNonExpired();
-
-    boolean isEnabled();
+    /**
+     * 是否可用
+     *
+     * @return true/false
+     */
+    boolean enabled();
 }

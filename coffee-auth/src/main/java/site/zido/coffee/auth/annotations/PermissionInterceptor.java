@@ -2,12 +2,16 @@ package site.zido.coffee.auth.annotations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.Assert;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import site.zido.coffee.auth.handlers.LoginExpectedHandler;
+import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.handlers.DisabledUserRestHandler;
+import site.zido.coffee.auth.handlers.LoginExpectedHandler;
 import site.zido.coffee.auth.handlers.UserManager;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,18 +22,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PermissionInterceptor implements HandlerInterceptor {
+public class PermissionInterceptor implements HandlerInterceptor, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionInterceptor.class);
     private static Map<HandlerMethod, AuthVal> authCache = new ConcurrentHashMap<>();
-    private String userAttrName = "user";
     private LoginExpectedHandler loginExpectedHandler;
-
+    private DisabledUserRestHandler disabledUserRestHandler;
     private UserManager userManager;
-
-    public PermissionInterceptor(LoginExpectedHandler loginExpectedHandler, UserManager userManager) {
-        this.loginExpectedHandler = loginExpectedHandler;
-        this.userManager = userManager;
-    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -41,10 +39,13 @@ public class PermissionInterceptor implements HandlerInterceptor {
         if (authVal.isSkip()) {
             return true;
         }
-        Collection<String> requiredPermissions = authVal.getPermissions();
         Collection<String> requiredRoles = authVal.getRoles();
         IUser currentUser = userManager.getCurrentUser(request);
         if (currentUser == null) {
+            return false;
+        }
+        if (!currentUser.enabled()) {
+            LOGGER.debug("current user is disabled");
             return false;
         }
         if (requiredRoles != null) {
@@ -54,22 +55,13 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 return false;
             }
         }
-        if (requiredPermissions != null) {
-            Collection<String> permissions = currentUser.roles();
-            if (handlePermissions(requiredPermissions, permissions)) {
-                loginExpectedHandler.handle(request, response);
-                return false;
-            }
-        }
-        request.setAttribute(userAttrName, currentUser);
+        UserHolder.set(currentUser);
         return true;
     }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        if (request.getAttribute(userAttrName) != null) {
-            request.removeAttribute(userAttrName);
-        }
+        UserHolder.clearContext();
     }
 
     @Override
@@ -103,19 +95,30 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 val.getRoles().add(role);
             }
         }
-        for (String permission : authAnnotation.permission()) {
-            if (!"".equals(permission) && null != permission) {
-                if (val.getPermissions() == null) {
-                    val.setPermissions(new HashSet<>());
-                }
-                val.getPermissions().add(permission);
-            }
-        }
     }
 
     private boolean handlePermissions(Collection<String> needs, Collection<String> requires) {
         Set<String> all = new HashSet<>(requires);
         all.retainAll(needs);
         return all.isEmpty();
+    }
+
+    public void setLoginExpectedHandler(LoginExpectedHandler loginExpectedHandler) {
+        this.loginExpectedHandler = loginExpectedHandler;
+    }
+
+    public void setDisabledUserRestHandler(DisabledUserRestHandler disabledUserRestHandler) {
+        this.disabledUserRestHandler = disabledUserRestHandler;
+    }
+
+    public void setUserManager(UserManager userManager) {
+        this.userManager = userManager;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.notNull(loginExpectedHandler, "loginExpectedHandler cannot be null");
+        Assert.notNull(disabledUserRestHandler, "disabledUserRestHandler cannot be null");
+        Assert.notNull(userManager, "userManager cannot be null");
     }
 }

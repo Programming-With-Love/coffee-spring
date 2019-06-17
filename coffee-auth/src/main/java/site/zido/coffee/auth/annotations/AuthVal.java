@@ -16,14 +16,6 @@ public class AuthVal {
         this.roles = roles;
     }
 
-    public Collection<String> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Set<String> permissions) {
-        this.permissions = permissions;
-    }
-
     public boolean isSkip() {
         return skip;
     }
