@@ -1,7 +1,5 @@
 package site.zido.coffee.auth.configurations;
 
-import site.zido.coffee.auth.entity.EntityUser;
-
 public class GlobalProperties {
     /**
      * 登录模式
@@ -16,5 +14,5 @@ public class GlobalProperties {
     /**
      * 用户实体类
      */
-    private Class<?> userClass = EntityUser.class;
+    private Class<?> userClass;
 }

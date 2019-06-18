@@ -1,7 +1,6 @@
 package site.zido.coffee.auth.entity;
 
 import java.io.Serializable;
-import java.util.Collection;
 
 /**
  * user
@@ -13,9 +12,11 @@ public interface IUser extends Serializable {
     /**
      * 角色
      *
-     * @return roles
+     * @return role
      */
-    Collection<String> roles();
+    default String role() {
+        return null;
+    }
 
     /**
      * 是否可用

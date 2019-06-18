@@ -50,7 +50,7 @@ public class PermissionInterceptor implements HandlerInterceptor, InitializingBe
             return false;
         }
         if (requiredRoles != null) {
-            Collection<String> roles = currentUser.roles();
+            Collection<String> roles = userManager.getRoles(currentUser);
             if (noPermissions(requiredRoles, roles)) {
                 loginExpectedHandler.handle(request, response);
                 return false;
