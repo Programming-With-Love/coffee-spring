@@ -4,20 +4,27 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.handlers.AuthHandler;
+import site.zido.coffee.auth.handlers.Authenticator;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class JpaAuthHandler implements AuthHandler {
+public class JpaAuthHandler<T extends IUser, Key extends Serializable> implements AuthHandler<T, Key> {
     private Class<?> userClass;
-    private JpaRepository userRepository;
+    private JpaRepository<T, Key> userRepository;
+    private List<Authenticator> authenticators;
 
-    public JpaAuthHandler(Class<?> userClass, JpaRepository userRepository) {
+    public JpaAuthHandler(Class<?> userClass, JpaRepository<T, Key> userRepository) {
         this.userClass = userClass;
         this.userRepository = userRepository;
         init();
     }
 
     private void init() {
+        authenticators = new ArrayList<>();
 
     }
 
@@ -38,8 +45,12 @@ public class JpaAuthHandler implements AuthHandler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public IUser getUserByKey(Object key) {
-        return (IUser) userRepository.findOne((Serializable) key);
+    public T getUserByKey(Key key) {
+        return userRepository.findOne(key);
+    }
+
+    @Override
+    public T attempAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        return null;
     }
 }

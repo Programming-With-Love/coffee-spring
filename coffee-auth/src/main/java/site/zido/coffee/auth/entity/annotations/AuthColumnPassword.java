@@ -16,5 +16,5 @@ public @interface AuthColumnPassword {
      *
      * @return true/false
      */
-    boolean encode() default false;
+    boolean encode() default true;
 }
