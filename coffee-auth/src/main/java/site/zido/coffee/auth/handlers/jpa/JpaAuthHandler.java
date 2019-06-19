@@ -3,6 +3,7 @@ package site.zido.coffee.auth.handlers.jpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.exceptions.AuthenticationException;
 import site.zido.coffee.auth.handlers.AuthHandler;
 import site.zido.coffee.auth.handlers.Authenticator;
 
@@ -15,7 +16,7 @@ import java.util.List;
 public class JpaAuthHandler<T extends IUser, Key extends Serializable> implements AuthHandler<T, Key> {
     private Class<?> userClass;
     private JpaRepository<T, Key> userRepository;
-    private List<Authenticator> authenticators;
+    private List<Authenticator<T>> authenticators;
 
     public JpaAuthHandler(Class<?> userClass, JpaRepository<T, Key> userRepository) {
         this.userClass = userClass;
@@ -50,7 +51,13 @@ public class JpaAuthHandler<T extends IUser, Key extends Serializable> implement
     }
 
     @Override
-    public T attempAuthentication(HttpServletRequest request, HttpServletResponse response) {
+    public T attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        for (Authenticator<T> authenticator : authenticators) {
+            T auth = authenticator.auth(request);
+            if (auth != null) {
+                return auth;
+            }
+        }
         return null;
     }
 }

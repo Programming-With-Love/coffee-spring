@@ -2,10 +2,10 @@ package site.zido.coffee.auth.handlers;
 
 import site.zido.coffee.auth.entity.IUser;
 
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
-public interface Authenticator<T extends IUser> {
+public interface Authenticator<T> {
     boolean prepare(Class<T> userClass);
 
-    T auth(Map<String, String> params);
+    T auth(HttpServletRequest params);
 }

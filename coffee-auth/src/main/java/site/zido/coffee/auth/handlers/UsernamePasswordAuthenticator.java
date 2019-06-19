@@ -5,10 +5,10 @@ import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthColumnPassword;
 import site.zido.coffee.auth.entity.annotations.AuthColumnUsername;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
-import java.util.Map;
 
-public class UsernamePasswordAuthenticator<T extends IUser> implements Authenticator<T> {
+public class UsernamePasswordAuthenticator<T> implements Authenticator<T> {
     private static final String defaultUsername = "username";
     private static final String defaultPassword = "password";
 
@@ -38,7 +38,7 @@ public class UsernamePasswordAuthenticator<T extends IUser> implements Authentic
     }
 
     @Override
-    public T auth(Map<String, String> params) {
+    public T auth(HttpServletRequest params) {
         return null;
     }
 }

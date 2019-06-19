@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 
-public class AuthFilterBean extends GenericFilterBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthFilterBean.class);
+public class AuthenticationFilter extends GenericFilterBean {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static final String REQUEST_METHOD = "POST";
     private Map<String, AuthHandler<? extends IUser, ? extends java.io.Serializable>> handlerMap;
     private UrlPathHelper urlPathHelper;
@@ -36,10 +36,10 @@ public class AuthFilterBean extends GenericFilterBean {
         String currentUrl = getRequestPath(request);
         AuthHandler<? extends IUser, ? extends Serializable> authHandler = handlerMap.get(currentUrl);
         if (authHandler != null && REQUEST_METHOD.equals(request.getMethod())) {
-            LOGGER.debug("请求认证开始");
+            LOGGER.debug("请求认证处理中");
             IUser authResult;
             try {
-                authResult = authHandler.attempAuthentication(request, response);
+                authResult = authHandler.attemptAuthentication(request, response);
                 if (authResult == null) {
                     return;
                 }
@@ -71,13 +71,13 @@ public class AuthFilterBean extends GenericFilterBean {
     }
 
     private void unsuccessfulAuthentication(HttpServletRequest request,
-                                            ServletResponse response,
-                                            AuthenticationException failed) {
+                                            HttpServletResponse response,
+                                            AuthenticationException failed) throws IOException, ServletException {
         UserHolder.clearContext();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("请求认证失败:" + failed.toString(), failed);
         }
-
+        failureHandler.onAuthenticationFailure(request, response, failed);
     }
 
     private String getRequestPath(HttpServletRequest request) {
