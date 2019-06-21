@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthEntity;
 import site.zido.coffee.auth.handlers.AuthHandler;
+import site.zido.coffee.auth.handlers.AuthenticatorFactory;
 import site.zido.coffee.auth.handlers.jpa.JpaAuthHandler;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +24,7 @@ public class AuthInitialzer implements BeanFactoryAware, InitializingBean {
     private static final String ERROR_WHEN_MULTI = String.format("多用户实体时需要使用%s标记，" +
             "并提供不同的url以帮助识别登录用户", AuthEntity.class.getName());
     private BeanFactory beanFactory;
+    private AuthenticatorFactory authenticatorFactory;
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -31,10 +32,9 @@ public class AuthInitialzer implements BeanFactoryAware, InitializingBean {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void afterPropertiesSet() throws Exception {
         Map<String, JpaRepositoryFactoryBean> jpaRepositoryFactoryBeanMap = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, JpaRepositoryFactoryBean.class);
-        Map<String, AuthHandler<? extends IUser, ? extends Serializable>> map = new HashMap<>();
+        Map<String, AuthHandler<? extends IUser>> map = new HashMap<>();
         for (JpaRepositoryFactoryBean factoryBean : jpaRepositoryFactoryBeanMap.values()) {
             Class<?> javaType = factoryBean.getEntityInformation().getJavaType();
             if (javaType.isAssignableFrom(IUser.class)) {
@@ -49,10 +49,10 @@ public class AuthInitialzer implements BeanFactoryAware, InitializingBean {
                 } else {
                     url = DEFAULT_LOGIN_URL;
                 }
-                AuthHandler oldValue = map.put(url, new JpaAuthHandler<>(javaType, repository));
-                if (oldValue != null) {
+                if (map.get(url) != null) {
                     throw new IllegalArgumentException(ERROR_WHEN_MULTI);
                 }
+                map.put(url, new JpaAuthHandler<>(javaType, authenticatorFactory.newChains(javaType)));
             }
         }
         map = Collections.unmodifiableMap(map);

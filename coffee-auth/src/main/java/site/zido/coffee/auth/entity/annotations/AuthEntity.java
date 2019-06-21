@@ -8,7 +8,7 @@ import java.lang.annotation.*;
  * @author zido
  */
 @Documented
-@Target({ElementType.FIELD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuthEntity {
     String url();

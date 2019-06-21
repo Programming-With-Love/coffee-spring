@@ -18,13 +18,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Map;
 
 public class AuthenticationFilter extends GenericFilterBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static final String REQUEST_METHOD = "POST";
-    private Map<String, AuthHandler<? extends IUser, ? extends java.io.Serializable>> handlerMap;
+    private Map<String, AuthHandler<? extends IUser>> handlerMap;
     private UrlPathHelper urlPathHelper;
     private LoginFailureHandler failureHandler;
     private LoginSuccessHandler successHandler;
@@ -34,7 +33,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
         String currentUrl = getRequestPath(request);
-        AuthHandler<? extends IUser, ? extends Serializable> authHandler = handlerMap.get(currentUrl);
+        AuthHandler<? extends IUser> authHandler = handlerMap.get(currentUrl);
         if (authHandler != null && REQUEST_METHOD.equals(request.getMethod())) {
             LOGGER.debug("请求认证处理中");
             IUser authResult;
@@ -106,7 +105,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         this.successHandler = successHandler;
     }
 
-    public void setHandlerMap(Map<String, AuthHandler<? extends IUser, ? extends Serializable>> handlerMap) {
+    public void setHandlerMap(Map<String, AuthHandler<? extends IUser>> handlerMap) {
         this.handlerMap = handlerMap;
     }
 
