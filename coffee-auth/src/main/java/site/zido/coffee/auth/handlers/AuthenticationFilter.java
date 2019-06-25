@@ -112,4 +112,20 @@ public class AuthenticationFilter extends GenericFilterBean {
     public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
         this.urlPathHelper = urlPathHelper;
     }
+
+    public Map<String, AuthHandler<? extends IUser>> getHandlerMap() {
+        return handlerMap;
+    }
+
+    public UrlPathHelper getUrlPathHelper() {
+        return urlPathHelper;
+    }
+
+    public LoginFailureHandler getFailureHandler() {
+        return failureHandler;
+    }
+
+    public LoginSuccessHandler getSuccessHandler() {
+        return successHandler;
+    }
 }
