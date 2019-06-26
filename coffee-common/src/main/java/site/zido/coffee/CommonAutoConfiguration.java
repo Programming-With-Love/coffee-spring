@@ -127,7 +127,7 @@ public class CommonAutoConfiguration {
     @Configuration
     @ConditionalOnProperty(prefix = "site.zido.json.auto-switch", value = "enable", havingValue = "true", matchIfMissing = true)
     @AutoConfigureAfter(JacksonAutoConfiguration.class)
-    static class JsonAutoConfiguration {
+    public static class JsonAutoConfiguration {
         /**
          * 配置全局json序列化(开发模式)
          * <ul>
