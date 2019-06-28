@@ -85,7 +85,7 @@ public class WechatAuthenticator<T, ID extends Serializable> implements Authenti
 
             String unionId = jsonNode.get("unionId").asText();
             String openId = jsonNode.get("openId").asText();
-            T tempUser = null;
+            T tempUser;
             if (StringUtils.hasText(unionId) && wechatUnionIdField != null) {
                 try {
                     tempUser = userClass.newInstance();
@@ -131,7 +131,7 @@ public class WechatAuthenticator<T, ID extends Serializable> implements Authenti
         this.appSecret = appSecret;
     }
 
-    public void setNoSuchUserHandler(NoSuchUserHandler noSuchUserHandler) {
+    public void setNoSuchUserHandler(NoSuchUserHandler<T> noSuchUserHandler) {
         this.noSuchUserHandler = noSuchUserHandler;
     }
 
