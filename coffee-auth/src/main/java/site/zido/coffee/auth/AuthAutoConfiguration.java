@@ -1,13 +1,8 @@
 package site.zido.coffee.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,10 +34,9 @@ import static site.zido.coffee.auth.Constants.DEFAULT_LOGIN_URL;
  */
 @Configuration
 @AutoConfigureAfter({JpaRepositoriesAutoConfiguration.class,
-        JacksonAutoConfiguration.class,
         CommonAutoConfiguration.JsonAutoConfiguration.class
 })
-public class AuthAutoConfiguration implements BeanFactoryAware {
+public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean {
     private static final String ERROR_WHEN_MULTI = String.format("多用户实体时需要使用%s标记，" +
             "并提供不同的url以帮助识别登录用户", AuthEntity.class.getName());
     private BeanFactory beanFactory;
@@ -78,34 +72,7 @@ public class AuthAutoConfiguration implements BeanFactoryAware {
     public AuthenticationFilter getFilter(LoginSuccessHandler loginSuccessHandler,
                                           LoginFailureHandler loginFailureHandler) {
         this.filter = new AuthenticationFilter();
-        Map<String, JpaRepositoryFactoryBean> jpaRepositoryFactoryBeanMap = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, JpaRepositoryFactoryBean.class);
-        Map<String, AuthHandler<? extends IUser>> map = new HashMap<>();
-        for (JpaRepositoryFactoryBean factoryBean : jpaRepositoryFactoryBeanMap.values()) {
-            Class<?> javaType = factoryBean.getEntityInformation().getJavaType();
-            if (javaType.isAssignableFrom(IUser.class)) {
-                JpaRepository repository = (JpaRepository) factoryBean.getObject();
-                AuthEntity annotation = AnnotationUtils.getAnnotation(javaType, AuthEntity.class);
-                String url;
-                if (annotation != null) {
-                    url = annotation.url().trim();
-                    if (!url.startsWith("/")) {
-                        url = "/" + url;
-                    }
-                } else {
-                    url = DEFAULT_LOGIN_URL;
-                }
-                if (map.get(url) != null) {
-                    throw new IllegalArgumentException(ERROR_WHEN_MULTI);
-                }
-                map.put(url, new JpaAuthHandler<>(javaType, authenticatorFactory.newChains(javaType)));
-            }
-        }
-        if (map.isEmpty()) {
-            //TODO don't register filter
-            return null;
-        }
-        map = Collections.unmodifiableMap(map);
-        filter.setHandlerMap(map);
+
         filter.setAuthenticationSuccessHandler(loginSuccessHandler);
         filter.setAuthenticationFailureHandler(loginFailureHandler);
         return filter;
@@ -156,4 +123,36 @@ public class AuthAutoConfiguration implements BeanFactoryAware {
         filter.setUrlPathHelper(helper);
     }
 
+    @Override
+    public void afterPropertiesSet() {
+        Map<String, JpaRepositoryFactoryBean> jpaRepositoryFactoryBeanMap = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, JpaRepositoryFactoryBean.class);
+        Map<String, AuthHandler<? extends IUser>> map = new HashMap<>();
+        for (JpaRepositoryFactoryBean factoryBean : jpaRepositoryFactoryBeanMap.values()) {
+            Class<?> javaType = factoryBean.getEntityInformation().getJavaType();
+            if (javaType.isAssignableFrom(IUser.class)) {
+                JpaRepository repository = (JpaRepository) factoryBean.getObject();
+                AuthEntity annotation = AnnotationUtils.getAnnotation(javaType, AuthEntity.class);
+                String url;
+                if (annotation != null) {
+                    url = annotation.url().trim();
+                    if (!url.startsWith("/")) {
+                        url = "/" + url;
+                    }
+                } else {
+                    url = DEFAULT_LOGIN_URL;
+                }
+                if (map.get(url) != null) {
+                    throw new IllegalArgumentException(ERROR_WHEN_MULTI);
+                }
+                map.put(url, new JpaAuthHandler<>(javaType,
+                        authenticatorFactory.newChains(javaType)));
+            }
+        }
+        if (map.isEmpty()) {
+            //TODO don't register filter
+            return;
+        }
+        map = Collections.unmodifiableMap(map);
+        filter.setHandlerMap(map);
+    }
 }
