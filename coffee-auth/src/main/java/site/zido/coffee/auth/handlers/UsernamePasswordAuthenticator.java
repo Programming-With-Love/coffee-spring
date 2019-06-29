@@ -1,8 +1,10 @@
 package site.zido.coffee.auth.handlers;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import site.zido.coffee.auth.entity.annotations.AuthColumnPassword;
 import site.zido.coffee.auth.entity.annotations.AuthColumnUsername;
@@ -13,22 +15,21 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
-public class UsernamePasswordAuthenticator<T, ID extends Serializable> implements Authenticator<T, ID> {
+public class UsernamePasswordAuthenticator<T> implements Authenticator<T>, InitializingBean {
     private static final String DEFAULT_USERNAME = "username";
     private static final String DEFAULT_PASSWORD = "password";
 
     private Class<T> userClass;
     private Field usernameField;
     private Field passwordField;
-    private JpaRepository<T, ID> repository;
+    private JpaRepository<T, ? extends Serializable> repository;
     private PasswordEncoder passwordEncoder;
 
-    public UsernamePasswordAuthenticator(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
+    public UsernamePasswordAuthenticator() {
     }
 
     @Override
-    public boolean prepare(Class<T> userClass, JpaRepository<T, ID> repository) {
+    public boolean prepare(Class<T> userClass, JpaRepository<T, ? extends Serializable> repository) {
         this.repository = repository;
         Field[] fields = userClass.getDeclaredFields();
         Field usernameField = null;
@@ -79,4 +80,8 @@ public class UsernamePasswordAuthenticator<T, ID extends Serializable> implement
         }
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.notNull(passwordEncoder,"password encoder can't be null");
+    }
 }

@@ -3,6 +3,7 @@ package site.zido.coffee.auth.handlers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,6 @@ import org.springframework.util.StringUtils;
 import site.zido.coffee.auth.configurations.AuthProperties;
 import site.zido.coffee.auth.entity.annotations.AuthColumnWechatOpenId;
 import site.zido.coffee.auth.entity.annotations.AuthColumnWechatUnionId;
-import site.zido.coffee.auth.exceptions.AuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.exceptions.NoSuchUserException;
 import site.zido.coffee.auth.utils.WxMiniUtil;
@@ -21,13 +21,13 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
-public class WechatAuthenticator<T, ID extends Serializable> implements Authenticator<T, ID>, InitializingBean {
+public class WechatAuthenticator<T> implements Authenticator<T>, InitializingBean {
     private static final String DEFAULT_WECHAT_OPEN_ID_FIELD_NAME = "wechatOpenId";
     private static final String DEFAULT_WECHAT_UNION_ID_FIELD_NAME = "wechatUnionId";
     private Field wechatOpenIdField;
     private Field wechatUnionIdField;
     private Class<T> userClass;
-    private JpaRepository<T, ID> repository;
+    private JpaRepository<T, ? extends Serializable> repository;
     private ObjectMapper mapper;
     private String appId;
     private String appSecret;
@@ -43,7 +43,7 @@ public class WechatAuthenticator<T, ID extends Serializable> implements Authenti
     }
 
     @Override
-    public boolean prepare(Class<T> userClass, JpaRepository<T, ID> repository) {
+    public boolean prepare(Class<T> userClass, JpaRepository<T, ? extends Serializable> repository) {
         if (appId == null || appSecret == null) {
             return false;
         }
@@ -119,18 +119,22 @@ public class WechatAuthenticator<T, ID extends Serializable> implements Authenti
     }
 
 
+    @Autowired
     public void setMapper(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
+    @Autowired
     public void setAppId(String appId) {
         this.appId = appId;
     }
 
+    @Autowired
     public void setAppSecret(String appSecret) {
         this.appSecret = appSecret;
     }
 
+    @Autowired
     public void setNoSuchUserHandler(NoSuchUserHandler<T> noSuchUserHandler) {
         this.noSuchUserHandler = noSuchUserHandler;
     }

@@ -145,7 +145,7 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
                     throw new IllegalArgumentException(ERROR_WHEN_MULTI);
                 }
                 map.put(url, new JpaAuthHandler<>(javaType,
-                        authenticatorFactory.newChains(javaType)));
+                        authenticatorFactory.newChains((Class<? extends IUser>) javaType, repository)));
             }
         }
         if (map.isEmpty()) {
