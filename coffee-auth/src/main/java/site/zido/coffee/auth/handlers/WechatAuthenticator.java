@@ -115,9 +115,9 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
                     if (user == null) {
                         throw new NoSuchUserException();
                     }
-                }else{
-                    return user;
                 }
+                //TODO 多个微信用户类时的冲突问题
+                return user;
             }
         }
         return null;
