@@ -23,9 +23,8 @@ import site.zido.coffee.auth.handlers.jpa.JpaAuthHandler;
 import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 import static site.zido.coffee.auth.Constants.DEFAULT_LOGIN_URL;
 
@@ -40,7 +39,6 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
     private static final String ERROR_WHEN_MULTI = String.format("多用户实体时需要使用%s标记，" +
             "并提供不同的url以帮助识别登录用户", AuthEntity.class.getName());
     private BeanFactory beanFactory;
-    private AuthenticatorFactory authenticatorFactory;
     private AuthenticationFilter filter;
 
     /**
@@ -118,6 +116,18 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
         return new RestLoginExceptedHandler(responseBodyFactory(), mapper);
     }
 
+    @Bean
+    @ConditionalOnMissingBean(UsernamePasswordAuthenticator.class)
+    public UsernamePasswordAuthenticator usernamePasswordAuthenticator(){
+        return new UsernamePasswordAuthenticator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(WechatAuthenticator.class)
+    public WechatAuthenticator wechatAuthenticator(){
+        return new WechatAuthenticator();
+    }
+
     @Autowired(required = false)
     public void setPathUrlHelper(UrlPathHelper helper) {
         filter.setUrlPathHelper(helper);
@@ -125,8 +135,11 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
 
     @Override
     public void afterPropertiesSet() {
-        Map<String, JpaRepositoryFactoryBean> jpaRepositoryFactoryBeanMap = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, JpaRepositoryFactoryBean.class);
+        Map<String, JpaRepositoryFactoryBean> jpaRepositoryFactoryBeanMap =
+                BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, JpaRepositoryFactoryBean.class);
         Map<String, AuthHandler<? extends IUser>> map = new HashMap<>();
+        Map<String, Authenticator> authenticatorMap =
+                BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, Authenticator.class);
         for (JpaRepositoryFactoryBean factoryBean : jpaRepositoryFactoryBeanMap.values()) {
             Class<?> javaType = factoryBean.getEntityInformation().getJavaType();
             if (javaType.isAssignableFrom(IUser.class)) {
@@ -144,8 +157,13 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
                 if (map.get(url) != null) {
                     throw new IllegalArgumentException(ERROR_WHEN_MULTI);
                 }
-                map.put(url, new JpaAuthHandler<>(javaType,
-                        authenticatorFactory.newChains((Class<? extends IUser>) javaType, repository)));
+                List<Authenticator> results = new ArrayList<>();
+                authenticatorMap.forEach((s, authenticator) -> {
+                    if(authenticator.prepare((Class<? extends IUser>) javaType,repository)){
+                        results.add(authenticator);
+                    }
+                });
+                map.put(url, new JpaAuthHandler<>(javaType, results));
             }
         }
         if (map.isEmpty()) {

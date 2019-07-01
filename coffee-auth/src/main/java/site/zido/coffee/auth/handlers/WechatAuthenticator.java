@@ -3,16 +3,15 @@ package site.zido.coffee.auth.handlers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import site.zido.coffee.auth.configurations.AuthProperties;
+import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthColumnWechatOpenId;
 import site.zido.coffee.auth.entity.annotations.AuthColumnWechatUnionId;
+import site.zido.coffee.auth.exceptions.AuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.exceptions.NoSuchUserException;
 import site.zido.coffee.auth.utils.WxMiniUtil;
@@ -20,53 +19,56 @@ import site.zido.coffee.auth.utils.WxMiniUtil;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
-public class WechatAuthenticator<T> implements Authenticator<T>, InitializingBean {
+public class WechatAuthenticator implements Authenticator, InitializingBean {
     private static final String DEFAULT_WECHAT_OPEN_ID_FIELD_NAME = "wechatOpenId";
     private static final String DEFAULT_WECHAT_UNION_ID_FIELD_NAME = "wechatUnionId";
-    private Field wechatOpenIdField;
-    private Field wechatUnionIdField;
-    private Class<T> userClass;
-    private JpaRepository<T, ? extends Serializable> repository;
-    private ObjectMapper mapper;
+    private Map<Class<? extends IUser>, WechatClassProps> propsCache =
+            new HashMap<>();
     private String appId;
     private String appSecret;
-    private NoSuchUserHandler<T> noSuchUserHandler;
+    private NoSuchUserHandler<? extends IUser> noSuchUserHandler;
+    private ObjectMapper mapper;
 
     public WechatAuthenticator() {
     }
 
-    public WechatAuthenticator(AuthProperties properties, ObjectMapper mapper) {
-        this.appId = properties.getWechatAppId();
-        this.appSecret = properties.getWechatAppSecret();
-        this.mapper = mapper;
-    }
-
     @Override
-    public boolean prepare(Class<T> userClass, JpaRepository<T, ? extends Serializable> repository) {
+    public boolean prepare(Class<? extends IUser> userClass,
+                           JpaRepository<? extends IUser, ? extends Serializable> repository) {
+        if(propsCache.containsKey(userClass)){
+            return true;
+        }
         if (appId == null || appSecret == null) {
             return false;
         }
-        this.repository = repository;
-        this.userClass = userClass;
+        WechatClassProps props = new WechatClassProps();
+        props.setRepository(repository);
+        props.setUserClass(userClass);
         Field[] fields = userClass.getDeclaredFields();
         for (Field field : fields) {
             if (AnnotatedElementUtils.findMergedAnnotation(field, AuthColumnWechatOpenId.class) != null) {
-                wechatOpenIdField = field;
-            } else if (wechatOpenIdField != null && field.getName().equals(DEFAULT_WECHAT_OPEN_ID_FIELD_NAME)) {
-                wechatOpenIdField = field;
+                props.setWechatOpenIdField(field);
+            } else if (props.getWechatOpenIdField()!= null && field.getName().equals(DEFAULT_WECHAT_OPEN_ID_FIELD_NAME)) {
+                props.setWechatOpenIdField(field);
             }
             if (AnnotatedElementUtils.findMergedAnnotation(field, AuthColumnWechatUnionId.class) != null) {
-                wechatUnionIdField = field;
-            } else if (wechatUnionIdField == null && field.getName().equals(DEFAULT_WECHAT_UNION_ID_FIELD_NAME)) {
-                wechatUnionIdField = field;
+                props.setWechatUnionIdField(field);
+            } else if (props.getWechatOpenIdField()== null && field.getName().equals(DEFAULT_WECHAT_UNION_ID_FIELD_NAME)) {
+                props.setWechatUnionIdField(field);
             }
         }
-        return wechatUnionIdField != null || wechatOpenIdField != null;
+        props.setNoSuchUserHandler(noSuchUserHandler);
+        props.setAppId(appId);
+        props.setAppSecret(appSecret);
+        return (props.getWechatOpenIdField()!= null || props.getWechatUnionIdField()!= null)
+                && propsCache.put(userClass,props) != null;
     }
 
     @Override
-    public T auth(HttpServletRequest request) {
+    public IUser auth(HttpServletRequest request) throws AuthenticationException {
         String encryptedData = request.getParameter("encryptedData");
         String iv = request.getParameter("iv");
         String code = request.getParameter("code");
@@ -85,62 +87,59 @@ public class WechatAuthenticator<T> implements Authenticator<T>, InitializingBea
 
             String unionId = jsonNode.get("unionId").asText();
             String openId = jsonNode.get("openId").asText();
-            T tempUser;
-            if (StringUtils.hasText(unionId) && wechatUnionIdField != null) {
-                try {
-                    tempUser = userClass.newInstance();
-                    ReflectionUtils.setField(wechatUnionIdField, tempUser, unionId);
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new InternalAuthenticationException("加载用户发生错误", e);
+            for (WechatClassProps props : propsCache.values()) {
+                IUser tempUser;
+                if (StringUtils.hasText(unionId) && props.getWechatUnionIdField()!= null) {
+                    try {
+                        tempUser = props.getUserClass().newInstance();
+                        ReflectionUtils.setField(props.getWechatUnionIdField(), tempUser, unionId);
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new InternalAuthenticationException("加载用户发生错误", e);
+                    }
+                } else {
+                    try {
+                        tempUser = props.getUserClass().newInstance();
+                        ReflectionUtils.setField(props.getWechatOpenIdField(), tempUser, openId);
+                    } catch (IllegalAccessException | InstantiationException e) {
+                        throw new InternalAuthenticationException("加载用户发生错误", e);
+                    }
                 }
-            } else {
-                try {
-                    tempUser = userClass.newInstance();
-                    ReflectionUtils.setField(wechatOpenIdField, tempUser, openId);
-                } catch (IllegalAccessException | InstantiationException e) {
-                    throw new InternalAuthenticationException("加载用户发生错误", e);
-                }
-            }
-            String nickName = jsonNode.get("nickName").asText();
-            String avatarUrl = jsonNode.get("avatarUrl").asText();
-            Integer gender = jsonNode.get("gender").asInt();
-            T user = repository.findOne(Example.of(tempUser));
-            if (user == null) {
-                if (noSuchUserHandler != null) {
-                    user = noSuchUserHandler.handle(nickName, avatarUrl, gender, openId, unionId);
-                }
+                String nickName = jsonNode.get("nickName").asText();
+                String avatarUrl = jsonNode.get("avatarUrl").asText();
+                Integer gender = jsonNode.get("gender").asInt();
+                IUser user = props.getRepository().findOne((Example) Example.of(tempUser));
                 if (user == null) {
-                    throw new NoSuchUserException();
+                    if (props.getNoSuchUserHandler()!= null) {
+                        user = props.getNoSuchUserHandler().handle(nickName, avatarUrl, gender, openId, unionId);
+                    }
+                    if (user == null) {
+                        throw new NoSuchUserException();
+                    }
+                }else{
+                    return user;
                 }
             }
-            return user;
         }
         return null;
     }
 
-
-    @Autowired
-    public void setMapper(ObjectMapper mapper) {
-        this.mapper = mapper;
-    }
-
-    @Autowired
     public void setAppId(String appId) {
         this.appId = appId;
     }
 
-    @Autowired
     public void setAppSecret(String appSecret) {
         this.appSecret = appSecret;
     }
 
-    @Autowired
-    public void setNoSuchUserHandler(NoSuchUserHandler<T> noSuchUserHandler) {
+    public void setNoSuchUserHandler(NoSuchUserHandler<? extends IUser> noSuchUserHandler) {
         this.noSuchUserHandler = noSuchUserHandler;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(mapper, "json object mapper can't be null");
+    }
+
+    public void setMapper(ObjectMapper mapper) {
+        this.mapper = mapper;
     }
 }
