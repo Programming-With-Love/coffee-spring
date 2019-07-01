@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
@@ -124,8 +125,12 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
 
     @Bean
     @ConditionalOnMissingBean(WechatAuthenticator.class)
-    public WechatAuthenticator wechatAuthenticator(){
-        return new WechatAuthenticator();
+    public WechatAuthenticator wechatAuthenticator(@Value("${auth.wechat.global.appId}") String appId,
+                                                   @Value("${auth.wechat.global.appSecret}") String appSecret){
+        WechatAuthenticator wechatAuthenticator = new WechatAuthenticator();
+        wechatAuthenticator.setAppId(appId);
+        wechatAuthenticator.setAppSecret(appSecret);
+        return wechatAuthenticator;
     }
 
     @Autowired(required = false)

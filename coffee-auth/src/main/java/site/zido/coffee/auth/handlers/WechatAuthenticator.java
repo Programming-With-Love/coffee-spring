@@ -3,6 +3,7 @@ package site.zido.coffee.auth.handlers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -131,6 +132,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
         this.appSecret = appSecret;
     }
 
+    @Autowired
     public void setNoSuchUserHandler(NoSuchUserHandler<? extends IUser> noSuchUserHandler) {
         this.noSuchUserHandler = noSuchUserHandler;
     }
@@ -139,6 +141,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
     public void afterPropertiesSet() throws Exception {
     }
 
+    @Autowired
     public void setMapper(ObjectMapper mapper) {
         this.mapper = mapper;
     }
