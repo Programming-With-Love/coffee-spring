@@ -9,4 +9,6 @@ public interface UserManager {
     IUser getCurrentUser(HttpServletRequest request);
 
     Collection<String> getRoles(IUser user);
+
+    void setUser(HttpServletRequest request, IUser authResult);
 }

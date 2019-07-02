@@ -1,5 +1,6 @@
 package site.zido.coffee.auth.handlers;
 
+import site.zido.coffee.auth.Constants;
 import site.zido.coffee.auth.entity.IUser;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 public abstract class AbstractSessionUserManager implements UserManager {
-    private String sessionKey = "key";
 
     protected abstract IUser getUserByKey(Object key);
 
@@ -18,7 +18,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
         if (session == null) {
             return null;
         }
-        Object key = session.getAttribute(sessionKey);
+        Object key = session.getAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME);
         if (key == null) {
             return null;
         }
@@ -31,7 +31,11 @@ public abstract class AbstractSessionUserManager implements UserManager {
         return Collections.singleton(user.role());
     }
 
-    public void setSessionKey(String sessionKey) {
-        this.sessionKey = sessionKey;
+    @Override
+    public void setUser(HttpServletRequest request, IUser authResult) {
+        HttpSession session = request.getSession(true);
+        //TODO
+        session.setAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME, authResult);
     }
+
 }

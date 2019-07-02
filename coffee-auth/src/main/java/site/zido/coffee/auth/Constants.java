@@ -5,4 +5,6 @@ public class Constants {
     public static final int ERROR_CODE_USER_IS_DISABLED = 4;
 
     public static final String DEFAULT_LOGIN_URL = "/user/login";
+
+    public static final String DEFAULT_SESSION_ATTRIBUTE_NAME = "user";
 }

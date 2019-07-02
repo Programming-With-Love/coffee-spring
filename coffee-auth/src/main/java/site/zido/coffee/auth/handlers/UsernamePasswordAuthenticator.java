@@ -15,7 +15,6 @@ import site.zido.coffee.auth.exceptions.UsernamePasswordException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,14 +43,11 @@ public class UsernamePasswordAuthenticator implements Authenticator {
         }
         UsernamePasswordClassProps props = new UsernamePasswordClassProps();
         props.setRepository(repository);
-        Field[] fields = userClass.getDeclaredFields();
-        Field usernameField = null;
-        Field passwordField = null;
-        for (Field field : fields) {
+        ReflectionUtils.doWithFields(userClass, field -> {
             if (AnnotatedElementUtils.findMergedAnnotation(field, AuthColumnUsername.class) != null) {
-                usernameField = field;
-            } else if (usernameField == null && field.getName().equals(DEFAULT_USERNAME)) {
-                usernameField = field;
+                props.setUsernameField(field);
+            } else if (props.getUsernameField() == null && field.getName().equals(DEFAULT_USERNAME)) {
+                props.setUsernameField(field);
             }
             AuthColumnPassword passwordAnnotation;
             if ((passwordAnnotation = AnnotatedElementUtils.findMergedAnnotation(field, AuthColumnPassword.class)) != null) {
@@ -62,15 +58,15 @@ public class UsernamePasswordAuthenticator implements Authenticator {
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
-                passwordField = field;
-            } else if (passwordField == null && field.getName().equals(DEFAULT_PASSWORD)) {
-                passwordField = field;
+                props.setPasswordField(field);
+            } else if (props.getPasswordField() == null && field.getName().equals(DEFAULT_PASSWORD)) {
+                props.setPasswordField(field);
                 props.setPasswordEncoder(NO_PASSWORD_ENCODER_INSTANCE);
             }
-        }
-        props.setUsernameField(usernameField);
+        });
         props.setUserClass(userClass);
-        return usernameField != null && passwordField != null
+        return props.getUsernameField() != null
+                && props.getPasswordField() != null
                 && propsCache.put(userClass, props) == null;
     }
 

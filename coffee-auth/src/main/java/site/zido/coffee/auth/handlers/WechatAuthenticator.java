@@ -49,8 +49,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
         WechatClassProps props = new WechatClassProps();
         props.setRepository(repository);
         props.setUserClass(userClass);
-        Field[] fields = userClass.getDeclaredFields();
-        for (Field field : fields) {
+        ReflectionUtils.doWithFields(userClass, field -> {
             if (AnnotatedElementUtils.findMergedAnnotation(field, AuthColumnWechatOpenId.class) != null) {
                 props.setWechatOpenIdField(field);
             } else if (props.getWechatOpenIdField() != null && field.getName().equals(DEFAULT_WECHAT_OPEN_ID_FIELD_NAME)) {
@@ -61,7 +60,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
             } else if (props.getWechatOpenIdField() == null && field.getName().equals(DEFAULT_WECHAT_UNION_ID_FIELD_NAME)) {
                 props.setWechatUnionIdField(field);
             }
-        }
+        });
         props.setNoSuchUserHandler(noSuchUserHandler);
         props.setAppId(appId);
         props.setAppSecret(appSecret);

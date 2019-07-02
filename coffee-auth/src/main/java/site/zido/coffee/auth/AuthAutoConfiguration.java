@@ -31,7 +31,8 @@ import static site.zido.coffee.auth.Constants.DEFAULT_LOGIN_URL;
  * @author zido
  */
 @Configuration
-@AutoConfigureAfter({JpaRepositoriesAutoConfiguration.class,
+@AutoConfigureAfter({
+        JpaRepositoriesAutoConfiguration.class,
         CommonAutoConfiguration.JsonAutoConfiguration.class
 })
 public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean {
@@ -175,7 +176,7 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
                         results.add(authenticator);
                     }
                 });
-                map.put(url, new SimpleAuthHandler((Class<? extends IUser>) javaType, results));
+                map.put(url, new SimpleAuthHandler(results));
             }
         }
         if (map.isEmpty()) {

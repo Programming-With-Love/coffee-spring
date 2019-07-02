@@ -17,8 +17,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
+
+import static site.zido.coffee.auth.Constants.DEFAULT_SESSION_ATTRIBUTE_NAME;
 
 public class AuthenticationFilter extends GenericFilterBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
@@ -27,6 +30,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     private UrlPathHelper urlPathHelper;
     private LoginFailureHandler failureHandler;
     private LoginSuccessHandler successHandler;
+    private UserManager userManager;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -65,7 +69,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("认证成功，更新userHolder:" + authResult);
         }
-        UserHolder.set(authResult);
+        userManager.setUser(request, authResult);
         successHandler.onAuthenticationSuccess(request, response, authResult);
     }
 
