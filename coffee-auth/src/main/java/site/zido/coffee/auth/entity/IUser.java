@@ -3,7 +3,7 @@ package site.zido.coffee.auth.entity;
 import java.io.Serializable;
 
 /**
- * user
+ * 用户抽象接口
  *
  * @author zido
  */
@@ -23,5 +23,7 @@ public interface IUser extends Serializable {
      *
      * @return true/false
      */
-    boolean enabled();
+    default boolean enabled() {
+        return true;
+    }
 }

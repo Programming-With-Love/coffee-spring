@@ -22,11 +22,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 权限判定拦截器
+ *
+ * @author zido
+ */
 public class PermissionInterceptor implements HandlerInterceptor, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionInterceptor.class);
+    /**
+     * 权限信息缓存
+     */
     private static Map<HandlerMethod, AuthVal> authCache = new ConcurrentHashMap<>();
+    /**
+     * 未登录处理器
+     */
     private LoginExpectedHandler loginExpectedHandler;
+    /**
+     * 用户被禁用处理器
+     */
     private DisabledUserHandler disabledUserHandler;
+    /**
+     * 用户管理器
+     */
     private UserManager userManager;
 
     @Override
@@ -69,6 +86,12 @@ public class PermissionInterceptor implements HandlerInterceptor, InitializingBe
         UserHolder.clearContext();
     }
 
+    /**
+     * 方法鉴权信息读取
+     *
+     * @param handlerMethod 请求方法
+     * @return auth val
+     */
     private AuthVal determinerAuth(HandlerMethod handlerMethod) {
         return authCache.computeIfAbsent(handlerMethod, (el) -> {
             Auth methodAuth = AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getMethod(), Auth.class);

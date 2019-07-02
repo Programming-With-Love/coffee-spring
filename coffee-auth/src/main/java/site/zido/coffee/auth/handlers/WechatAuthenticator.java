@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import site.zido.coffee.auth.entity.IUser;
@@ -39,7 +40,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
     @Override
     public boolean prepare(Class<? extends IUser> userClass,
                            JpaRepository<? extends IUser, ? extends Serializable> repository) {
-        if(propsCache.containsKey(userClass)){
+        if (propsCache.containsKey(userClass)) {
             return true;
         }
         if (appId == null || appSecret == null) {
@@ -52,20 +53,20 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
         for (Field field : fields) {
             if (AnnotatedElementUtils.findMergedAnnotation(field, AuthColumnWechatOpenId.class) != null) {
                 props.setWechatOpenIdField(field);
-            } else if (props.getWechatOpenIdField()!= null && field.getName().equals(DEFAULT_WECHAT_OPEN_ID_FIELD_NAME)) {
+            } else if (props.getWechatOpenIdField() != null && field.getName().equals(DEFAULT_WECHAT_OPEN_ID_FIELD_NAME)) {
                 props.setWechatOpenIdField(field);
             }
             if (AnnotatedElementUtils.findMergedAnnotation(field, AuthColumnWechatUnionId.class) != null) {
                 props.setWechatUnionIdField(field);
-            } else if (props.getWechatOpenIdField()== null && field.getName().equals(DEFAULT_WECHAT_UNION_ID_FIELD_NAME)) {
+            } else if (props.getWechatOpenIdField() == null && field.getName().equals(DEFAULT_WECHAT_UNION_ID_FIELD_NAME)) {
                 props.setWechatUnionIdField(field);
             }
         }
         props.setNoSuchUserHandler(noSuchUserHandler);
         props.setAppId(appId);
         props.setAppSecret(appSecret);
-        return (props.getWechatOpenIdField()!= null || props.getWechatUnionIdField()!= null)
-                && propsCache.put(userClass,props) != null;
+        return (props.getWechatOpenIdField() != null || props.getWechatUnionIdField() != null)
+                && propsCache.put(userClass, props) == null;
     }
 
     @Override
@@ -90,7 +91,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
             String openId = jsonNode.get("openId").asText();
             for (WechatClassProps props : propsCache.values()) {
                 IUser tempUser;
-                if (StringUtils.hasText(unionId) && props.getWechatUnionIdField()!= null) {
+                if (StringUtils.hasText(unionId) && props.getWechatUnionIdField() != null) {
                     try {
                         tempUser = props.getUserClass().newInstance();
                         ReflectionUtils.setField(props.getWechatUnionIdField(), tempUser, unionId);
@@ -109,17 +110,17 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
                 String avatarUrl = jsonNode.get("avatarUrl").asText();
                 Integer gender = jsonNode.get("gender").asInt();
                 IUser user = props.getRepository().findOne((Example) Example.of(tempUser));
-                if (user == null) {
-                    if (props.getNoSuchUserHandler()!= null) {
-                        user = props.getNoSuchUserHandler().handle(nickName, avatarUrl, gender, openId, unionId);
-                    }
+                if (user != null) {
+                    return user;
+                }
+                if (props.getNoSuchUserHandler() != null) {
+                    user = props.getNoSuchUserHandler().handle(nickName, avatarUrl, gender, openId, unionId);
                     if (user == null) {
                         throw new NoSuchUserException();
                     }
                 }
-                //TODO 多个微信用户类时的冲突问题
-                return user;
             }
+            throw new NoSuchUserException();
         }
         return null;
     }
@@ -132,13 +133,14 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
         this.appSecret = appSecret;
     }
 
-    @Autowired
+    @Autowired(required = false)
     public void setNoSuchUserHandler(NoSuchUserHandler<? extends IUser> noSuchUserHandler) {
         this.noSuchUserHandler = noSuchUserHandler;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        Assert.notNull(mapper, "object mapper can't be null");
     }
 
     @Autowired

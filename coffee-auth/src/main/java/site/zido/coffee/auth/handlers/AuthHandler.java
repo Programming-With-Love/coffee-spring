@@ -6,7 +6,7 @@ import site.zido.coffee.auth.exceptions.AuthenticationException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public interface AuthHandler<T extends IUser> {
+public interface AuthHandler {
 
-    T attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException;
+    IUser attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException;
 }

@@ -20,7 +20,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UsernamePasswordAuthenticator implements Authenticator{
+/**
+ * 用户名密码认证器，用于用户名密码登陆
+ *
+ * @author zido
+ */
+public class UsernamePasswordAuthenticator implements Authenticator {
     private static final String DEFAULT_USERNAME = "username";
     private static final String DEFAULT_PASSWORD = "password";
     private static final NoPasswordEncoder NO_PASSWORD_ENCODER_INSTANCE = new NoPasswordEncoder();
@@ -66,14 +71,14 @@ public class UsernamePasswordAuthenticator implements Authenticator{
         props.setUsernameField(usernameField);
         props.setUserClass(userClass);
         return usernameField != null && passwordField != null
-                && propsCache.put(userClass,props) != null;
+                && propsCache.put(userClass, props) == null;
     }
 
     @Override
     public IUser auth(HttpServletRequest request) throws AuthenticationException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        if(!StringUtils.hasText(username) && !StringUtils.hasText(password)){
+        if (!StringUtils.hasText(username) && !StringUtils.hasText(password)) {
             throw new NotThisAuthenticatorException();
         }
         username = username.trim();

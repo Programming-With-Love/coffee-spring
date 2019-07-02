@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers.jpa;
+package site.zido.coffee.auth.handlers;
 
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.exceptions.AuthenticationException;
@@ -9,11 +9,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-public class JpaAuthHandler<T extends IUser> implements AuthHandler<T> {
-    private Class<?> userClass;
-    private List<Authenticator<T>> authenticators;
+/**
+ * 简单的认证处理器
+ *
+ * @author zido
+ */
+public class SimpleAuthHandler implements AuthHandler {
+    private Class<? extends IUser> userClass;
+    private List<Authenticator> authenticators;
 
-    public JpaAuthHandler(Class<?> userClass, List<Authenticator<T>> authenticators) {
+    public SimpleAuthHandler(Class<? extends IUser> userClass, List<Authenticator> authenticators) {
         this.userClass = userClass;
         this.authenticators = authenticators;
     }
@@ -22,14 +27,14 @@ public class JpaAuthHandler<T extends IUser> implements AuthHandler<T> {
         return userClass;
     }
 
-    public void setUserClass(Class<?> userClass) {
+    public void setUserClass(Class<? extends IUser> userClass) {
         this.userClass = userClass;
     }
 
     @Override
-    public T attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        for (Authenticator<T> authenticator : authenticators) {
-            T auth = authenticator.auth(request);
+    public IUser attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        for (Authenticator authenticator : authenticators) {
+            IUser auth = authenticator.auth(request);
             if (auth != null) {
                 return auth;
             }

@@ -23,7 +23,7 @@ import java.util.Map;
 public class AuthenticationFilter extends GenericFilterBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static final String REQUEST_METHOD = "POST";
-    private Map<String, AuthHandler<? extends IUser>> handlerMap;
+    private Map<String, AuthHandler> handlerMap;
     private UrlPathHelper urlPathHelper;
     private LoginFailureHandler failureHandler;
     private LoginSuccessHandler successHandler;
@@ -33,7 +33,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
         String currentUrl = getRequestPath(request);
-        AuthHandler<? extends IUser> authHandler = handlerMap.get(currentUrl);
+        AuthHandler authHandler = handlerMap.get(currentUrl);
         if (authHandler != null && REQUEST_METHOD.equals(request.getMethod())) {
             LOGGER.debug("请求认证处理中");
             IUser authResult;
@@ -105,7 +105,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         this.successHandler = successHandler;
     }
 
-    public void setHandlerMap(Map<String, AuthHandler<? extends IUser>> handlerMap) {
+    public void setHandlerMap(Map<String, AuthHandler> handlerMap) {
         this.handlerMap = handlerMap;
     }
 
@@ -113,7 +113,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         this.urlPathHelper = urlPathHelper;
     }
 
-    public Map<String, AuthHandler<? extends IUser>> getHandlerMap() {
+    public Map<String, AuthHandler> getHandlerMap() {
         return handlerMap;
     }
 

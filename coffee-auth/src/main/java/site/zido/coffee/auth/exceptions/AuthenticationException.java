@@ -16,6 +16,11 @@
 
 package site.zido.coffee.auth.exceptions;
 
+/**
+ * 认证错误
+ *
+ * @author zido
+ */
 public abstract class AuthenticationException extends RuntimeException {
 
     public AuthenticationException(String msg, Throwable t) {

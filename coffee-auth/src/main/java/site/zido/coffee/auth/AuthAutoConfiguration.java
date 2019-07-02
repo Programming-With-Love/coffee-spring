@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -20,12 +19,11 @@ import site.zido.coffee.auth.annotations.PermissionInterceptor;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthEntity;
 import site.zido.coffee.auth.handlers.*;
-import site.zido.coffee.auth.handlers.jpa.JpaAuthHandler;
+import site.zido.coffee.auth.handlers.SimpleAuthHandler;
 import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 import static site.zido.coffee.auth.Constants.DEFAULT_LOGIN_URL;
 
@@ -119,14 +117,14 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
 
     @Bean
     @ConditionalOnMissingBean(UsernamePasswordAuthenticator.class)
-    public UsernamePasswordAuthenticator usernamePasswordAuthenticator(){
+    public UsernamePasswordAuthenticator usernamePasswordAuthenticator() {
         return new UsernamePasswordAuthenticator();
     }
 
     @Bean
     @ConditionalOnMissingBean(WechatAuthenticator.class)
     public WechatAuthenticator wechatAuthenticator(@Value("${auth.wechat.global.appId}") String appId,
-                                                   @Value("${auth.wechat.global.appSecret}") String appSecret){
+                                                   @Value("${auth.wechat.global.appSecret}") String appSecret) {
         WechatAuthenticator wechatAuthenticator = new WechatAuthenticator();
         wechatAuthenticator.setAppId(appId);
         wechatAuthenticator.setAppSecret(appSecret);
@@ -138,15 +136,24 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
         filter.setUrlPathHelper(helper);
     }
 
+    /**
+     * 后置处理,自动扫描需要注册自动注入的用户认证类
+     * <p>
+     * 目前仅支持jpa管理下的user实体，来源可以是任何支持jpa的数据库
+     */
     @Override
+    @SuppressWarnings("unchecked")
     public void afterPropertiesSet() {
+        //repository扫描
         Map<String, JpaRepositoryFactoryBean> jpaRepositoryFactoryBeanMap =
                 BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, JpaRepositoryFactoryBean.class);
-        Map<String, AuthHandler<? extends IUser>> map = new HashMap<>();
+        Map<String, AuthHandler> map = new HashMap<>();
+        //认证器查询,可以自行扩展认证器
         Map<String, Authenticator> authenticatorMap =
                 BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, Authenticator.class);
         for (JpaRepositoryFactoryBean factoryBean : jpaRepositoryFactoryBeanMap.values()) {
             Class<?> javaType = factoryBean.getEntityInformation().getJavaType();
+            //查询实现IUser接口的对象,自动注入用户认证
             if (javaType.isAssignableFrom(IUser.class)) {
                 JpaRepository repository = (JpaRepository) factoryBean.getObject();
                 AuthEntity annotation = AnnotationUtils.getAnnotation(javaType, AuthEntity.class);
@@ -164,11 +171,11 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
                 }
                 List<Authenticator> results = new ArrayList<>();
                 authenticatorMap.forEach((s, authenticator) -> {
-                    if(authenticator.prepare((Class<? extends IUser>) javaType,repository)){
+                    if (authenticator.prepare((Class<? extends IUser>) javaType, repository)) {
                         results.add(authenticator);
                     }
                 });
-                map.put(url, new JpaAuthHandler<>(javaType, results));
+                map.put(url, new SimpleAuthHandler((Class<? extends IUser>) javaType, results));
             }
         }
         if (map.isEmpty()) {
