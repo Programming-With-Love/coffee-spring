@@ -12,7 +12,6 @@ import site.zido.coffee.auth.utils.FieldUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -24,10 +23,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zido
  */
 public abstract class AbstractSessionUserManager implements UserManager {
-    private static final Map<Class<? extends IUser>, Method> KEY_METHOD_CACHE
+    private static final Map<Class<? extends IUser>, FieldVal> KEY_METHOD_CACHE
             = new ConcurrentHashMap<>();
 
-    protected abstract IUser getUserByKey(Object key, Class<? extends IUser> userClass);
+    protected abstract IUser getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass);
 
     @Override
     public IUser getCurrentUser(HttpServletRequest request) {
@@ -44,8 +43,11 @@ public abstract class AbstractSessionUserManager implements UserManager {
             return null;
         }
         Class<? extends IUser> userClass =
-                (Class<? extends IUser>) session.getAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME + ".class");
-        return getUserByKey(key, userClass);
+                (Class<? extends IUser>) session.getAttribute(
+                        getClassAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME));
+        String name = (String) session.getAttribute(
+                getFieldNameAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME));
+        return getUserByKey(key, name, userClass);
     }
 
     @Override
@@ -56,7 +58,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
     @Override
     public void setUser(HttpServletRequest request, IUser authResult) {
         HttpSession session = request.getSession(true);
-        Method method = KEY_METHOD_CACHE.computeIfAbsent(authResult.getClass(), clazz -> {
+        FieldVal val = KEY_METHOD_CACHE.computeIfAbsent(authResult.getClass(), clazz -> {
             Field[] fields = new Field[1];
             ReflectionUtils.doWithFields(clazz, field -> {
                 //兼容jpa标准，默认使用id作为session内容
@@ -76,17 +78,30 @@ public abstract class AbstractSessionUserManager implements UserManager {
                 Id id = AnnotatedElementUtils.findMergedAnnotation(field, Id.class);
                 return annotation != null || id != null;
             });
-            return FieldUtils.getGetterMethodByField(fields[0], clazz);
+            return new FieldVal(fields[0], FieldUtils.getGetterMethodByField(fields[0], clazz));
         });
-        Object key = ReflectionUtils.invokeMethod(method, authResult);
+        Object key = ReflectionUtils.invokeMethod(val.getMethod(), authResult);
         session.setAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME, key);
-        session.setAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME + ".class",
+        session.setAttribute(
+                getClassAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME),
                 authResult.getClass());
+        session.setAttribute(
+                getFieldNameAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME),
+                val.getField().getName());
+    }
+
+    protected String getClassAttrName(String attrName) {
+        return attrName + ".class";
+    }
+
+    protected String getFieldNameAttrName(String attrName) {
+        return attrName + ".name";
     }
 
     @Override
     public void clear() {
         UserHolder.clearContext();
     }
+
 
 }
