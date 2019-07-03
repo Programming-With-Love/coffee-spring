@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.handlers.authentication;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,11 +16,11 @@ import site.zido.coffee.auth.entity.annotations.AuthColumnWechatUnionId;
 import site.zido.coffee.auth.exceptions.AuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.exceptions.NoSuchUserException;
+import site.zido.coffee.auth.handlers.NoSuchUserHandler;
 import site.zido.coffee.auth.utils.WxMiniUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 

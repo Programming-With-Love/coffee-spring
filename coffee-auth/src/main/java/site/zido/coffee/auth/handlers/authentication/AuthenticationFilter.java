@@ -1,7 +1,8 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.handlers.authentication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
@@ -10,6 +11,9 @@ import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.exceptions.AuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
+import site.zido.coffee.auth.handlers.LoginFailureHandler;
+import site.zido.coffee.auth.handlers.LoginSuccessHandler;
+import site.zido.coffee.auth.handlers.UserManager;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,11 +21,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
-
-import static site.zido.coffee.auth.Constants.DEFAULT_SESSION_ATTRIBUTE_NAME;
 
 public class AuthenticationFilter extends GenericFilterBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
@@ -97,12 +98,14 @@ public class AuthenticationFilter extends GenericFilterBean {
         return url;
     }
 
+    @Autowired
     public void setAuthenticationFailureHandler(
             LoginFailureHandler failureHandler) {
         Assert.notNull(failureHandler, "failureHandler cannot be null");
         this.failureHandler = failureHandler;
     }
 
+    @Autowired
     public void setAuthenticationSuccessHandler(
             LoginSuccessHandler successHandler) {
         Assert.notNull(successHandler, "successHandler cannot be null");
@@ -113,6 +116,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         this.handlerMap = handlerMap;
     }
 
+    @Autowired(required = false)
     public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
         this.urlPathHelper = urlPathHelper;
     }

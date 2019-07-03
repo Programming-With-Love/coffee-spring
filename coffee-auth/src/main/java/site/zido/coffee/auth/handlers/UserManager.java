@@ -11,4 +11,6 @@ public interface UserManager {
     Collection<String> getRoles(IUser user);
 
     void setUser(HttpServletRequest request, IUser authResult);
+
+    void clear();
 }

@@ -1,18 +1,18 @@
-package site.zido.coffee.auth.annotations;
+package site.zido.coffee.auth.handlers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import site.zido.coffee.auth.annotations.Auth;
+import site.zido.coffee.auth.annotations.AuthVal;
 import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.handlers.DisabledUserHandler;
-import site.zido.coffee.auth.handlers.LoginExpectedHandler;
-import site.zido.coffee.auth.handlers.UserManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -73,7 +73,6 @@ public class PermissionInterceptor implements HandlerInterceptor, InitializingBe
                 return false;
             }
         }
-        UserHolder.set(currentUser);
         return true;
     }
 
@@ -83,7 +82,7 @@ public class PermissionInterceptor implements HandlerInterceptor, InitializingBe
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        UserHolder.clearContext();
+        userManager.clear();
     }
 
     /**
@@ -126,14 +125,17 @@ public class PermissionInterceptor implements HandlerInterceptor, InitializingBe
         return all.isEmpty();
     }
 
+    @Autowired
     public void setLoginExpectedHandler(LoginExpectedHandler loginExpectedHandler) {
         this.loginExpectedHandler = loginExpectedHandler;
     }
 
+    @Autowired
     public void setDisabledUserHandler(DisabledUserHandler disabledUserHandler) {
         this.disabledUserHandler = disabledUserHandler;
     }
 
+    @Autowired
     public void setUserManager(UserManager userManager) {
         this.userManager = userManager;
     }

@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.handlers.authentication;
 
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.exceptions.AuthenticationException;

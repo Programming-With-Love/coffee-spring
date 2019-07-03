@@ -15,11 +15,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.CommonAutoConfiguration;
-import site.zido.coffee.auth.annotations.PermissionInterceptor;
+import site.zido.coffee.auth.handlers.PermissionInterceptor;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthEntity;
 import site.zido.coffee.auth.handlers.*;
-import site.zido.coffee.auth.handlers.SimpleAuthHandler;
+import site.zido.coffee.auth.handlers.authentication.*;
 import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 
@@ -44,35 +44,23 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
     /**
      * 注册拦截器，用于权限校验
      *
-     * @param disabledUserHandler  禁用用户处理
-     * @param loginExpectedHandler 需要登陆处理
      * @return interceptor
      */
     @Bean
     @ConditionalOnMissingBean(PermissionInterceptor.class)
-    public PermissionInterceptor interceptor(DisabledUserHandler disabledUserHandler,
-                                             LoginExpectedHandler loginExpectedHandler) {
-        PermissionInterceptor interceptor = new PermissionInterceptor();
-        interceptor.setDisabledUserHandler(disabledUserHandler);
-        interceptor.setLoginExpectedHandler(loginExpectedHandler);
-        return interceptor;
+    public PermissionInterceptor interceptor() {
+        return new PermissionInterceptor();
     }
 
     /**
      * 注册过滤器,用于认证/授权
      *
-     * @param loginSuccessHandler 登录成功处理
-     * @param loginFailureHandler 登录失败处理
      * @return filter
      */
     @Bean
     @ConditionalOnMissingBean(AuthenticationFilter.class)
-    public AuthenticationFilter getFilter(LoginSuccessHandler loginSuccessHandler,
-                                          LoginFailureHandler loginFailureHandler) {
+    public AuthenticationFilter getFilter() {
         this.filter = new AuthenticationFilter();
-
-        filter.setAuthenticationSuccessHandler(loginSuccessHandler);
-        filter.setAuthenticationFailureHandler(loginFailureHandler);
         return filter;
     }
 
@@ -130,6 +118,13 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
         wechatAuthenticator.setAppId(appId);
         wechatAuthenticator.setAppSecret(appSecret);
         return wechatAuthenticator;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(UserManager.class)
+    public UserManager userManager() {
+        //TODO
+        return null;
     }
 
     @Autowired(required = false)

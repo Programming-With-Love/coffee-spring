@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.handlers.authentication;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.domain.Example;
@@ -12,6 +12,8 @@ import site.zido.coffee.auth.exceptions.AuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.exceptions.NotThisAuthenticatorException;
 import site.zido.coffee.auth.exceptions.UsernamePasswordException;
+import site.zido.coffee.auth.handlers.NoPasswordEncoder;
+import site.zido.coffee.auth.handlers.PasswordEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;

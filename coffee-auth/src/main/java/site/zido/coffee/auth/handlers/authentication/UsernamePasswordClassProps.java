@@ -1,7 +1,8 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.handlers.authentication;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.handlers.PasswordEncoder;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
