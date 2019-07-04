@@ -136,4 +136,17 @@ public class AuthenticationFilter extends GenericFilterBean {
     public LoginSuccessHandler getSuccessHandler() {
         return successHandler;
     }
+
+    @Autowired
+    public void setUserManager(UserManager userManager) {
+        this.userManager = userManager;
+    }
+
+
+    @Override
+    protected void initFilterBean() throws ServletException {
+        Assert.notNull(userManager, "user manager can't be null");
+        Assert.notNull(failureHandler, "failure handler can't be null");
+        Assert.notNull(successHandler, "success handler can't be null");
+    }
 }

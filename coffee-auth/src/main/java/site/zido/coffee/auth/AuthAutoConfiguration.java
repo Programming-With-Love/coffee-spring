@@ -123,8 +123,7 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
     @Bean
     @ConditionalOnMissingBean(UserManager.class)
     public UserManager userManager() {
-        //TODO
-        return null;
+        return new JpaSessionUserManager();
     }
 
     @Autowired(required = false)
