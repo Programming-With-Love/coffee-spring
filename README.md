@@ -15,6 +15,8 @@
 
 * 全局请求日志,帮助快速定位问题所在,日志示例：`Before request [uri=/test3/a?x=1&y=2;client=0:0:0:0:0:0:0:1;headers={host=[localhost:8080], user-agent=[curl/7.64.1], accept=[*/*]}]`
 
+* 自动配置的认证框架，包含登录/鉴权功能
+
 * 定义更多的校验注解，例如：`@Mobile`
 
 一些其他常用工具：分布式id生成器，分布式锁等
@@ -35,6 +37,33 @@ maven 加入依赖
 ...
 
 完毕
+
+## 认证模块
+
+可实现几乎0配置的自动认证模块
+
+**但是请注意，必须使用spring-data-jpa作为orm框架**
+
+自带的登录功能包括：
+
+* 微信小程序登录(可通过openId和unionId登录，优先使用unionId)
+* 帐号密码登录
+* 手机号登录(未完成)
+
+### 使用
+
+只需要实体类实现**IUser**接口即可完成自动登录的配置
+
+登录接口约定为**/user/login**。如需定制接口，可使用**AuthEntity**注解，并配置**url**。
+
+请注意：当有多个实体类需要登录时，必须使用**AuthEntity**注解标记，并配置不同的url。
+
+扫描器进行相关登录的搜寻自动配置：
+
+* 如包含**username**和**password**字样，会自动加入用户名密码登录功能，如需要使用其他字段，
+请加入**AuthColumnUsername**和**AuthColumnPassword**注解到相关字段上。
+* 如包含**wechatOpenId**或者**wechatUnionId**字样，会自动加入微信小程序登录。如需要使用其他字段，
+请加入**AuthColumnWechatOpenId**或者**AuthColumnWechatUnionId**注解到相关字段上
 
 ## 注解式限流
 
@@ -76,7 +105,5 @@ site.zido.json.auto-switch.enable=false
 
 
 * 注解式防重放攻击解决方案
-
-* 权限管理框架集成（小程序和web通用的效率更高的解决方案），注解式鉴权，随时获取用户信息等功能
 
 
