@@ -9,9 +9,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import site.zido.coffee.auth.annotations.Auth;
-import site.zido.coffee.auth.annotations.AuthVal;
-import site.zido.coffee.auth.context.UserHolder;
+import site.zido.coffee.auth.authentication.Auth;
+import site.zido.coffee.auth.authentication.AuthVal;
 import site.zido.coffee.auth.entity.IUser;
 
 import javax.servlet.http.HttpServletRequest;

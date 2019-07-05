@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers.authentication;
+package site.zido.coffee.auth.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.jpa.repository.JpaRepository;

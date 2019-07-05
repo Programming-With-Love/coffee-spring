@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.annotations;
+package site.zido.coffee.auth.authentication;
 
 import java.util.Collection;
 import java.util.Set;

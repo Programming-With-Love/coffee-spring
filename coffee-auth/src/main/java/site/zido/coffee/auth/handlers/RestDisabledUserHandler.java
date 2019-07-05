@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @author zido
+ */
 public class RestDisabledUserHandler implements DisabledUserHandler {
     private String disabledUserMessage;
 
@@ -36,7 +39,6 @@ public class RestDisabledUserHandler implements DisabledUserHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (!response.isCommitted()) {
-            response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json; charset=utf-8");
             StreamUtils.copy(disabledUserMessage, StandardCharsets.UTF_8, response.getOutputStream());
         }

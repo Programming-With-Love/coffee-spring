@@ -26,6 +26,14 @@ public abstract class AbstractSessionUserManager implements UserManager {
     private static final Map<Class<? extends IUser>, FieldVal> KEY_METHOD_CACHE
             = new ConcurrentHashMap<>();
 
+    /**
+     * 通过键值从数据源查询用户
+     *
+     * @param fieldValue 查询值
+     * @param fieldName  查询键
+     * @param userClass  查询目标类
+     * @return user
+     */
     protected abstract IUser getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass);
 
     @Override
@@ -34,12 +42,10 @@ public abstract class AbstractSessionUserManager implements UserManager {
         if (user != null) {
             return user;
         }
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return null;
-        }
-        Object key = session.getAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME);
-        if (key == null) {
+        HttpSession session;
+        Object key;
+        if ((session = request.getSession(false)) == null
+                || (key = session.getAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME)) == null) {
             return null;
         }
         Class<? extends IUser> userClass =
@@ -55,9 +61,16 @@ public abstract class AbstractSessionUserManager implements UserManager {
         return Collections.singleton(user.role());
     }
 
+    /**
+     * 绑定用户到对应的session中
+     *
+     * @param request    request
+     * @param authResult 用户
+     */
     @Override
     public void bindUser(HttpServletRequest request, IUser authResult) {
         HttpSession session = request.getSession(true);
+        //反射缓存查询
         FieldVal val = KEY_METHOD_CACHE.computeIfAbsent(authResult.getClass(), clazz -> {
             Field[] fields = new Field[1];
             ReflectionUtils.doWithFields(clazz, field -> {

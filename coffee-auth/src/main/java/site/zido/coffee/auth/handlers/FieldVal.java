@@ -3,6 +3,9 @@ package site.zido.coffee.auth.handlers;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * @author zido
+ */
 public final class FieldVal {
     private Field field;
     private Method method;

@@ -7,6 +7,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * @author zido
+ */
 public interface LoginFailureHandler {
     /**
      * 认证失败时的回调处理

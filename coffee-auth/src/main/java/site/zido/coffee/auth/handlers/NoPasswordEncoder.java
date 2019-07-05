@@ -1,6 +1,9 @@
 package site.zido.coffee.auth.handlers;
 
-public class NoPasswordEncoder implements PasswordEncoder{
+/**
+ * @author zido
+ */
+public class NoPasswordEncoder implements PasswordEncoder {
     @Override
     public String encode(String password) {
         return password;

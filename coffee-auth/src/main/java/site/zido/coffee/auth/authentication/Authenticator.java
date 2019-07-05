@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers.authentication;
+package site.zido.coffee.auth.authentication;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import site.zido.coffee.auth.entity.IUser;

@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers.authentication;
+package site.zido.coffee.auth.authentication;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.domain.Example;

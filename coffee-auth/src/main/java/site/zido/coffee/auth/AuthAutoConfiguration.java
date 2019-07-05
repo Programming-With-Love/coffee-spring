@@ -19,7 +19,7 @@ import site.zido.coffee.auth.handlers.PermissionInterceptor;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthEntity;
 import site.zido.coffee.auth.handlers.*;
-import site.zido.coffee.auth.handlers.authentication.*;
+import site.zido.coffee.auth.authentication.*;
 import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 

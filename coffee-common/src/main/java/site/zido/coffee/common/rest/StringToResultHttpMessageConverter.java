@@ -11,16 +11,18 @@ import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 为string类型返回值定制的消息处理器，配合补充{@link GlobalResultHandler}。
- *
+ * <p>
  * 默认spring对string的处理经过GlobalResultHandler之后会返回text/plain类型的json对象,在这个消息转换器中，专门处理string类型，
  * 给前端正确的application/json响应头。
+ *
  * @author zido
  */
 public class StringToResultHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
-    public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+    public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private ObjectMapper mapper;
 
     public StringToResultHttpMessageConverter() {
@@ -45,9 +47,9 @@ public class StringToResultHttpMessageConverter extends AbstractHttpMessageConve
     @Override
     protected void writeInternal(Object o, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         Charset charset = getContentTypeCharset(outputMessage.getHeaders().getContentType());
-        if(o instanceof String){
+        if (o instanceof String) {
             StreamUtils.copy((String) o, charset, outputMessage.getBody());
-        }else {
+        } else {
             StreamUtils.copy(mapper.writeValueAsString(o), charset, outputMessage.getBody());
         }
     }
