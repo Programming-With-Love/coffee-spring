@@ -56,7 +56,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
     }
 
     @Override
-    public void setUser(HttpServletRequest request, IUser authResult) {
+    public void bindUser(HttpServletRequest request, IUser authResult) {
         HttpSession session = request.getSession(true);
         FieldVal val = KEY_METHOD_CACHE.computeIfAbsent(authResult.getClass(), clazz -> {
             Field[] fields = new Field[1];

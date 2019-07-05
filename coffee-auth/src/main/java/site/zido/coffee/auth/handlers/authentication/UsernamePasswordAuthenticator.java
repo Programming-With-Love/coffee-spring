@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthColumnPassword;
 import site.zido.coffee.auth.entity.annotations.AuthColumnUsername;
-import site.zido.coffee.auth.exceptions.AuthenticationException;
+import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.exceptions.NotThisAuthenticatorException;
 import site.zido.coffee.auth.exceptions.UsernamePasswordException;
@@ -37,6 +37,13 @@ public class UsernamePasswordAuthenticator implements Authenticator {
     public UsernamePasswordAuthenticator() {
     }
 
+    /**
+     * 准备过程中将缓存相关用户的用户名密码字段，以帮助后续认证更快的执行
+     *
+     * @param userClass  用户类
+     * @param repository jpa repository
+     * @return true/false
+     */
     @Override
     public boolean prepare(Class<? extends IUser> userClass,
                            JpaRepository<? extends IUser, ? extends Serializable> repository) {
@@ -72,8 +79,15 @@ public class UsernamePasswordAuthenticator implements Authenticator {
                 && propsCache.put(userClass, props) == null;
     }
 
+    /**
+     * 认证过程中，将获取请求中的username/password字段。目前只支持application/x-www-form-urlencoded
+     *
+     * @param request 请求
+     * @return 用户
+     * @throws AbstractAuthenticationException 当用户名密码错误时会抛出{@link UsernamePasswordException}
+     */
     @Override
-    public IUser auth(HttpServletRequest request) throws AuthenticationException {
+    public IUser auth(HttpServletRequest request) throws AbstractAuthenticationException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         if (!StringUtils.hasText(username) && !StringUtils.hasText(password)) {

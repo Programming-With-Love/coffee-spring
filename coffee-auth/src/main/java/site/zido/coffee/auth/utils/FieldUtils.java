@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zido
  */
 public class FieldUtils {
-    private static final Map<PrimKey, Method> setterCache = new ConcurrentHashMap<>(6);
+    private static final Map<PrimKey, Method> SETTER_CACHE = new ConcurrentHashMap<>(6);
 
     private static final class PrimKey {
         private Class<?> clazz;
         private Field field;
 
-        public PrimKey(Class<?> clazz, Field field) {
+        private PrimKey(Class<?> clazz, Field field) {
             this.clazz = clazz;
             this.field = field;
         }
@@ -80,7 +80,7 @@ public class FieldUtils {
      * @param value value
      */
     public static void injectFieldBySetter(Field field, Object obj, Object value) {
-        Method method = setterCache.computeIfAbsent(new PrimKey(obj.getClass(), field),
+        Method method = SETTER_CACHE.computeIfAbsent(new PrimKey(obj.getClass(), field),
                 primKey -> getSetterMethodByField(primKey.getField(), primKey.getClazz()));
         ReflectionUtils.invokeMethod(method, obj, value);
     }

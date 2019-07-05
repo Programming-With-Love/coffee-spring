@@ -9,7 +9,7 @@ import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.exceptions.AuthenticationException;
+import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.handlers.LoginFailureHandler;
 import site.zido.coffee.auth.handlers.LoginSuccessHandler;
@@ -24,13 +24,36 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * 认证过滤器
+ *
+ * @author zido
+ */
 public class AuthenticationFilter extends GenericFilterBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
+    /**
+     * 默认的登陆方式限定为POST
+     */
     private static final String REQUEST_METHOD = "POST";
+    /**
+     * 登陆处理器map，键为对应的url
+     */
     private Map<String, AuthHandler> handlerMap;
+    /**
+     * 用于帮助查询url
+     */
     private UrlPathHelper urlPathHelper;
+    /**
+     * 失败处理器
+     */
     private LoginFailureHandler failureHandler;
+    /**
+     * 成功处理器
+     */
     private LoginSuccessHandler successHandler;
+    /**
+     * 用户管理器
+     */
     private UserManager userManager;
 
     @Override
@@ -38,6 +61,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
         String currentUrl = getRequestPath(request);
+        //查询是否是登陆接口,并获得相关的登陆处理器
         AuthHandler authHandler = handlerMap.get(currentUrl);
         if (authHandler != null && REQUEST_METHOD.equals(request.getMethod())) {
             LOGGER.debug("请求认证处理中");
@@ -53,7 +77,7 @@ public class AuthenticationFilter extends GenericFilterBean {
                         failed);
                 unsuccessfulAuthentication(request, response, failed);
                 return;
-            } catch (AuthenticationException failed) {
+            } catch (AbstractAuthenticationException failed) {
                 unsuccessfulAuthentication(request, response, failed);
                 return;
             }
@@ -70,13 +94,13 @@ public class AuthenticationFilter extends GenericFilterBean {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("认证成功，更新userHolder:" + authResult);
         }
-        userManager.setUser(request, authResult);
+        userManager.bindUser(request, authResult);
         successHandler.onAuthenticationSuccess(request, response, authResult);
     }
 
     private void unsuccessfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
-                                            AuthenticationException failed) throws IOException, ServletException {
+                                            AbstractAuthenticationException failed) throws IOException, ServletException {
         UserHolder.clearContext();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("请求认证失败:" + failed.toString(), failed);

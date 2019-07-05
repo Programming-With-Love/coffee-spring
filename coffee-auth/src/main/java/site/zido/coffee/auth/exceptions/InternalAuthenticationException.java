@@ -5,7 +5,7 @@ package site.zido.coffee.auth.exceptions;
  *
  * @author zido
  */
-public class InternalAuthenticationException extends AuthenticationException {
+public class InternalAuthenticationException extends AbstractAuthenticationException {
 
     public InternalAuthenticationException(String message, Throwable cause) {
         super(message, cause);

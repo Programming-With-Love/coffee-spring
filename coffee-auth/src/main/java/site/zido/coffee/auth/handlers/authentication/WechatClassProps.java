@@ -8,6 +8,11 @@ import site.zido.coffee.auth.handlers.NoSuchUserHandler;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
+/**
+ * 微信登陆相关属性
+ *
+ * @author zido
+ */
 public class WechatClassProps {
     private Field wechatOpenIdField;
     private Field wechatUnionIdField;

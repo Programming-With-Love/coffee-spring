@@ -5,7 +5,7 @@ package site.zido.coffee.auth.exceptions;
  *
  * @author zido
  */
-public class NotThisAuthenticatorException extends AuthenticationException {
+public class NotThisAuthenticatorException extends AbstractAuthenticationException {
     public NotThisAuthenticatorException() {
         super("not this authenticator");
     }

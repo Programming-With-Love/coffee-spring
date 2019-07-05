@@ -2,7 +2,7 @@ package site.zido.coffee.auth.handlers.authentication;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.exceptions.AuthenticationException;
+import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
@@ -28,8 +28,8 @@ public interface Authenticator {
      *
      * @param request 请求
      * @return 用户
-     * @throws AuthenticationException 认证异常,需要注意此抛出会根据不同的类进行不同的逻辑处理
+     * @throws AbstractAuthenticationException 认证异常,需要注意此抛出会根据不同的类进行不同的逻辑处理
      */
-    IUser auth(HttpServletRequest request) throws AuthenticationException;
+    IUser auth(HttpServletRequest request) throws AbstractAuthenticationException;
 
 }

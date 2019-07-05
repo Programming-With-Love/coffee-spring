@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthColumnWechatOpenId;
 import site.zido.coffee.auth.entity.annotations.AuthColumnWechatUnionId;
-import site.zido.coffee.auth.exceptions.AuthenticationException;
+import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.exceptions.NoSuchUserException;
 import site.zido.coffee.auth.handlers.NoSuchUserHandler;
@@ -24,13 +24,29 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 微信登陆认证器
+ * <p>
+ * 默认使用 <code>wechatOpenId</code>或者<code>wechatUnionId</code>作为默认登陆凭证
+ *
+ * @author zido
+ */
 public class WechatAuthenticator implements Authenticator, InitializingBean {
     private static final String DEFAULT_WECHAT_OPEN_ID_FIELD_NAME = "wechatOpenId";
     private static final String DEFAULT_WECHAT_UNION_ID_FIELD_NAME = "wechatUnionId";
     private Map<Class<? extends IUser>, WechatClassProps> propsCache =
             new HashMap<>();
+    /**
+     * 微信appId
+     */
     private String appId;
+    /**
+     * 微信appSecret
+     */
     private String appSecret;
+    /**
+     * 用户未查询到处理器
+     */
     private NoSuchUserHandler<? extends IUser> noSuchUserHandler;
     private ObjectMapper mapper;
 
@@ -68,8 +84,15 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
                 && propsCache.put(userClass, props) == null;
     }
 
+    /**
+     * 认证请求，优先使用unionId，目前只支持application/x-www-form-urlencoded
+     *
+     * @param request 请求
+     * @return 用户
+     * @throws AbstractAuthenticationException 当认证失败时会抛出{@link NoSuchUserException}
+     */
     @Override
-    public IUser auth(HttpServletRequest request) throws AuthenticationException {
+    public IUser auth(HttpServletRequest request) throws AbstractAuthenticationException {
         String encryptedData = request.getParameter("encryptedData");
         String iv = request.getParameter("iv");
         String code = request.getParameter("code");

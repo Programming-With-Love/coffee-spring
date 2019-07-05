@@ -5,7 +5,7 @@ package site.zido.coffee.auth.exceptions;
  *
  * @author zido
  */
-public class NoSuchUserException extends AuthenticationException {
+public class NoSuchUserException extends AbstractAuthenticationException {
     public NoSuchUserException() {
         super("用户不存在");
     }

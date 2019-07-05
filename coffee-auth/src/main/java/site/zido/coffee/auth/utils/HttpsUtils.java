@@ -57,10 +57,8 @@ public class HttpsUtils {
      * @throws Exception e
      */
     public static String post(String url, Map<String, String> header, Map<String, String> param, HttpEntity entity) throws Exception {
-        String result = "";
-        CloseableHttpClient httpClient = null;
-        try {
-            httpClient = getHttpClient();
+        String result;
+        try (CloseableHttpClient httpClient = getHttpClient()) {
             HttpPost httpPost = new HttpPost(url);
             // 设置头信息
             if (!CollectionUtils.isEmpty(header)) {
@@ -89,10 +87,6 @@ public class HttpsUtils {
                 result = EntityUtils.toString(resEntity);
             } else {
                 result = readHttpResponse(httpResponse);
-            }
-        } finally {
-            if (httpClient != null) {
-                httpClient.close();
             }
         }
         return result;

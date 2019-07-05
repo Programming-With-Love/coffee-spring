@@ -12,6 +12,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+/**
+ * 使用jpa/hibernate作为orm的用户管理器
+ *
+ * @author zido
+ */
 public class JpaSessionUserManager extends AbstractSessionUserManager
         implements InitializingBean {
     private EntityManager entityManager;

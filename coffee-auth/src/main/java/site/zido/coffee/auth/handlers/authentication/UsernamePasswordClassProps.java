@@ -7,6 +7,11 @@ import site.zido.coffee.auth.handlers.PasswordEncoder;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
+/**
+ * 用户名密码相关的属性
+ *
+ * @author zido
+ */
 public class UsernamePasswordClassProps {
     private Class<? extends IUser> userClass;
     private Field usernameField;

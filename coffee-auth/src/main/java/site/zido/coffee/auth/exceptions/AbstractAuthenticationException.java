@@ -21,13 +21,13 @@ package site.zido.coffee.auth.exceptions;
  *
  * @author zido
  */
-public abstract class AuthenticationException extends RuntimeException {
+public abstract class AbstractAuthenticationException extends RuntimeException {
 
-    public AuthenticationException(String msg, Throwable t) {
+    public AbstractAuthenticationException(String msg, Throwable t) {
         super(msg, t);
     }
 
-    public AuthenticationException(String msg) {
+    public AbstractAuthenticationException(String msg) {
         super(msg);
     }
 

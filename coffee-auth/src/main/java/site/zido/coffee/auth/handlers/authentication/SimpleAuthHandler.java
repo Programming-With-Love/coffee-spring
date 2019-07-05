@@ -1,7 +1,7 @@
 package site.zido.coffee.auth.handlers.authentication;
 
 import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.exceptions.AuthenticationException;
+import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,9 +19,17 @@ public class SimpleAuthHandler implements AuthHandler {
         this.authenticators = authenticators;
     }
 
+    /**
+     * 简单的遍历各自的认证器
+     *
+     * @param request  request
+     * @param response response
+     * @return 用户
+     * @throws AbstractAuthenticationException ex
+     */
     @Override
     public IUser attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws AuthenticationException {
+            throws AbstractAuthenticationException {
         for (Authenticator authenticator : authenticators) {
             IUser auth = authenticator.auth(request);
             if (auth != null) {

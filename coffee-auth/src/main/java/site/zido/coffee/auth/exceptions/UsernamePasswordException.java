@@ -5,7 +5,7 @@ package site.zido.coffee.auth.exceptions;
  *
  * @author zido
  */
-public class UsernamePasswordException extends AuthenticationException {
+public class UsernamePasswordException extends AbstractAuthenticationException {
     public UsernamePasswordException() {
         super("账号或密码错误");
     }
