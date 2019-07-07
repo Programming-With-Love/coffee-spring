@@ -100,7 +100,7 @@ public class FieldUtils {
 
     public static Method getGetterMethodByField(Field field, Class<?> clazz) {
         String name = field.getName();
-        String setterName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
-        return ReflectionUtils.findMethod(clazz, setterName, field.getType());
+        String getterName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        return ReflectionUtils.findMethod(clazz, getterName);
     }
 }

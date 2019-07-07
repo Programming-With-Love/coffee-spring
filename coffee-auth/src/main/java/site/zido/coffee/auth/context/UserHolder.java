@@ -8,17 +8,17 @@ import site.zido.coffee.auth.entity.IUser;
  * @author zido
  */
 public class UserHolder {
-    private static ThreadLocal<IUser> local = new ThreadLocal<>();
+    public static UserContextHolderStrategy strategy = new ThreadLocalUserContextHolderStrategy();
 
     public static void clearContext() {
-        local.remove();
+        strategy.clearContext();
     }
 
     public static IUser get() {
-        return local.get();
+        return strategy.getContext().getUser();
     }
 
-    public static void set(IUser user) {
-        local.set(user);
+    public static void set(UserContext context) {
+        strategy.setContext(context);
     }
 }
