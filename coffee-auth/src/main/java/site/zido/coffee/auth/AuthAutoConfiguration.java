@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +41,7 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
             "并提供不同的url以帮助识别登录用户", AuthEntity.class.getName());
     private BeanFactory beanFactory;
     private AuthenticationFilter filter;
+    private UrlPathHelper urlPathHelper;
 
     /**
      * 注册拦截器，用于权限校验
@@ -61,6 +63,7 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
     @ConditionalOnMissingBean(AuthenticationFilter.class)
     public AuthenticationFilter getFilter() {
         this.filter = new AuthenticationFilter();
+        this.filter.setUrlPathHelper(urlPathHelper);
         return filter;
     }
 
@@ -112,6 +115,7 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
 
     @Bean
     @ConditionalOnMissingBean(WechatAuthenticator.class)
+    @ConditionalOnProperty({"auth.wechat.global.appId", "auth.wechat.global.appSecret"})
     public WechatAuthenticator wechatAuthenticator(@Value("${auth.wechat.global.appId}") String appId,
                                                    @Value("${auth.wechat.global.appSecret}") String appSecret) {
         WechatAuthenticator wechatAuthenticator = new WechatAuthenticator();
@@ -128,7 +132,7 @@ public class AuthAutoConfiguration implements BeanFactoryAware, InitializingBean
 
     @Autowired(required = false)
     public void setPathUrlHelper(UrlPathHelper helper) {
-        filter.setUrlPathHelper(helper);
+        this.urlPathHelper = helper;
     }
 
     /**

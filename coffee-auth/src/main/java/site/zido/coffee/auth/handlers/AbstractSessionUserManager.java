@@ -37,6 +37,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
     protected abstract IUser getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass);
 
     @Override
+    @SuppressWarnings("unchecked")
     public IUser getCurrentUser(HttpServletRequest request) {
         IUser user = UserHolder.get();
         if (user != null) {
