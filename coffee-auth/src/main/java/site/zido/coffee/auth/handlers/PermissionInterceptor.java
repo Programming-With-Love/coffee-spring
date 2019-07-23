@@ -58,6 +58,7 @@ public class PermissionInterceptor implements HandlerInterceptor, InitializingBe
         Collection<String> requiredRoles = authVal.getRoles();
         IUser currentUser = userManager.getCurrentUser(request);
         if (currentUser == null) {
+            loginExpectedHandler.handle(request, response);
             return false;
         }
         if (!currentUser.enabled()) {

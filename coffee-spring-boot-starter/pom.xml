@@ -20,6 +20,10 @@
             <groupId>site.zido</groupId>
             <artifactId>coffee-extra</artifactId>
         </dependency>
+        <dependency>
+            <groupId>site.zido</groupId>
+            <artifactId>coffee-auth</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

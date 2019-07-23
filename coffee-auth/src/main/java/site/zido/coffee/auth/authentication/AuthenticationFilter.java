@@ -2,13 +2,19 @@ package site.zido.coffee.auth.authentication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.entity.annotations.AuthEntity;
 import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.handlers.LoginFailureHandler;
@@ -22,15 +28,19 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
+import java.util.*;
+
+import static site.zido.coffee.auth.Constants.DEFAULT_LOGIN_URL;
 
 /**
  * 认证过滤器
  *
  * @author zido
  */
-public class AuthenticationFilter extends GenericFilterBean {
+public class AuthenticationFilter extends GenericFilterBean implements BeanFactoryAware, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
+    private static final String ERROR_WHEN_MULTI = String.format("多用户实体时需要使用%s标记，" +
+            "并提供不同的url以帮助识别登录用户", AuthEntity.class.getName());
     /**
      * 默认的登陆方式限定为POST
      */
@@ -55,6 +65,8 @@ public class AuthenticationFilter extends GenericFilterBean {
      * 用户管理器
      */
     private UserManager userManager;
+
+    private BeanFactory beanFactory;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -122,17 +134,13 @@ public class AuthenticationFilter extends GenericFilterBean {
         return url;
     }
 
-    @Autowired
     public void setAuthenticationFailureHandler(
             LoginFailureHandler failureHandler) {
-        Assert.notNull(failureHandler, "failureHandler cannot be null");
         this.failureHandler = failureHandler;
     }
 
-    @Autowired
     public void setAuthenticationSuccessHandler(
             LoginSuccessHandler successHandler) {
-        Assert.notNull(successHandler, "successHandler cannot be null");
         this.successHandler = successHandler;
     }
 
@@ -140,7 +148,6 @@ public class AuthenticationFilter extends GenericFilterBean {
         this.handlerMap = handlerMap;
     }
 
-    @Autowired(required = false)
     public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
         this.urlPathHelper = urlPathHelper;
     }
@@ -161,16 +168,69 @@ public class AuthenticationFilter extends GenericFilterBean {
         return successHandler;
     }
 
-    @Autowired
     public void setUserManager(UserManager userManager) {
         this.userManager = userManager;
     }
 
+    /**
+     * 后置处理,自动扫描需要注册自动注入的用户认证类
+     * <p>
+     * 目前仅支持jpa管理下的user实体，来源可以是任何支持jpa的数据库
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public void afterPropertiesSet() {
+        //repository扫描
+        Map<String, JpaRepositoryFactoryBean> jpaRepositoryFactoryBeanMap =
+                BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, JpaRepositoryFactoryBean.class);
+        Map<String, AuthHandler> map = new HashMap<>();
+        //认证器查询,可以自行扩展认证器
+        Map<String, Authenticator> authenticatorMap =
+                BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, Authenticator.class);
+        for (JpaRepositoryFactoryBean factoryBean : jpaRepositoryFactoryBeanMap.values()) {
+            Class<?> javaType = factoryBean.getEntityInformation().getJavaType();
+            //查询实现IUser接口的对象,自动注入用户认证
+            if (IUser.class.isAssignableFrom(javaType)) {
+                JpaRepository repository = (JpaRepository) factoryBean.getObject();
+                AuthEntity annotation = AnnotationUtils.getAnnotation(javaType, AuthEntity.class);
+                String url;
+                if (annotation != null) {
+                    url = annotation.url().trim();
+                    if (!url.startsWith("/")) {
+                        url = "/" + url;
+                    }
+                } else {
+                    url = DEFAULT_LOGIN_URL;
+                }
+                if (map.get(url) != null) {
+                    throw new IllegalArgumentException(ERROR_WHEN_MULTI);
+                }
+                List<Authenticator> results = new ArrayList<>();
+                authenticatorMap.forEach((s, authenticator) -> {
+                    if (authenticator.prepare((Class<? extends IUser>) javaType, repository)) {
+                        results.add(authenticator);
+                    }
+                });
+                map.put(url, new SimpleAuthHandler(results));
+            }
+        }
+        if (map.isEmpty()) {
+            //TODO don't register filter
+            return;
+        }
+        map = Collections.unmodifiableMap(map);
+        this.setHandlerMap(map);
+    }
 
     @Override
     protected void initFilterBean() throws ServletException {
         Assert.notNull(userManager, "user manager can't be null");
         Assert.notNull(failureHandler, "failure handler can't be null");
         Assert.notNull(successHandler, "success handler can't be null");
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
     }
 }
