@@ -96,19 +96,20 @@ public class UsernamePasswordAuthenticator implements Authenticator {
         username = username.trim();
         Collection<UsernamePasswordClassProps> values = propsCache.values();
         for (UsernamePasswordClassProps props : values) {
+            IUser entity;
             try {
-                IUser entity = props.getUserClass().newInstance();
-                ReflectionUtils.setField(props.getUsernameField(), entity, username);
-                Example example = Example.of(entity);
-                IUser user = props.getRepository().findOne(example);
-                if (user != null) {
-                    String currentPassword = (String) ReflectionUtils.getField(props.getPasswordField(), entity);
-                    if (props.getPasswordEncoder().validate(password, currentPassword)) {
-                        return user;
-                    }
-                }
+                entity = props.getUserClass().newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new InternalAuthenticationException("加载用户时发生异常", e);
+            }
+            ReflectionUtils.setField(props.getUsernameField(), entity, username);
+            Example example = Example.of(entity);
+            IUser user = props.getRepository().findOne(example);
+            if (user != null) {
+                String currentPassword = (String) ReflectionUtils.getField(props.getPasswordField(), entity);
+                if (props.getPasswordEncoder().validate(password, currentPassword)) {
+                    return user;
+                }
             }
         }
         throw new UsernamePasswordException();
