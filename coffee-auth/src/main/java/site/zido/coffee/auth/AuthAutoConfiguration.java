@@ -28,6 +28,7 @@ import site.zido.coffee.auth.authentication.*;
 import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 
+import javax.persistence.EntityManager;
 import java.util.*;
 
 import static site.zido.coffee.auth.Constants.DEFAULT_LOGIN_URL;
@@ -53,12 +54,12 @@ public class AuthAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(AuthenticationFilter.class)
-    public AuthenticationFilter getFilter() {
+    public AuthenticationFilter getFilter(EntityManager manager) {
         AuthenticationFilter filter = new AuthenticationFilter();
         filter.setUrlPathHelper(urlPathHelper);
         filter.setAuthenticationFailureHandler(loginFailureHandler());
         filter.setAuthenticationSuccessHandler(loginSuccessHandler());
-        filter.setUserManager(userManager());
+        filter.setUserManager(userManager(manager));
         return filter;
     }
 
@@ -106,8 +107,8 @@ public class AuthAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(UserManager.class)
-    public UserManager userManager() {
-        return new JpaSessionUserManager();
+    public UserManager userManager(EntityManager manager) {
+        return new JpaSessionUserManager(manager);
     }
 
     @Autowired(required = false)
@@ -128,13 +129,20 @@ public class AuthAutoConfiguration {
 
     @Configuration
     class PermissionInterceptorConfiguration extends WebMvcConfigurerAdapter {
+        private EntityManager manager;
+
         @Override
         public void addInterceptors(InterceptorRegistry registry) {
             PermissionInterceptor interceptor = new PermissionInterceptor();
             interceptor.setDisabledUserHandler(disabledUserHandler());
             interceptor.setLoginExpectedHandler(loginExpectedHandler());
-            interceptor.setUserManager(userManager());
+            interceptor.setUserManager(userManager(manager));
             registry.addInterceptor(interceptor);
+        }
+
+        @Autowired
+        public void setManager(EntityManager manager) {
+            this.manager = manager;
         }
     }
 }

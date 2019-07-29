@@ -1,7 +1,6 @@
 package site.zido.coffee.auth.handlers;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import site.zido.coffee.auth.entity.IUser;
 
@@ -17,28 +16,22 @@ import javax.persistence.criteria.Root;
  *
  * @author zido
  */
-public class JpaSessionUserManager extends AbstractSessionUserManager
-        implements InitializingBean {
-    private EntityManager entityManager;
+public class JpaSessionUserManager extends AbstractSessionUserManager {
+    private EntityManager em;
+
+    public JpaSessionUserManager(EntityManager em) {
+        Assert.notNull(em, "the entity manager can't be null");
+        this.em = em;
+    }
 
     @Override
     protected IUser getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<? extends IUser> query = criteriaBuilder.createQuery(userClass);
         Root<? extends IUser> root = query.from(userClass);
         Predicate pre = criteriaBuilder.equal(root.get(fieldName), fieldValue);
         query = query.where(pre);
-        TypedQuery<? extends IUser> typedQuery = entityManager.createQuery(query);
+        TypedQuery<? extends IUser> typedQuery = em.createQuery(query);
         return typedQuery.getSingleResult();
-    }
-
-    @Autowired
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(entityManager, "entity manager can't be null");
     }
 }

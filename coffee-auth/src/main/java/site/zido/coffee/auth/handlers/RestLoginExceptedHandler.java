@@ -2,7 +2,6 @@ package site.zido.coffee.auth.handlers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.rules.ErrorCollector;
 import org.springframework.util.StreamUtils;
 import site.zido.coffee.auth.Constants;
 import site.zido.coffee.common.CommonErrorCode;

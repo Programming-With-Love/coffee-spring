@@ -76,8 +76,8 @@ public abstract class AbstractSessionUserManager implements UserManager {
             Field[] fields = new Field[1];
             ReflectionUtils.doWithFields(clazz, field -> {
                 //兼容jpa标准，默认使用id作为session内容
-                Id id = AnnotatedElementUtils.findMergedAnnotation(field, Id.class);
-                if (id != null && fields[0] == null) {
+                if (fields[0] == null && (AnnotatedElementUtils.findMergedAnnotation(field, Id.class) != null
+                        || AnnotatedElementUtils.findMergedAnnotation(field, javax.persistence.Id.class) != null)) {
                     fields[0] = field;
                     return;
                 }
@@ -86,11 +86,6 @@ public abstract class AbstractSessionUserManager implements UserManager {
                 if (annotation != null) {
                     fields[0] = field;
                 }
-            }, field -> {
-                AuthColumnKey annotation =
-                        AnnotatedElementUtils.findMergedAnnotation(field, AuthColumnKey.class);
-                Id id = AnnotatedElementUtils.findMergedAnnotation(field, Id.class);
-                return annotation != null || id != null;
             });
             return new FieldVal(fields[0], FieldUtils.getGetterMethodByField(fields[0], clazz));
         });
