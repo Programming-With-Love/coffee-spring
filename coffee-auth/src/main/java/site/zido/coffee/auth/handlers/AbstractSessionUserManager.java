@@ -87,6 +87,11 @@ public abstract class AbstractSessionUserManager implements UserManager {
                     fields[0] = field;
                 }
             });
+            if (fields[0] == null) {
+                throw new IllegalStateException("the user entity should by annotated by javax.persistence.Id" +
+                        " or org.springframework.data.annotation" +
+                        " or site.zido.coffee.auth.entity.annotations.AuthColumnKey");
+            }
             return new FieldVal(fields[0], FieldUtils.getGetterMethodByField(fields[0], clazz));
         });
         Object key = ReflectionUtils.invokeMethod(val.getMethod(), authResult);
