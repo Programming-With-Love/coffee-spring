@@ -1,12 +1,12 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.context;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.util.ReflectionUtils;
 import site.zido.coffee.auth.Constants;
-import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthColumnKey;
+import site.zido.coffee.auth.handlers.FieldVal;
 import site.zido.coffee.auth.utils.FieldUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,7 +54,11 @@ public abstract class AbstractSessionUserManager implements UserManager {
                         getClassAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME));
         String name = (String) session.getAttribute(
                 getFieldNameAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME));
-        return getUserByKey(key, name, userClass);
+        user = getUserByKey(key, name, userClass);
+        if (user != null) {
+            UserHolder.set(new UserContextImpl(user));
+        }
+        return user;
     }
 
     @Override
@@ -76,7 +80,8 @@ public abstract class AbstractSessionUserManager implements UserManager {
             Field[] fields = new Field[1];
             ReflectionUtils.doWithFields(clazz, field -> {
                 //兼容jpa标准，默认使用id作为session内容
-                if (fields[0] == null && (AnnotatedElementUtils.findMergedAnnotation(field, Id.class) != null
+                if (fields[0] == null
+                        && (AnnotatedElementUtils.findMergedAnnotation(field, Id.class) != null
                         || AnnotatedElementUtils.findMergedAnnotation(field, javax.persistence.Id.class) != null)) {
                     fields[0] = field;
                     return;

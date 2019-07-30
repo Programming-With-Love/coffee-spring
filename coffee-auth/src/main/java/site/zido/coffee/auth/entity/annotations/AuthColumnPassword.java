@@ -1,7 +1,7 @@
 package site.zido.coffee.auth.entity.annotations;
 
-import site.zido.coffee.auth.handlers.NoPasswordEncoder;
-import site.zido.coffee.auth.handlers.PasswordEncoder;
+import site.zido.coffee.auth.security.NoPasswordEncoder;
+import site.zido.coffee.auth.security.PasswordEncoder;
 
 import java.lang.annotation.*;
 

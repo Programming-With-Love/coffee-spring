@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers.entity;
+package site.zido.coffee.auth.context.pkg;
 
 import org.springframework.data.annotation.Id;
 import site.zido.coffee.auth.entity.IUser;

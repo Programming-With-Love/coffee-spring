@@ -1,10 +1,9 @@
-package site.zido.coffee.auth.authentication;
+package site.zido.coffee.auth.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
@@ -12,6 +11,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
+import site.zido.coffee.auth.authentication.AuthHandler;
+import site.zido.coffee.auth.authentication.Authenticator;
+import site.zido.coffee.auth.authentication.SimpleAuthHandler;
 import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthEntity;
@@ -19,7 +21,7 @@ import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.handlers.LoginFailureHandler;
 import site.zido.coffee.auth.handlers.LoginSuccessHandler;
-import site.zido.coffee.auth.handlers.UserManager;
+import site.zido.coffee.auth.context.UserManager;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

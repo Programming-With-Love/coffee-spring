@@ -1,10 +1,9 @@
-package site.zido.coffee.auth.handlers.entity;
+package site.zido.coffee.auth.context.pkg;
 
+import org.springframework.data.annotation.Id;
 import site.zido.coffee.auth.entity.IUser;
 
-import javax.persistence.Id;
-
-public class MockedJavaxUser implements IUser {
+public class MockedSpringUser implements IUser {
     private static final long serialVersionUID = -200831662244124675L;
     @Id
     private Integer id;

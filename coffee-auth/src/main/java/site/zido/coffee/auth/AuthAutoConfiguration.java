@@ -1,37 +1,27 @@
 package site.zido.coffee.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.CommonAutoConfiguration;
-import site.zido.coffee.auth.handlers.PermissionInterceptor;
-import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.entity.annotations.AuthEntity;
+import site.zido.coffee.auth.context.JpaSessionUserManager;
+import site.zido.coffee.auth.context.UserManager;
+import site.zido.coffee.auth.web.AuthenticationFilter;
+import site.zido.coffee.auth.web.PermissionInterceptor;
 import site.zido.coffee.auth.handlers.*;
 import site.zido.coffee.auth.authentication.*;
-import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 
 import javax.persistence.EntityManager;
-import java.util.*;
-
-import static site.zido.coffee.auth.Constants.DEFAULT_LOGIN_URL;
 
 /**
  * @author zido

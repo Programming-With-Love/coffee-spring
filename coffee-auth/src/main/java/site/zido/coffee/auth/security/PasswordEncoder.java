@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.security;
 
 /**
  * @author zido

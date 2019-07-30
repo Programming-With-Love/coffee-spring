@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.context;
 
 import site.zido.coffee.auth.entity.IUser;
 

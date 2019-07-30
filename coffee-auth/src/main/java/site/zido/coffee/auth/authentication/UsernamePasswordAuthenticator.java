@@ -12,8 +12,8 @@ import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
 import site.zido.coffee.auth.exceptions.NotThisAuthenticatorException;
 import site.zido.coffee.auth.exceptions.UsernamePasswordException;
-import site.zido.coffee.auth.handlers.NoPasswordEncoder;
-import site.zido.coffee.auth.handlers.PasswordEncoder;
+import site.zido.coffee.auth.security.NoPasswordEncoder;
+import site.zido.coffee.auth.security.PasswordEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
@@ -106,7 +106,7 @@ public class UsernamePasswordAuthenticator implements Authenticator {
             Example example = Example.of(entity);
             IUser user = props.getRepository().findOne(example);
             if (user != null) {
-                String currentPassword = (String) ReflectionUtils.getField(props.getPasswordField(), entity);
+                String currentPassword = (String) ReflectionUtils.getField(props.getPasswordField(), user);
                 if (props.getPasswordEncoder().validate(password, currentPassword)) {
                     return user;
                 }

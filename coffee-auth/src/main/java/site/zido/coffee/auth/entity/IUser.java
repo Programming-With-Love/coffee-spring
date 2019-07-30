@@ -8,6 +8,7 @@ import java.io.Serializable;
  * @author zido
  */
 public interface IUser extends Serializable {
+    String DEFAULT_ROLE = "user";
 
     /**
      * 角色
@@ -15,7 +16,7 @@ public interface IUser extends Serializable {
      * @return role
      */
     default String role() {
-        return null;
+        return DEFAULT_ROLE;
     }
 
     /**

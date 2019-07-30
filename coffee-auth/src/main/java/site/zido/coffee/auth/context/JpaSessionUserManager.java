@@ -1,6 +1,5 @@
-package site.zido.coffee.auth.handlers;
+package site.zido.coffee.auth.context;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import site.zido.coffee.auth.entity.IUser;
 
