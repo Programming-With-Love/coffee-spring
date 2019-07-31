@@ -2,6 +2,9 @@ package site.zido.coffee.auth.context;
 
 import org.springframework.util.Assert;
 
+/**
+ * @author zido
+ */
 public class ThreadLocalUserContextHolderStrategy
         implements UserContextHolderStrategy {
     private static final ThreadLocal<UserContext> CONTEXT_HOLDER = new ThreadLocal<>();

@@ -1,5 +1,8 @@
 package site.zido.coffee.auth.context;
 
+/**
+ * @author zido
+ */
 public interface UserContextHolderStrategy {
     void clearContext();
 

@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class AbstractSessionUserManager implements UserManager {
     private static final Map<Class<? extends IUser>, FieldVal> KEY_METHOD_CACHE
             = new ConcurrentHashMap<>();
+    protected String sessionKey = Constants.DEFAULT_SESSION_ATTRIBUTE_NAME;
 
     /**
      * 通过键值从数据源查询用户
@@ -46,14 +47,14 @@ public abstract class AbstractSessionUserManager implements UserManager {
         HttpSession session;
         Object key;
         if ((session = request.getSession(false)) == null
-                || (key = session.getAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME)) == null) {
+                || (key = session.getAttribute(sessionKey)) == null) {
             return null;
         }
         Class<? extends IUser> userClass =
                 (Class<? extends IUser>) session.getAttribute(
-                        getClassAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME));
+                        getClassAttrName(sessionKey));
         String name = (String) session.getAttribute(
-                getFieldNameAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME));
+                getFieldNameAttrName(sessionKey));
         user = getUserByKey(key, name, userClass);
         if (user != null) {
             UserHolder.set(new UserContextImpl(user));
@@ -74,7 +75,6 @@ public abstract class AbstractSessionUserManager implements UserManager {
      */
     @Override
     public void bindUser(HttpServletRequest request, IUser authResult) {
-        HttpSession session = request.getSession(true);
         //反射缓存查询
         FieldVal val = KEY_METHOD_CACHE.computeIfAbsent(authResult.getClass(), clazz -> {
             Field[] fields = new Field[1];
@@ -100,6 +100,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
             return new FieldVal(fields[0], FieldUtils.getGetterMethodByField(fields[0], clazz));
         });
         Object key = ReflectionUtils.invokeMethod(val.getMethod(), authResult);
+        HttpSession session = request.getSession(true);
         session.setAttribute(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME, key);
         session.setAttribute(
                 getClassAttrName(Constants.DEFAULT_SESSION_ATTRIBUTE_NAME),
@@ -115,6 +116,14 @@ public abstract class AbstractSessionUserManager implements UserManager {
 
     protected String getFieldNameAttrName(String attrName) {
         return attrName + ".name";
+    }
+
+    public void setSessionKey(String sessionKey) {
+        this.sessionKey = sessionKey;
+    }
+
+    public String getSessionKey() {
+        return sessionKey;
     }
 
     @Override
