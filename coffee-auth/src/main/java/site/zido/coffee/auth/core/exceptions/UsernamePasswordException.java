@@ -1,4 +1,6 @@
-package site.zido.coffee.auth.exceptions;
+package site.zido.coffee.auth.core.exceptions;
+
+import site.zido.coffee.auth.authentication.AbstractAuthenticationException;
 
 /**
  * 用户名密码错误

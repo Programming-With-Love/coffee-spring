@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package site.zido.coffee.auth.exceptions;
+package site.zido.coffee.auth.authentication;
 
 /**
  * 认证错误
@@ -22,6 +22,8 @@ package site.zido.coffee.auth.exceptions;
  * @author zido
  */
 public abstract class AbstractAuthenticationException extends RuntimeException {
+
+    private static final long serialVersionUID = 7109623910705254563L;
 
     public AbstractAuthenticationException(String msg, Throwable t) {
         super(msg, t);

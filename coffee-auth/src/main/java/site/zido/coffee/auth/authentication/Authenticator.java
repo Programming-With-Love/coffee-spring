@@ -2,7 +2,6 @@ package site.zido.coffee.auth.authentication;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;

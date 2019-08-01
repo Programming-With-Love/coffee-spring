@@ -8,10 +8,8 @@ import org.springframework.util.StringUtils;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthColumnPassword;
 import site.zido.coffee.auth.entity.annotations.AuthColumnUsername;
-import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
-import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
-import site.zido.coffee.auth.exceptions.NotThisAuthenticatorException;
-import site.zido.coffee.auth.exceptions.UsernamePasswordException;
+import site.zido.coffee.auth.core.exceptions.NotThisAuthenticatorException;
+import site.zido.coffee.auth.core.exceptions.UsernamePasswordException;
 import site.zido.coffee.auth.security.NoPasswordEncoder;
 import site.zido.coffee.auth.security.PasswordEncoder;
 

@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.exceptions;
+package site.zido.coffee.auth.authentication;
 
 /**
  * 鉴权时发生的内部异常

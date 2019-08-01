@@ -10,12 +10,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import site.zido.coffee.auth.core.exceptions.NoSuchUserException;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthColumnWechatOpenId;
 import site.zido.coffee.auth.entity.annotations.AuthColumnWechatUnionId;
-import site.zido.coffee.auth.exceptions.AbstractAuthenticationException;
-import site.zido.coffee.auth.exceptions.InternalAuthenticationException;
-import site.zido.coffee.auth.exceptions.NoSuchUserException;
 import site.zido.coffee.auth.handlers.NoSuchUserHandler;
 import site.zido.coffee.auth.utils.WxMiniUtil;
 
