@@ -1,6 +1,7 @@
 package site.zido.coffee.auth.handlers;
 
 import site.zido.coffee.auth.authentication.AbstractAuthenticationException;
+import site.zido.coffee.auth.authentication.InternalAuthenticationException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +17,7 @@ public interface LoginFailureHandler {
      *
      * @param request   request
      * @param response  response
-     * @param exception exception,可能为{@link site.zido.coffee.auth.core.exceptions.InternalAuthenticationException}
+     * @param exception exception,可能为{@link InternalAuthenticationException}
      *                  ,相关日志已经完成打印.
      * @throws IOException      io exception
      * @throws ServletException servlet exception

@@ -13,6 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * @author zido
+ */
 public class RestLoginFailureHandler implements LoginFailureHandler {
     private HttpResponseBodyFactory factory;
     private ObjectMapper mapper;
