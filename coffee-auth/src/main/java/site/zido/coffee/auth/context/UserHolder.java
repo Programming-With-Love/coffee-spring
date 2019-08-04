@@ -14,8 +14,8 @@ public class UserHolder {
         strategy.clearContext();
     }
 
-    public static IUser get() {
-        return strategy.getContext().getUser();
+    public static UserContext get() {
+        return strategy.getContext();
     }
 
     public static void set(UserContext context) {

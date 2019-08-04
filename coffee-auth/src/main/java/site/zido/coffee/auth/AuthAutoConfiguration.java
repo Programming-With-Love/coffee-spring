@@ -9,7 +9,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.CommonAutoConfiguration;
@@ -22,6 +24,7 @@ import site.zido.coffee.auth.authentication.*;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 
 import javax.persistence.EntityManager;
+import java.util.List;
 
 /**
  * @author zido
@@ -133,6 +136,14 @@ public class AuthAutoConfiguration {
         @Autowired
         public void setManager(EntityManager manager) {
             this.manager = manager;
+        }
+    }
+
+    @Configuration
+    class WebMvcAuthConfiguration extends WebMvcConfigurerAdapter {
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+
         }
     }
 }

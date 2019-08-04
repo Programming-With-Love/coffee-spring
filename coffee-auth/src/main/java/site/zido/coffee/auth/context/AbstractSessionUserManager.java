@@ -40,7 +40,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
     @Override
     @SuppressWarnings("unchecked")
     public IUser getCurrentUser(HttpServletRequest request) {
-        IUser user = UserHolder.get();
+        IUser user = UserHolder.get().getUser();
         if (user != null) {
             return user;
         }
