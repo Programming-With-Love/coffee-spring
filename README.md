@@ -6,6 +6,8 @@
 
 提供通用自动配置，完全零配置并提供高度扩展能力
 
+* 自动配置的认证框架，包含登录/鉴权功能
+
 * rest配置，能够正确的返回`site.zido.pojo.Result`封装的json，提供`OriginalResponse`注解以帮助返回原值。直接返回的方式可以让controller层更薄，更易于编写。
 
 * json配置，自动根据profile配置json序列化方式，具体表现为`prod`环境下，null不参与序列化,属性不匹配会失败，节省带宽，提高返回速度
@@ -14,8 +16,6 @@
 * 全局异常自动捕捉并返回Result结果。业务异常务必继承`CommonBussinessException`，给予前端更好的提示处理
 
 * 全局请求日志,帮助快速定位问题所在,日志示例：`Before request [uri=/test3/a?x=1&y=2;client=0:0:0:0:0:0:0:1;headers={host=[localhost:8080], user-agent=[curl/7.64.1], accept=[*/*]}]`
-
-* 自动配置的认证框架，包含登录/鉴权功能
 
 * 定义更多的校验注解，例如：`@Mobile`
 
@@ -38,11 +38,11 @@ maven 加入依赖
 
 完毕
 
-## 认证模块
+## 认证模块 (coffee-auth)
 
 可实现几乎0配置的自动认证模块
 
-**但是请注意，必须使用spring-data-jpa作为orm框架**
+**请注意，必须使用spring-data-jpa作为orm框架**
 
 自带的登录功能包括：
 
@@ -65,7 +65,7 @@ maven 加入依赖
 * 如包含**wechatOpenId**或者**wechatUnionId**字样，会自动加入微信小程序登录。如需要使用其他字段，
 请加入**AuthColumnWechatOpenId**或者**AuthColumnWechatUnionId**注解到相关字段上
 
-## 注解式限流
+## 注解式限流 (coffee-extra)
 
 如需启用需使用 @EnableLimiter 注解
 
