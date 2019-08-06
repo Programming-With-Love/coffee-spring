@@ -5,13 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.GenericFilterBean;
 import site.zido.coffee.auth.context.UserHolder;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 过滤器链的过滤器，用于遍历安全认证过滤器链
@@ -43,8 +41,12 @@ public class FilterChainFilter extends GenericFilterBean {
     private void doFilterInternal(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest seRequest = httpSecurityManager.getSecurityRequest((HttpServletRequest) request);
         HttpServletResponse seResponse = httpSecurityManager.getSecurityResponse((HttpServletResponse) response);
-
+        getFilters(seRequest);
         //TODO do filter internal in filter chain filter
+    }
+
+    private List<Filter> getFilters(HttpServletRequest request) {
+
     }
 
     public void setHttpSecurityManager(HttpSecurityManager httpSecurityManager) {
