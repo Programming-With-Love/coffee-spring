@@ -6,8 +6,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.entity.UserDetails;
+import site.zido.coffee.auth.user.IUser;
 
 import java.lang.annotation.Annotation;
 

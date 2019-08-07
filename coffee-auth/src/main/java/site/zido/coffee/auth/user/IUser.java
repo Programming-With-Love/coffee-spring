@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.entity;
+package site.zido.coffee.auth.user;
 
 import java.io.Serializable;
 

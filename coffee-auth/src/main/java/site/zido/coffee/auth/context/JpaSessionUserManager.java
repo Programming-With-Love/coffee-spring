@@ -2,7 +2,7 @@ package site.zido.coffee.auth.context;
 
 import org.springframework.util.Assert;
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.user.IUser;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -32,6 +32,8 @@ public class JpaSessionUserManager extends AbstractSessionUserManager {
         Predicate pre = criteriaBuilder.equal(root.get(fieldName), fieldValue);
         query = query.where(pre);
         TypedQuery<? extends IUser> typedQuery = em.createQuery(query);
-        return typedQuery.getSingleResult();
+        //TODO
+//        return typedQuery.getSingleResult();
+        return null;
     }
 }

@@ -1,7 +1,6 @@
 package site.zido.coffee.auth.handlers;
 
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.entity.IUser;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

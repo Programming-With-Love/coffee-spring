@@ -1,7 +1,7 @@
 package site.zido.coffee.auth.context;
 
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.user.IUser;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;

@@ -1,6 +1,6 @@
 package example;
 
-import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.user.IUser;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

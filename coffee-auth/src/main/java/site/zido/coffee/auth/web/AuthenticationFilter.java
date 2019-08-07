@@ -14,8 +14,8 @@ import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.auth.authentication.*;
 import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.context.UserManager;
-import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.entity.annotations.AuthEntity;
+import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.annotations.AuthEntity;
 import site.zido.coffee.auth.handlers.LoginFailureHandler;
 import site.zido.coffee.auth.handlers.LoginSuccessHandler;
 

@@ -5,8 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.util.ReflectionUtils;
 import site.zido.coffee.auth.Constants;
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.entity.IUser;
-import site.zido.coffee.auth.entity.annotations.AuthColumnKey;
+import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.annotations.AuthColumnKey;
 import site.zido.coffee.auth.handlers.FieldVal;
 import site.zido.coffee.auth.utils.FieldUtils;
 

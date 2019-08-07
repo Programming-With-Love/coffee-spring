@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.entity;
+package site.zido.coffee.auth.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

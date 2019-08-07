@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.entity.annotations;
+package site.zido.coffee.auth.user.annotations;
 
 import java.lang.annotation.*;
 

@@ -3,7 +3,7 @@ package site.zido.coffee.auth.authentication;
 import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.core.CredentialsContainer;
 import site.zido.coffee.auth.core.GrantedAuthority;
-import site.zido.coffee.auth.entity.UserDetails;
+import site.zido.coffee.auth.user.UserDetails;
 
 import java.security.Principal;
 import java.util.*;
