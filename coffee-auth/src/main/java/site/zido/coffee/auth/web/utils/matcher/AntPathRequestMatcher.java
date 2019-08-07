@@ -84,6 +84,10 @@ public class AntPathRequestMatcher implements RequestMatcher, RequestVariablesEx
         return this.matcher.matches(url);
     }
 
+    public String getPattern() {
+        return pattern;
+    }
+
     private String getRequestPath(HttpServletRequest request) {
         if (this.urlPathHelper != null) {
             return this.urlPathHelper.getPathWithinApplication(request);

@@ -1,7 +1,5 @@
 package site.zido.coffee.auth.context;
 
-import site.zido.coffee.auth.entity.IUser;
-
 /**
  * 全局用户保持,线程级
  *

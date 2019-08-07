@@ -1,6 +1,7 @@
 package site.zido.coffee.auth.context;
 
 import org.springframework.util.Assert;
+import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.entity.IUser;
 
 import javax.persistence.EntityManager;
@@ -24,7 +25,7 @@ public class JpaSessionUserManager extends AbstractSessionUserManager {
     }
 
     @Override
-    protected IUser getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass) {
+    protected Authentication getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<? extends IUser> query = criteriaBuilder.createQuery(userClass);
         Root<? extends IUser> root = query.from(userClass);

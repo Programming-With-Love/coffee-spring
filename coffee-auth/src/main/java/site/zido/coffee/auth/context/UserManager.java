@@ -1,5 +1,6 @@
 package site.zido.coffee.auth.context;
 
+import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.entity.IUser;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +18,7 @@ public interface UserManager {
      * @param request request
      * @return user
      */
-    IUser getCurrentUser(HttpServletRequest request);
+    Authentication getCurrentUser(HttpServletRequest request);
 
     /**
      * 获取用户的相关角色
@@ -25,7 +26,7 @@ public interface UserManager {
      * @param user 用户
      * @return 角色集合
      */
-    Collection<String> getRoles(IUser user);
+    Collection<String> getRoles(Authentication user);
 
     /**
      * 将认证结果与请求进行绑定

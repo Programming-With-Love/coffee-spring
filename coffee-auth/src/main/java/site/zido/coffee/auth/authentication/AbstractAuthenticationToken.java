@@ -3,7 +3,7 @@ package site.zido.coffee.auth.authentication;
 import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.core.CredentialsContainer;
 import site.zido.coffee.auth.core.GrantedAuthority;
-import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.entity.UserDetails;
 
 import java.security.Principal;
 import java.util.*;
@@ -20,7 +20,7 @@ public abstract class AbstractAuthenticationToken implements Authentication, Cre
     private Object details;
     private boolean authenticated = false;
 
-    public AbstractAuthenticationToken(Collection<GrantedAuthority> authorities) {
+    public AbstractAuthenticationToken(Collection<? extends GrantedAuthority> authorities) {
         if (authorities == null) {
             this.authorities = NO_AUTHORITIES;
             return;
@@ -58,8 +58,8 @@ public abstract class AbstractAuthenticationToken implements Authentication, Cre
 
     @Override
     public String getName() {
-        if (!(this.getPrincipal() instanceof IUser)) {
-            return ((IUser) this.getPrincipal()).getUsername();
+        if (!(this.getPrincipal() instanceof UserDetails)) {
+            return ((UserDetails) this.getPrincipal()).getUsername();
         }
         if (this.getPrincipal() instanceof AuthenticatedPrincipal) {
             return ((AuthenticatedPrincipal) this.getPrincipal()).getName();

@@ -12,7 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 import site.zido.coffee.auth.authentication.Auth;
 import site.zido.coffee.auth.authentication.AuthVal;
 import site.zido.coffee.auth.context.UserManager;
-import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.handlers.DisabledUserHandler;
 import site.zido.coffee.auth.handlers.LoginExpectedHandler;
 
@@ -59,12 +59,12 @@ public class PermissionInterceptor implements HandlerInterceptor, InitializingBe
             return true;
         }
         Collection<String> requiredRoles = authVal.getRoles();
-        IUser currentUser = userManager.getCurrentUser(request);
+        Authentication currentUser = userManager.getCurrentUser(request);
         if (currentUser == null) {
             loginExpectedHandler.handle(request, response);
             return false;
         }
-        if (!currentUser.enabled()) {
+        if (!currentUser.isAuthenticated()) {
             LOGGER.debug("current user is disabled");
             disabledUserHandler.handle(request, response);
             return false;

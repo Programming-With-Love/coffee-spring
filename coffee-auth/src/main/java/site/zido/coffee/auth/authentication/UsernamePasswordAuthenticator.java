@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.entity.UserDetails;
 import site.zido.coffee.auth.entity.annotations.AuthColumnPassword;
 import site.zido.coffee.auth.entity.annotations.AuthColumnUsername;
 import site.zido.coffee.auth.core.exceptions.NotThisAuthenticatorException;

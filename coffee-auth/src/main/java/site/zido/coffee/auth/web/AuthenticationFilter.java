@@ -11,17 +11,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
-import site.zido.coffee.auth.authentication.AuthHandler;
-import site.zido.coffee.auth.authentication.Authenticator;
-import site.zido.coffee.auth.authentication.SimpleAuthHandler;
+import site.zido.coffee.auth.authentication.*;
 import site.zido.coffee.auth.context.UserHolder;
+import site.zido.coffee.auth.context.UserManager;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthEntity;
-import site.zido.coffee.auth.authentication.AbstractAuthenticationException;
-import site.zido.coffee.auth.authentication.InternalAuthenticationException;
 import site.zido.coffee.auth.handlers.LoginFailureHandler;
 import site.zido.coffee.auth.handlers.LoginSuccessHandler;
-import site.zido.coffee.auth.context.UserManager;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -109,7 +105,8 @@ public class AuthenticationFilter extends GenericFilterBean implements BeanFacto
             LOGGER.debug("认证成功，更新userHolder:" + authResult);
         }
         userManager.bindUser(request, authResult);
-        successHandler.onAuthenticationSuccess(request, response, authResult);
+        //TODO update detail
+        successHandler.onAuthenticationSuccess(request, response, null);
     }
 
     private void unsuccessfulAuthentication(HttpServletRequest request,

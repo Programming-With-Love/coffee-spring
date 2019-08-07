@@ -46,7 +46,7 @@ public class FilterChainFilter extends GenericFilterBean {
     }
 
     private List<Filter> getFilters(HttpServletRequest request) {
-
+        return null;
     }
 
     public void setHttpSecurityManager(HttpSecurityManager httpSecurityManager) {

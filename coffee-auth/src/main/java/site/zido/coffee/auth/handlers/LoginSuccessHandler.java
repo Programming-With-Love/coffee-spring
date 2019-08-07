@@ -1,5 +1,6 @@
 package site.zido.coffee.auth.handlers;
 
+import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.entity.IUser;
 
 import javax.servlet.ServletException;
@@ -16,13 +17,13 @@ public interface LoginSuccessHandler {
     /**
      * 当认证成功时的相应处理
      *
-     * @param request  request
-     * @param response response
-     * @param user     user
+     * @param request        request
+     * @param response       response
+     * @param authentication authentication
      * @throws IOException      ex
      * @throws ServletException ex
      */
     void onAuthenticationSuccess(HttpServletRequest request,
-                                 HttpServletResponse response, IUser user)
+                                 HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException;
 }

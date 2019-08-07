@@ -3,7 +3,6 @@ package site.zido.coffee.auth.entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-import site.zido.coffee.auth.Constants;
 import site.zido.coffee.auth.core.CredentialsContainer;
 import site.zido.coffee.auth.core.GrantedAuthority;
 
@@ -15,7 +14,7 @@ import static site.zido.coffee.auth.Constants.COFFEE_AUTH_VERSION;
 /**
  * @author zido
  */
-public class User implements IUser, CredentialsContainer {
+public class User implements UserDetails, CredentialsContainer {
     private static final long serialVersionUID = COFFEE_AUTH_VERSION;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(User.class);

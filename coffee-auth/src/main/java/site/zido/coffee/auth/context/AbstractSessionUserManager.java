@@ -4,6 +4,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.util.ReflectionUtils;
 import site.zido.coffee.auth.Constants;
+import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.entity.IUser;
 import site.zido.coffee.auth.entity.annotations.AuthColumnKey;
 import site.zido.coffee.auth.handlers.FieldVal;
@@ -35,12 +36,12 @@ public abstract class AbstractSessionUserManager implements UserManager {
      * @param userClass  查询目标类
      * @return user
      */
-    protected abstract IUser getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass);
+    protected abstract Authentication getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass);
 
     @Override
     @SuppressWarnings("unchecked")
-    public IUser getCurrentUser(HttpServletRequest request) {
-        IUser user = UserHolder.get().getUser();
+    public Authentication getCurrentUser(HttpServletRequest request) {
+        Authentication user = UserHolder.get().getUser();
         if (user != null) {
             return user;
         }
@@ -63,7 +64,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
     }
 
     @Override
-    public Collection<String> getRoles(IUser user) {
+    public Collection<String> getRoles(Authentication user) {
         return Collections.singleton(user.role());
     }
 

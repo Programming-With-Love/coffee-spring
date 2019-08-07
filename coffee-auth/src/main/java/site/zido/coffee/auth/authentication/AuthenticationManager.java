@@ -2,8 +2,6 @@ package site.zido.coffee.auth.authentication;
 
 import site.zido.coffee.auth.core.Authentication;
 
-import javax.naming.AuthenticationException;
-
 /**
  * 认证处理器
  *
@@ -16,8 +14,8 @@ public interface AuthenticationManager {
      *
      * @param authentication 认证请求
      * @return 完全认证对象
-     * @throws AuthenticationException 如果认证失败则抛出此异常
+     * @throws AbstractAuthenticationException 如果认证失败则抛出此异常
      */
     Authentication authenticate(Authentication authentication)
-            throws AuthenticationException;
+            throws AbstractAuthenticationException;
 }

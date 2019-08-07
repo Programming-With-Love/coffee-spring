@@ -1,6 +1,6 @@
 package site.zido.coffee.auth.context;
 
-import site.zido.coffee.auth.entity.IUser;
+import site.zido.coffee.auth.core.Authentication;
 
 /**
  * @author zido
@@ -8,23 +8,23 @@ import site.zido.coffee.auth.entity.IUser;
 public class UserContextImpl implements UserContext {
     private static final long serialVersionUID = -1L;
 
-    private IUser user;
+    private Authentication authentication;
 
     public UserContextImpl() {
     }
 
-    public UserContextImpl(IUser user) {
-        this.user = user;
+    public UserContextImpl(Authentication authentication) {
+        this.authentication = authentication;
     }
 
     @Override
-    public IUser getUser() {
-        return user;
+    public Authentication getAuthentication() {
+        return authentication;
     }
 
     @Override
-    public void setUser(IUser user) {
-        this.user = user;
+    public void setAuthentication(Authentication authentication) {
+        this.authentication = authentication;
     }
 
 
@@ -32,21 +32,21 @@ public class UserContextImpl implements UserContext {
     public boolean equals(Object o) {
         if (o instanceof UserContextImpl) {
             UserContextImpl test = (UserContextImpl) o;
-            if ((this.getUser() == null) && (test.getUser() == null)) {
+            if ((this.getAuthentication() == null) && (test.getAuthentication() == null)) {
                 return true;
             }
-            return (this.getUser() != null) && (test.getUser() != null)
-                    && this.getUser().equals(test.getUser());
+            return (this.getAuthentication() != null) && (test.getAuthentication() != null)
+                    && this.getAuthentication().equals(test.getAuthentication());
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        if (this.getUser() == null) {
+        if (this.getAuthentication() == null) {
             return -1;
         } else {
-            return this.getUser().hashCode();
+            return this.getAuthentication().hashCode();
         }
     }
 
@@ -54,10 +54,10 @@ public class UserContextImpl implements UserContext {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString());
-        if (this.user == null) {
-            sb.append(": Null user");
+        if (this.authentication == null) {
+            sb.append(": Null Authentication");
         } else {
-            sb.append(": Authentication: ").append(this.user);
+            sb.append(": Authentication: ").append(this.authentication);
         }
         return sb.toString();
     }

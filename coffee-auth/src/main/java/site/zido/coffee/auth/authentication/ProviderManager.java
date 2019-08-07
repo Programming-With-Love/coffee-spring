@@ -44,7 +44,7 @@ public class ProviderManager implements AuthenticationManager, InitializingBean 
     }
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication) throws AbstractAuthenticationException {
         Class<? extends Authentication> targetClass = authentication.getClass();
         AbstractAuthenticationException lastException = null;
         Authentication result = null;
