@@ -29,7 +29,8 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
+        Assert.notNull(this.userCache, "UserCache can't be null");
+        Assert.notNull(this.messages, "Message source can't be null");
     }
 
     @Override
@@ -101,6 +102,30 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         result.setDetails(authentication.getDetails());
 
         return result;
+    }
+
+    public void setForcePrincipalAsString(boolean forcePrincipalAsString) {
+        this.forcePrincipalAsString = forcePrincipalAsString;
+    }
+
+    public void setHideUserNotFoundExceptions(boolean hideUserNotFoundExceptions) {
+        this.hideUserNotFoundExceptions = hideUserNotFoundExceptions;
+    }
+
+    public void setMessages(MessageSourceAccessor messages) {
+        this.messages = messages;
+    }
+
+    public void setUserCache(UserCache userCache) {
+        this.userCache = userCache;
+    }
+
+    public void setPreAuthenticationChecks(UserDetailsChecker preAuthenticationChecks) {
+        this.preAuthenticationChecks = preAuthenticationChecks;
+    }
+
+    public void setPostAuthenticationChecks(UserDetailsChecker postAuthenticationChecks) {
+        this.postAuthenticationChecks = postAuthenticationChecks;
     }
 
     @Override
