@@ -11,8 +11,6 @@ import java.util.Collection;
  * @author zido
  */
 public interface UserDetails extends Serializable {
-    String DEFAULT_ROLE = "user";
-
     /**
      * 获取用户权限信息,不能返回null
      *
@@ -47,15 +45,6 @@ public interface UserDetails extends Serializable {
      * @return 如果未过期返回true, 否则返回false
      */
     boolean isCredentialsNonExpired();
-
-    /**
-     * 角色
-     *
-     * @return role
-     */
-    default String role() {
-        return DEFAULT_ROLE;
-    }
 
     /**
      * 是否可用

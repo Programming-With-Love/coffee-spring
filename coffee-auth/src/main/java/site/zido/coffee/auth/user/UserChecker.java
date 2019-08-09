@@ -1,5 +1,8 @@
 package site.zido.coffee.auth.user;
 
-public interface UserDetailsChecker {
+/**
+ * @author zido
+ */
+public interface UserChecker {
     void check(UserDetails toCheck);
 }

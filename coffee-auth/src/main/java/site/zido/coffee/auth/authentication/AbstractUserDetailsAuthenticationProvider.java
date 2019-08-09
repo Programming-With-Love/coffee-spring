@@ -10,9 +10,7 @@ import site.zido.coffee.auth.user.NullUserCache;
 import site.zido.coffee.auth.user.UserCache;
 import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.user.UserDetails;
-import site.zido.coffee.auth.user.UserDetailsChecker;
-
-import javax.naming.AuthenticationException;
+import site.zido.coffee.auth.user.UserChecker;
 
 /**
  * @author zido
@@ -23,8 +21,8 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
     private UserCache userCache = new NullUserCache();
     protected boolean hideUserNotFoundExceptions = true;
     protected MessageSourceAccessor messages = CoffeeAuthMessageSource.getAccessor();
-    private UserDetailsChecker preAuthenticationChecks = new DefaultPreAuthenticationChecks();
-    private UserDetailsChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
+    private UserChecker preAuthenticationChecks = new DefaultPreAuthenticationChecks();
+    private UserChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
     private boolean forcePrincipalAsString = false;
 
     @Override
@@ -120,11 +118,11 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         this.userCache = userCache;
     }
 
-    public void setPreAuthenticationChecks(UserDetailsChecker preAuthenticationChecks) {
+    public void setPreAuthenticationChecks(UserChecker preAuthenticationChecks) {
         this.preAuthenticationChecks = preAuthenticationChecks;
     }
 
-    public void setPostAuthenticationChecks(UserDetailsChecker postAuthenticationChecks) {
+    public void setPostAuthenticationChecks(UserChecker postAuthenticationChecks) {
         this.postAuthenticationChecks = postAuthenticationChecks;
     }
 
@@ -133,7 +131,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private class DefaultPreAuthenticationChecks implements UserDetailsChecker {
+    private class DefaultPreAuthenticationChecks implements UserChecker {
         @Override
         public void check(UserDetails user) {
             if (!user.isAccountNonLocked()) {
@@ -162,7 +160,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         }
     }
 
-    private class DefaultPostAuthenticationChecks implements UserDetailsChecker {
+    private class DefaultPostAuthenticationChecks implements UserChecker {
         @Override
         public void check(UserDetails user) {
             if (!user.isCredentialsNonExpired()) {

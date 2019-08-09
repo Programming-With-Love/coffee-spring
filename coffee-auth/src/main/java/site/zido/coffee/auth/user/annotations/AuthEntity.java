@@ -1,5 +1,7 @@
 package site.zido.coffee.auth.user.annotations;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.*;
 
 /**
@@ -11,5 +13,15 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuthEntity {
-    String url();
+
+    /**
+     * 登陆入口url
+     *
+     * @return url path
+     */
+    @AliasFor("url")
+    String value() default "";
+
+    @AliasFor("value")
+    String url() default "";
 }
