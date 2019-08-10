@@ -14,16 +14,16 @@ import java.util.List;
  *
  * @author zido
  */
-public class DefaultFilterChainManager implements FilterChainManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFilterChainManager.class);
+public class UrlBasedFilterChainManager implements FilterChainManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UrlBasedFilterChainManager.class);
     private final List<Filter> filters;
     private final RequestMatcher requestMatcher;
 
-    public DefaultFilterChainManager(RequestMatcher requestMatcher, Filter... filters) {
+    public UrlBasedFilterChainManager(RequestMatcher requestMatcher, Filter... filters) {
         this(requestMatcher, Arrays.asList(filters));
     }
 
-    public DefaultFilterChainManager(RequestMatcher requestMatcher, List<Filter> filters) {
+    public UrlBasedFilterChainManager(RequestMatcher requestMatcher, List<Filter> filters) {
         LOGGER.info("Creating filter chain: " + requestMatcher + "," + filters);
         this.filters = filters;
         this.requestMatcher = requestMatcher;
