@@ -12,7 +12,7 @@ public class NullUserCache implements UserCache {
     }
 
     @Override
-    public void removeUserFromCache(String username) {
+    public void removeUserFromCache(Object username) {
 
     }
 }

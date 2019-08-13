@@ -7,16 +7,16 @@ import site.zido.coffee.auth.utils.pojo.PrivateFieldPOJO;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-public class FieldUtilsTest {
+public class CachedFieldUtilsTest {
     @Test
     public void testGetSetterMethodByField() throws NoSuchFieldException {
         Field nameField = PrivateFieldPOJO.class.getDeclaredField("name");
-        Method nameSetterMethod = FieldUtils.getSetterMethodByField(nameField, PrivateFieldPOJO.class);
+        Method nameSetterMethod = CachedFieldUtils.getSetterMethodByField(nameField, PrivateFieldPOJO.class);
         Assert.assertNotNull("the setter method of name is null", nameSetterMethod);
         Assert.assertEquals(nameSetterMethod.getName(), "setName");
 
         Field camelCaseField = PrivateFieldPOJO.class.getDeclaredField("privateField");
-        Method camelCaseFieldSetterMethod = FieldUtils.getSetterMethodByField(camelCaseField, PrivateFieldPOJO.class);
+        Method camelCaseFieldSetterMethod = CachedFieldUtils.getSetterMethodByField(camelCaseField, PrivateFieldPOJO.class);
         Assert.assertNotNull("the setter method of camel case field is null", camelCaseFieldSetterMethod);
         Assert.assertEquals(camelCaseFieldSetterMethod.getName(), "setPrivateField");
     }
@@ -24,12 +24,12 @@ public class FieldUtilsTest {
     @Test
     public void testGetGetterMethodByField() throws NoSuchFieldException {
         Field nameField = PrivateFieldPOJO.class.getDeclaredField("name");
-        Method nameGetterMethod = FieldUtils.getGetterMethodByField(nameField, PrivateFieldPOJO.class);
+        Method nameGetterMethod = CachedFieldUtils.getGetterMethodByField(nameField, PrivateFieldPOJO.class);
         Assert.assertNotNull("the getter method of name is null", nameGetterMethod);
         Assert.assertEquals(nameGetterMethod.getName(), "getName");
 
         Field camelCaseField = PrivateFieldPOJO.class.getDeclaredField("privateField");
-        Method camelCaseFieldGetterMethod = FieldUtils.getGetterMethodByField(camelCaseField, PrivateFieldPOJO.class);
+        Method camelCaseFieldGetterMethod = CachedFieldUtils.getGetterMethodByField(camelCaseField, PrivateFieldPOJO.class);
         Assert.assertNotNull("the getter method of camel case field is null", camelCaseFieldGetterMethod);
         Assert.assertEquals(camelCaseFieldGetterMethod.getName(), "getPrivateField");
     }
@@ -39,7 +39,7 @@ public class FieldUtilsTest {
         PrivateFieldPOJO pojo = PrivateFieldPOJO.class.newInstance();
         Field nameField = PrivateFieldPOJO.class.getDeclaredField("name");
         String nameValue = "xx";
-        FieldUtils.injectField(nameField, pojo, nameValue);
+        CachedFieldUtils.injectField(nameField, pojo, nameValue);
         Assert.assertEquals("inject xx to name failed", pojo.getName(), nameValue);
     }
 
@@ -48,7 +48,7 @@ public class FieldUtilsTest {
         PrivateFieldPOJO pojo = PrivateFieldPOJO.class.newInstance();
         Field nameField = PrivateFieldPOJO.class.getDeclaredField("name");
         String nameValue = "xx";
-        FieldUtils.injectFieldBySetter(nameField, pojo, nameValue);
+        CachedFieldUtils.injectFieldBySetter(nameField, pojo, nameValue);
         Assert.assertEquals("inject xx to name failed", pojo.getName(), nameValue);
     }
 

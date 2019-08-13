@@ -9,20 +9,21 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 属性注入工具
+ * 属性注入工具,内置缓存，尽量只有高频操作使用此工具
  *
  * @author zido
  */
-public class FieldUtils {
+public class CachedFieldUtils {
     private static final Map<PrimKey, Method> SETTER_CACHE = new ConcurrentHashMap<>(6);
+    private static final Map<PrimKey, Method> GETTER_CACHE = new ConcurrentHashMap<>(6);
 
     private static final class PrimKey {
         private Class<?> clazz;
-        private Field field;
+        private String fieldName;
 
-        private PrimKey(Class<?> clazz, Field field) {
+        private PrimKey(Class<?> clazz, String fieldName) {
             this.clazz = clazz;
-            this.field = field;
+            this.fieldName = fieldName;
         }
 
         @Override
@@ -35,12 +36,12 @@ public class FieldUtils {
             }
             PrimKey primKey = (PrimKey) o;
             return Objects.equals(clazz, primKey.clazz) &&
-                    Objects.equals(field, primKey.field);
+                    Objects.equals(fieldName, primKey.fieldName);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(clazz, field);
+            return Objects.hash(clazz, fieldName);
         }
 
         public Class<?> getClazz() {
@@ -51,12 +52,12 @@ public class FieldUtils {
             this.clazz = clazz;
         }
 
-        public Field getField() {
-            return field;
+        public String getFieldName() {
+            return fieldName;
         }
 
-        public void setField(Field field) {
-            this.field = field;
+        public void setFieldName(String fieldName) {
+            this.fieldName = fieldName;
         }
     }
 
@@ -80,8 +81,7 @@ public class FieldUtils {
      * @param value value
      */
     public static void injectFieldBySetter(Field field, Object obj, Object value) {
-        Method method = SETTER_CACHE.computeIfAbsent(new PrimKey(obj.getClass(), field),
-                primKey -> getSetterMethodByField(primKey.getField(), primKey.getClazz()));
+        Method method = getSetterMethodByField(field.getName(), obj.getClass());
         ReflectionUtils.invokeMethod(method, obj, value);
     }
 
@@ -94,13 +94,27 @@ public class FieldUtils {
      */
     public static Method getSetterMethodByField(Field field, Class<?> clazz) {
         String name = field.getName();
-        String setterName = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
-        return ReflectionUtils.findMethod(clazz, setterName, field.getType());
+        return getSetterMethodByField(name, clazz);
+    }
+
+    public static Method getSetterMethodByField(String fieldName, Class<?> clazz) {
+        return SETTER_CACHE.computeIfAbsent(new PrimKey(clazz, fieldName), primKey -> {
+            String setterName = "set" + primKey.getFieldName().substring(0, 1).toUpperCase() + primKey.getFieldName().substring(1);
+            return ReflectionUtils.findMethod(clazz, setterName);
+        });
+    }
+
+    public static Method getGetterMethodByField(String fieldName, Class<?> clazz) {
+        return GETTER_CACHE.computeIfAbsent(new PrimKey(clazz, fieldName), primKey -> {
+            String getterName = "get" + primKey.getFieldName().substring(0, 1).toUpperCase()
+                    + primKey.getFieldName().substring(1);
+            return ReflectionUtils.findMethod(clazz, getterName);
+        });
+
     }
 
     public static Method getGetterMethodByField(Field field, Class<?> clazz) {
         String name = field.getName();
-        String getterName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
-        return ReflectionUtils.findMethod(clazz, getterName);
+        return getGetterMethodByField(name, clazz);
     }
 }

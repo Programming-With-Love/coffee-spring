@@ -8,7 +8,7 @@ import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.user.IUser;
 import site.zido.coffee.auth.user.annotations.AuthColumnKey;
 import site.zido.coffee.auth.handlers.FieldVal;
-import site.zido.coffee.auth.utils.FieldUtils;
+import site.zido.coffee.auth.utils.CachedFieldUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -41,7 +41,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
     @Override
     @SuppressWarnings("unchecked")
     public Authentication getCurrentUser(HttpServletRequest request) {
-        Authentication user = UserHolder.get().getUser();
+        Authentication user = UserHolder.get().getAuthentication();
         if (user != null) {
             return user;
         }
@@ -98,7 +98,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
                         " or org.springframework.data.annotation" +
                         " or site.zido.coffee.auth.entity.annotations.AuthColumnKey");
             }
-            return new FieldVal(fields[0], FieldUtils.getGetterMethodByField(fields[0], clazz));
+            return new FieldVal(fields[0], CachedFieldUtils.getGetterMethodByField(fields[0], clazz));
         });
         Object key = ReflectionUtils.invokeMethod(val.getMethod(), authResult);
         HttpSession session = request.getSession(true);

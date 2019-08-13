@@ -7,5 +7,5 @@ public interface UserCache {
 
     void putUserInCache(UserDetails user);
 
-    void removeUserFromCache(String username);
+    void removeUserFromCache(Object username);
 }

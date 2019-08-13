@@ -19,11 +19,11 @@ public interface UserDetails extends Serializable {
     Collection<? extends GrantedAuthority> getAuthorities();
 
     /**
-     * 获取用户名
+     * 获取用户key
      *
      * @return username
      */
-    String getUsername();
+    Object getKey();
 
     /**
      * 用户是否已过期，过期用户无法认证
@@ -51,7 +51,7 @@ public interface UserDetails extends Serializable {
      *
      * @return true/false
      */
-    default boolean enabled() {
+    default boolean isEnabled() {
         return true;
     }
 }

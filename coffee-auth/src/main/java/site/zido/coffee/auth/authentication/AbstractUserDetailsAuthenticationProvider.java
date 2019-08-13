@@ -33,17 +33,17 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AbstractAuthenticationException {
-        String username = (authentication.getPrincipal() == null) ? "NONE_PROVIDED"
+        String userKey = (authentication.getPrincipal() == null) ? "NONE_PROVIDED"
                 : authentication.getName();
 
         boolean cacheWasUsed = true;
-        UserDetails user = this.userCache.getUserFromCache(username);
+        UserDetails user = this.userCache.getUserFromCache(userKey);
         if (user == null) {
             cacheWasUsed = false;
             try {
-                user = retrieveUser(username, (UsernamePasswordAuthenticationToken) authentication);
+                user = retrieveUser(userKey, authentication);
             } catch (UsernameNotFoundException e) {
-                LOGGER.debug("User '{}' not found", username);
+                LOGGER.debug("User '{}' not found", userKey);
                 if (hideUserNotFoundExceptions) {
                     throw new BadCredentialsException(messages.getMessage(
                             "AbstractUserDetailsAuthenticationProvider.badCredentials",
@@ -62,7 +62,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         } catch (AbstractAuthenticationException ex) {
             if (cacheWasUsed) {
                 cacheWasUsed = false;
-                user = retrieveUser(username,
+                user = retrieveUser(userKey,
                         (UsernamePasswordAuthenticationToken) authentication);
                 preAuthenticationChecks.check(user);
                 additionalAuthenticationChecks(user,
@@ -79,13 +79,13 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         Object principalToReturn = user;
 
         if (forcePrincipalAsString) {
-            principalToReturn = user.getUsername();
+            principalToReturn = user.getKey();
         }
         return createSuccessAuthentication(principalToReturn, authentication, user);
     }
 
     protected abstract UserDetails retrieveUser(String username,
-                                                UsernamePasswordAuthenticationToken authentication)
+                                                Authentication authentication)
             throws AbstractAuthenticationException;
 
     protected abstract void additionalAuthenticationChecks(UserDetails userDetails,
@@ -141,7 +141,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
                         "User account is locked"
                 ));
             }
-            if (!user.enabled()) {
+            if (!user.isEnabled()) {
                 LOGGER.debug("User account is disabled");
 
                 throw new DisabledException(messages.getMessage(

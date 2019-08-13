@@ -2,6 +2,7 @@ package site.zido.coffee.auth.authentication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.security.PasswordEncoder;
 import site.zido.coffee.auth.user.IUserPasswordService;
 import site.zido.coffee.auth.user.IUserService;
@@ -20,10 +21,10 @@ public class DaoUserDetailsAuthenticationProvider extends AbstractUserDetailsAut
     private volatile String userNotFoundEncodedPassword;
 
     @Override
-    protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AbstractAuthenticationException {
+    protected UserDetails retrieveUser(String userKey, Authentication authentication) throws AbstractAuthenticationException {
         prepareTimingAttackProtection();
         try {
-            UserDetails loadedUser = this.getUserService().findUserByUsername(username);
+            UserDetails loadedUser = this.getUserService().findUserByKey(userKey);
             if (loadedUser == null) {
                 throw new InternalAuthenticationException(
                         "loaded user is null"
@@ -63,7 +64,7 @@ public class DaoUserDetailsAuthenticationProvider extends AbstractUserDetailsAut
         }
     }
 
-    private void mitigateAgainstTimingAttack(UsernamePasswordAuthenticationToken authentication) {
+    private void mitigateAgainstTimingAttack(Authentication authentication) {
         if (authentication.getCredentials() != null) {
             String presentedPassword = authentication.getCredentials().toString();
             this.passwordEncoder.validate(presentedPassword, this.userNotFoundEncodedPassword);

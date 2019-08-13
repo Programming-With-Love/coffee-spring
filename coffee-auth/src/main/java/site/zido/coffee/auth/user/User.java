@@ -17,31 +17,28 @@ import static site.zido.coffee.auth.Constants.COFFEE_AUTH_VERSION;
 public class User implements UserDetails, CredentialsContainer {
     private static final long serialVersionUID = COFFEE_AUTH_VERSION;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(User.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(User.class);
 
-    private String password;
-    private final String username;
+    private final Object userKey;
     private final Set<GrantedAuthority> authorities;
     private final boolean accountNonExpired;
     private final boolean accountNonLocked;
     private final boolean credentialsNonExpired;
     private final boolean enabled;
 
-    public User(String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        this(username, password, true, true, true, true, authorities);
+    public User(String userKey, Collection<? extends GrantedAuthority> authorities) {
+        this(userKey, true, true, true, true, authorities);
     }
 
-    public User(String username, String password, boolean enabled,
+    public User(String userKey, boolean enabled,
                 boolean accountNonExpired, boolean credentialsNonExpired,
                 boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
-
-        if (((username == null) || "".equals(username)) || (password == null)) {
+        if (((userKey == null) || "".equals(userKey))) {
             throw new IllegalArgumentException(
                     "Cannot pass null or empty values to constructor");
         }
 
-        this.username = username;
-        this.password = password;
+        this.userKey = userKey;
         this.enabled = enabled;
         this.accountNonExpired = accountNonExpired;
         this.credentialsNonExpired = credentialsNonExpired;
@@ -50,18 +47,13 @@ public class User implements UserDetails, CredentialsContainer {
     }
 
     @Override
-    public void eraseCredentials() {
-        password = null;
-    }
-
-    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
 
     @Override
-    public String getUsername() {
-        return username;
+    public Object getKey() {
+        return userKey;
     }
 
     @Override
@@ -94,6 +86,11 @@ public class User implements UserDetails, CredentialsContainer {
         return sortedAuthorities;
     }
 
+    @Override
+    public void eraseCredentials() {
+
+    }
+
     private static class AuthorityComparator implements Comparator<GrantedAuthority>,
             Serializable {
 
@@ -116,21 +113,21 @@ public class User implements UserDetails, CredentialsContainer {
     @Override
     public boolean equals(Object rhs) {
         if (rhs instanceof User) {
-            return username.equals(((User) rhs).username);
+            return userKey.equals(((User) rhs).userKey);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return username.hashCode();
+        return userKey.hashCode();
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString()).append(": ");
-        sb.append("Username: ").append(this.username).append("; ");
+        sb.append("Username: ").append(this.userKey).append("; ");
         sb.append("Password: [PROTECTED]; ");
         sb.append("Enabled: ").append(this.enabled).append("; ");
         sb.append("AccountNonExpired: ").append(this.accountNonExpired).append("; ");

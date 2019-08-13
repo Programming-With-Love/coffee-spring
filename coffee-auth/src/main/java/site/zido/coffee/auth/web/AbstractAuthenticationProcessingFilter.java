@@ -31,7 +31,6 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
     private RequestMatcher requestMatcher;
     private boolean continueChainBeforeSuccessfulAuthentication = false;
     private SecuritySessionStrategy sessionStrategy = new NotSecuritySessionStrategy();
-    private boolean allowSessionCreation = true;
     private LoginSuccessHandler successHandler;
     private LoginFailureHandler failureHandler;
     private RememberMeService rememberMeService = new NullRememberMeService();
@@ -123,10 +122,6 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
                 filterProcessesUrl));
     }
 
-    public void setAllowSessionCreation(boolean allowSessionCreation) {
-        this.allowSessionCreation = allowSessionCreation;
-    }
-
     public LoginSuccessHandler getSuccessHandler() {
         return successHandler;
     }
@@ -145,6 +140,10 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
 
     public AuthenticationManager getAuthenticationManager() {
         return authenticationManager;
+    }
+
+    public void setContinueChainBeforeSuccessfulAuthentication(boolean continueChainBeforeSuccessfulAuthentication) {
+        this.continueChainBeforeSuccessfulAuthentication = continueChainBeforeSuccessfulAuthentication;
     }
 
     @Override

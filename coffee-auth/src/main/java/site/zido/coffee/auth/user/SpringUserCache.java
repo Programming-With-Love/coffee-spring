@@ -27,16 +27,16 @@ public class SpringUserCache implements UserCache {
 
     @Override
     public void putUserInCache(UserDetails user) {
-        LOGGER.debug("Cache put: {}", user.getUsername());
-        cache.put(user.getUsername(), user);
+        LOGGER.debug("Cache put: {}", user.getKey());
+        cache.put(user.getKey(), user);
     }
 
     public void removeUserFromCache(UserDetails user) {
-        this.removeUserFromCache(user.getUsername());
+        this.removeUserFromCache(user.getKey());
     }
 
     @Override
-    public void removeUserFromCache(String username) {
+    public void removeUserFromCache(Object username) {
         LOGGER.debug("Cache remove: {}", username);
         cache.evict(username);
     }
