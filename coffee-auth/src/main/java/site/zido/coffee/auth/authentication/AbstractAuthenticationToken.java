@@ -58,8 +58,8 @@ public abstract class AbstractAuthenticationToken implements Authentication, Cre
 
     @Override
     public String getName() {
-        if (!(this.getPrincipal() instanceof UserDetails)) {
-            return ((UserDetails) this.getPrincipal()).getKey();
+        if (this.getPrincipal() instanceof UserDetails) {
+            return ((UserDetails) this.getPrincipal()).getKey().toString();
         }
         if (this.getPrincipal() instanceof AuthenticatedPrincipal) {
             return ((AuthenticatedPrincipal) this.getPrincipal()).getName();

@@ -26,11 +26,11 @@ public class User implements UserDetails, CredentialsContainer {
     private final boolean credentialsNonExpired;
     private final boolean enabled;
 
-    public User(String userKey, Collection<? extends GrantedAuthority> authorities) {
+    public User(Object userKey, Collection<? extends GrantedAuthority> authorities) {
         this(userKey, true, true, true, true, authorities);
     }
 
-    public User(String userKey, boolean enabled,
+    public User(Object userKey, boolean enabled,
                 boolean accountNonExpired, boolean credentialsNonExpired,
                 boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         if (((userKey == null) || "".equals(userKey))) {

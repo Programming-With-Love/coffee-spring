@@ -6,11 +6,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.util.Assert;
 import site.zido.coffee.auth.core.CoffeeAuthMessageSource;
-import site.zido.coffee.auth.user.NullUserCache;
-import site.zido.coffee.auth.user.UserCache;
+import site.zido.coffee.auth.user.*;
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.user.UserDetails;
-import site.zido.coffee.auth.user.UserChecker;
 
 /**
  * @author zido
@@ -19,16 +16,17 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         AuthenticationProvider, InitializingBean {
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private UserCache userCache = new NullUserCache();
-    protected boolean hideUserNotFoundExceptions = true;
     protected MessageSourceAccessor messages = CoffeeAuthMessageSource.getAccessor();
     private UserChecker preAuthenticationChecks = new DefaultPreAuthenticationChecks();
     private UserChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
     private boolean forcePrincipalAsString = false;
+    private UserDetailsReader reader = AnnotatedUserDetailsReader.getInstance();
 
     @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(this.userCache, "UserCache can't be null");
         Assert.notNull(this.messages, "Message source can't be null");
+        Assert.notNull(this.reader, "User Reader can't be null");
     }
 
     @Override
@@ -37,59 +35,47 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
                 : authentication.getName();
 
         boolean cacheWasUsed = true;
-        UserDetails user = this.userCache.getUserFromCache(userKey);
-        if (user == null) {
+        UserDetails userDetails = this.userCache.getUserFromCache(userKey);
+        Object principal = null;
+        if (userDetails == null) {
             cacheWasUsed = false;
-            try {
-                user = retrieveUser(userKey, authentication);
-            } catch (UsernameNotFoundException e) {
-                LOGGER.debug("User '{}' not found", userKey);
-                if (hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException(messages.getMessage(
-                            "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                            "Bad credentials"));
-                } else {
-                    throw e;
-                }
-            }
-            Assert.notNull(user,
+            principal = retrieveUser(authentication);
+            userDetails = reader.parseUser(principal);
+            Assert.notNull(userDetails,
                     "retrieveUser returned null - a violation of the interface contract");
         }
         try {
-            preAuthenticationChecks.check(user);
-            additionalAuthenticationChecks(user,
-                    (UsernamePasswordAuthenticationToken) authentication);
+            preAuthenticationChecks.check(userDetails);
+            additionalAuthenticationChecks(userDetails, authentication, principal);
         } catch (AbstractAuthenticationException ex) {
             if (cacheWasUsed) {
                 cacheWasUsed = false;
-                user = retrieveUser(userKey,
-                        (UsernamePasswordAuthenticationToken) authentication);
-                preAuthenticationChecks.check(user);
-                additionalAuthenticationChecks(user,
-                        (UsernamePasswordAuthenticationToken) authentication);
+                userDetails = reader.parseUser(retrieveUser(authentication));
+                preAuthenticationChecks.check(userDetails);
+                additionalAuthenticationChecks(userDetails,
+                        authentication, principal);
             } else {
                 throw ex;
             }
         }
-        postAuthenticationChecks.check(user);
+        postAuthenticationChecks.check(userDetails);
 
         if (!cacheWasUsed) {
-            this.userCache.putUserInCache(user);
+            this.userCache.putUserInCache(userDetails);
         }
-        Object principalToReturn = user;
+        Object principalToReturn = userDetails;
 
         if (forcePrincipalAsString) {
-            principalToReturn = user.getKey();
+            principalToReturn = userDetails.getKey();
         }
-        return createSuccessAuthentication(principalToReturn, authentication, user);
+        return createSuccessAuthentication(principalToReturn, authentication, userDetails);
     }
 
-    protected abstract UserDetails retrieveUser(String username,
-                                                Authentication authentication)
+    protected abstract Object retrieveUser(Authentication authentication)
             throws AbstractAuthenticationException;
 
     protected abstract void additionalAuthenticationChecks(UserDetails userDetails,
-                                                           UsernamePasswordAuthenticationToken authentication)
+                                                           Authentication authentication, Object principal)
             throws AbstractAuthenticationException;
 
     protected Authentication createSuccessAuthentication(Object principal,
@@ -104,10 +90,6 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
 
     public void setForcePrincipalAsString(boolean forcePrincipalAsString) {
         this.forcePrincipalAsString = forcePrincipalAsString;
-    }
-
-    public void setHideUserNotFoundExceptions(boolean hideUserNotFoundExceptions) {
-        this.hideUserNotFoundExceptions = hideUserNotFoundExceptions;
     }
 
     public void setMessages(MessageSourceAccessor messages) {
@@ -126,9 +108,12 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         this.postAuthenticationChecks = postAuthenticationChecks;
     }
 
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+    public void setReader(UserDetailsReader reader) {
+        this.reader = reader;
+    }
+
+    public UserDetailsReader getReader() {
+        return reader;
     }
 
     private class DefaultPreAuthenticationChecks implements UserChecker {

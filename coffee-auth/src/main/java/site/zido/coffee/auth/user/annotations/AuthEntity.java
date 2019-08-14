@@ -24,4 +24,13 @@ public @interface AuthEntity {
 
     @AliasFor("value")
     String url() default "";
+
+    /**
+     * 可为当前实体配置默认角色集合，当用户角色关系简单时可以不必在数据库中查询用户角色
+     * <p>
+     * 此角色为最基础角色，当使用{@link AuthColumnRole}标记角色字段时，会在标记角色基础上加上此默认角色
+     *
+     * @return roles
+     */
+    String[] roles() default {};
 }
