@@ -3,6 +3,7 @@ package site.zido.coffee.auth.utils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
@@ -116,5 +117,21 @@ public class CachedFieldUtils {
     public static Method getGetterMethodByField(Field field, Class<?> clazz) {
         String name = field.getName();
         return getGetterMethodByField(name, clazz);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getFieldValue(Object target, Field field) {
+        try {
+            return (T) CachedFieldUtils.getGetterMethodByField(field, target.getClass()).invoke(target);
+        } catch (IllegalAccessException | InvocationTargetException ignore) {
+        }
+        ReflectionUtils.makeAccessible(field);
+        try {
+            return (T) field.get(target);
+        } catch (IllegalAccessException ignore) {
+        }
+        throw new RuntimeException("invoke get " + field.getName() + " error," +
+                "consider add a getter method for "
+                + target.getClass().getSimpleName() + "." + field.getName());
     }
 }

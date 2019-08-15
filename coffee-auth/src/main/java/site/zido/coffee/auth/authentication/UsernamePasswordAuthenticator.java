@@ -10,7 +10,7 @@ import site.zido.coffee.auth.user.annotations.AuthColumnPassword;
 import site.zido.coffee.auth.user.annotations.AuthColumnUsername;
 import site.zido.coffee.auth.core.exceptions.NotThisAuthenticatorException;
 import site.zido.coffee.auth.core.exceptions.UsernamePasswordException;
-import site.zido.coffee.auth.security.NoPasswordEncoder;
+import site.zido.coffee.auth.security.NullPasswordEncoder;
 import site.zido.coffee.auth.security.PasswordEncoder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class UsernamePasswordAuthenticator implements Authenticator {
     private static final String DEFAULT_USERNAME = "username";
     private static final String DEFAULT_PASSWORD = "password";
-    private static final NoPasswordEncoder NO_PASSWORD_ENCODER_INSTANCE = new NoPasswordEncoder();
+    private static final NullPasswordEncoder NO_PASSWORD_ENCODER_INSTANCE = new NullPasswordEncoder();
     private Map<Class<? extends IUser>, UsernamePasswordClassProps> propsCache =
             new HashMap<>();
 

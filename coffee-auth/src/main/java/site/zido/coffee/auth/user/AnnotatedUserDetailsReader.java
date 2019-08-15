@@ -9,14 +9,14 @@ import site.zido.coffee.auth.user.annotations.AuthColumnEnabled;
 import site.zido.coffee.auth.user.annotations.AuthColumnKey;
 import site.zido.coffee.auth.user.annotations.AuthColumnRole;
 import site.zido.coffee.auth.user.annotations.AuthEntity;
-import site.zido.coffee.auth.utils.CachedFieldUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static site.zido.coffee.auth.utils.CachedFieldUtils.getFieldValue;
 
 /**
  * 通过注解元信息提取用户接口的读取器
@@ -90,7 +90,7 @@ public class AnnotatedUserDetailsReader implements UserDetailsReader {
     }
 
 
-    private static class UserDetailsBuilder {
+    public static class UserDetailsBuilder {
         private Field keyField;
         private Field accountNonExpiredField;
         private Field accountNonLockedField;
@@ -119,7 +119,7 @@ public class AnnotatedUserDetailsReader implements UserDetailsReader {
                 return ((UserDetails) user).getAuthorities();
             }
             if (roleField != null) {
-                Object result = invoke(user, roleField);
+                Object result = getFieldValue(user, roleField);
                 if (result instanceof String) {
                     List<GrantedAuthority> authorities = new ArrayList<>(defaultRoles);
                     authorities.add(new SimpleGrantedAuthority((String) result));
@@ -129,28 +129,14 @@ public class AnnotatedUserDetailsReader implements UserDetailsReader {
             return Collections.unmodifiableCollection(defaultRoles);
         }
 
-        @SuppressWarnings("unchecked")
-        private <T> T invoke(Object target, Field field) {
-            try {
-                return (T) CachedFieldUtils.getGetterMethodByField(field, target.getClass()).invoke(target);
-            } catch (IllegalAccessException | InvocationTargetException ignore) {
-            }
-            ReflectionUtils.makeAccessible(field);
-            try {
-                return (T) field.get(target);
-            } catch (IllegalAccessException ignore) {
-            }
-            throw new RuntimeException("invoke get " + field.getName() + " error," +
-                    "consider add a getter method for "
-                    + target.getClass().getSimpleName() + "." + field.getName());
-        }
+
 
         public boolean isEnabled(Object target) {
             if (target instanceof UserDetails) {
                 return ((UserDetails) target).isEnabled();
             }
             if (enableField != null) {
-                Object value = invoke(target, enableField);
+                Object value = getFieldValue(target, enableField);
                 if (value instanceof Boolean) {
                     return (boolean) value;
                 } else {
@@ -251,7 +237,7 @@ public class AnnotatedUserDetailsReader implements UserDetailsReader {
             if (user instanceof UserDetails) {
                 return ((UserDetails) user).getKey();
             }
-            return invoke(user, keyField);
+            return getFieldValue(user, keyField);
         }
     }
 }

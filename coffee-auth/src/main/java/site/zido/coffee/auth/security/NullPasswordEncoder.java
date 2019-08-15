@@ -3,7 +3,7 @@ package site.zido.coffee.auth.security;
 /**
  * @author zido
  */
-public class NoPasswordEncoder implements PasswordEncoder {
+public class NullPasswordEncoder implements PasswordEncoder {
     @Override
     public String encode(String password) {
         return password;

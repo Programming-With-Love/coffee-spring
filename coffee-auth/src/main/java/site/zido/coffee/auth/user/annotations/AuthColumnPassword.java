@@ -1,6 +1,6 @@
 package site.zido.coffee.auth.user.annotations;
 
-import site.zido.coffee.auth.security.NoPasswordEncoder;
+import site.zido.coffee.auth.security.NullPasswordEncoder;
 import site.zido.coffee.auth.security.PasswordEncoder;
 
 import java.lang.annotation.*;
@@ -14,5 +14,5 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuthColumnPassword {
-    Class<? extends PasswordEncoder> encodeClass() default NoPasswordEncoder.class;
+    Class<? extends PasswordEncoder> encodeClass() default NullPasswordEncoder.class;
 }
