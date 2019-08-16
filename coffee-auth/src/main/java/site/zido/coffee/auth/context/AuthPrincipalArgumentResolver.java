@@ -6,6 +6,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.user.IUser;
 
 import java.lang.annotation.Annotation;
@@ -18,7 +19,7 @@ public class AuthPrincipalArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        IUser user = UserHolder.get().getUser();
+        Authentication authentication = UserHolder.get().getAuthentication();
         //TODO resolve context
         return null;
     }

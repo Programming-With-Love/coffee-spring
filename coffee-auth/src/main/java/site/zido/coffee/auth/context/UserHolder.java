@@ -19,4 +19,8 @@ public class UserHolder {
     public static void set(UserContext context) {
         strategy.setContext(context);
     }
+
+    public static UserContext createEmptyContext() {
+        return strategy.createEmptyContext();
+    }
 }

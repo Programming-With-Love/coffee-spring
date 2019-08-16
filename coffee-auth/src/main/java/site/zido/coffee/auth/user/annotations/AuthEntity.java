@@ -26,6 +26,27 @@ public @interface AuthEntity {
     String url() default "";
 
     /**
+     * 指定管理的url,遵守ant url规范
+     *
+     * @return url
+     */
+    String[] baseUrl() default "";
+
+    /**
+     * 请求方法
+     *
+     * @return 允许认证请求方法
+     */
+    String[] method() default "POST";
+
+    /**
+     * 是否大小写敏感
+     *
+     * @return true/false
+     */
+    boolean caseSensitive() default true;
+
+    /**
      * 可为当前实体配置默认角色集合，当用户角色关系简单时可以不必在数据库中查询用户角色
      * <p>
      * 此角色为最基础角色，当使用{@link AuthColumnRole}标记角色字段时，会在标记角色基础上加上此默认角色

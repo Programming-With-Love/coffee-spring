@@ -1,6 +1,5 @@
 package site.zido.coffee.auth.authentication.account;
 
-import org.springframework.http.HttpMethod;
 import site.zido.coffee.auth.authentication.AuthenticationTokenFactory;
 import site.zido.coffee.auth.authentication.InternalAuthenticationException;
 import site.zido.coffee.auth.authentication.UsernamePasswordAuthenticationToken;
@@ -20,15 +19,9 @@ public class UsernamePasswordTokenFactory implements AuthenticationTokenFactory 
 
     private String usernameParameter = DEFAULT_USERNAME_KEY;
     private String passwordParameter = DEFAULT_PASSWORD_KEY;
-    private boolean postOnly = true;
 
     @Override
     public Authentication createToken(HttpServletRequest request, HttpServletResponse response) {
-        if (postOnly && !"POST".equals(request.getMethod())) {
-            throw new InternalAuthenticationException(
-                    "Authentication method not supported: " + request.getMethod());
-        }
-
         String username = obtainUsername(request);
         String password = obtainPassword(request);
 
@@ -60,9 +53,5 @@ public class UsernamePasswordTokenFactory implements AuthenticationTokenFactory 
 
     public void setPasswordParameter(String passwordParameter) {
         this.passwordParameter = passwordParameter;
-    }
-
-    public void setPostOnly(boolean postOnly) {
-        this.postOnly = postOnly;
     }
 }

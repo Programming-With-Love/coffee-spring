@@ -65,7 +65,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
 
     @Override
     public Collection<String> getRoles(Authentication user) {
-        return Collections.singleton(user.role());
+        return null;
     }
 
     /**

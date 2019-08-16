@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -25,9 +26,9 @@ import java.util.List;
  */
 public class ConfigurableAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private List<AuthenticationTokenFactory> tokenFactories;
+    private Collection<AuthenticationTokenFactory> tokenFactories;
 
-    public ConfigurableAuthenticationFilter(RequestMatcher entry, List<AuthenticationTokenFactory> tokenFactories) {
+    public ConfigurableAuthenticationFilter(RequestMatcher entry, Collection<AuthenticationTokenFactory> tokenFactories) {
         super(entry);
         Assert.notEmpty(tokenFactories, "token factories can't be null or empty");
         if (tokenFactories.contains(null)) {
@@ -38,16 +39,12 @@ public class ConfigurableAuthenticationFilter extends AbstractAuthenticationProc
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AbstractAuthenticationException, IOException, ServletException {
-        Authentication authRequest = null;
         for (AuthenticationTokenFactory tokenFactory : tokenFactories) {
-            authRequest = tokenFactory.createToken(request, response);
+            Authentication authRequest = tokenFactory.createToken(request, response);
             if (authRequest != null) {
-                break;
+                return getAuthenticationManager().authenticate(authRequest);
             }
         }
-        if (authRequest == null) {
-            throw new NotThisAuthenticatorException();
-        }
-        return getAuthenticationManager().authenticate(authRequest);
+        throw new NotThisAuthenticatorException();
     }
 }

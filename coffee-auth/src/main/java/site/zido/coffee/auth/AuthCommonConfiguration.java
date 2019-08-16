@@ -15,12 +15,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.CommonAutoConfiguration;
+import site.zido.coffee.auth.context.AuthPrincipalArgumentResolver;
 import site.zido.coffee.auth.context.JpaSessionUserManager;
 import site.zido.coffee.auth.context.UserManager;
 import site.zido.coffee.auth.web.AuthenticationFilter;
 import site.zido.coffee.auth.web.PermissionInterceptor;
 import site.zido.coffee.auth.handlers.*;
 import site.zido.coffee.auth.authentication.*;
+import site.zido.coffee.auth.web.session.DefaultSecuritySessionStrategy;
+import site.zido.coffee.auth.web.session.SecuritySessionStrategy;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 
 import javax.persistence.EntityManager;
@@ -34,27 +37,10 @@ import java.util.List;
         JpaRepositoriesAutoConfiguration.class,
         CommonAutoConfiguration.JsonAutoConfiguration.class
 })
-public class AuthAutoConfiguration {
+public class AuthCommonConfiguration {
 
-    private UrlPathHelper urlPathHelper;
     private HttpResponseBodyFactory responseBodyFactory;
     private ObjectMapper mapper;
-
-    /**
-     * 注册过滤器,用于认证/授权
-     *
-     * @return filter
-     */
-    @Bean
-    @ConditionalOnMissingBean(AuthenticationFilter.class)
-    public AuthenticationFilter getFilter(EntityManager manager) {
-        AuthenticationFilter filter = new AuthenticationFilter();
-        filter.setUrlPathHelper(urlPathHelper);
-        filter.setAuthenticationFailureHandler(loginFailureHandler());
-        filter.setAuthenticationSuccessHandler(loginSuccessHandler());
-        filter.setUserManager(userManager(manager));
-        return filter;
-    }
 
     @Bean
     @ConditionalOnMissingBean(DisabledUserHandler.class)
@@ -81,21 +67,21 @@ public class AuthAutoConfiguration {
         return new RestLoginExceptedHandler(responseBodyFactory, mapper);
     }
 
-    @Bean
-    @ConditionalOnMissingBean(UsernamePasswordAuthenticator.class)
-    public UsernamePasswordAuthenticator usernamePasswordAuthenticator() {
-        return new UsernamePasswordAuthenticator();
-    }
+    //    @Bean
+//    @ConditionalOnMissingBean(WechatAuthenticator.class)
+//    @ConditionalOnProperty({"auth.wechat.global.appId", "auth.wechat.global.appSecret"})
+//    public WechatAuthenticator wechatAuthenticator(@Value("${auth.wechat.global.appId}") String appId,
+//                                                   @Value("${auth.wechat.global.appSecret}") String appSecret) {
+//        WechatAuthenticator wechatAuthenticator = new WechatAuthenticator();
+//        wechatAuthenticator.setAppId(appId);
+//        wechatAuthenticator.setAppSecret(appSecret);
+//        return wechatAuthenticator;
+//    }
 
     @Bean
-    @ConditionalOnMissingBean(WechatAuthenticator.class)
-    @ConditionalOnProperty({"auth.wechat.global.appId", "auth.wechat.global.appSecret"})
-    public WechatAuthenticator wechatAuthenticator(@Value("${auth.wechat.global.appId}") String appId,
-                                                   @Value("${auth.wechat.global.appSecret}") String appSecret) {
-        WechatAuthenticator wechatAuthenticator = new WechatAuthenticator();
-        wechatAuthenticator.setAppId(appId);
-        wechatAuthenticator.setAppSecret(appSecret);
-        return wechatAuthenticator;
+    @ConditionalOnMissingBean(SecuritySessionStrategy.class)
+    public SecuritySessionStrategy strategy() {
+        return new DefaultSecuritySessionStrategy();
     }
 
     @Bean
@@ -103,12 +89,6 @@ public class AuthAutoConfiguration {
     public UserManager userManager(EntityManager manager) {
         return new JpaSessionUserManager(manager);
     }
-
-    @Autowired(required = false)
-    public void setPathUrlHelper(UrlPathHelper helper) {
-        this.urlPathHelper = helper;
-    }
-
 
     @Autowired
     public void setResponseBodyFactory(HttpResponseBodyFactory responseBodyFactory) {
@@ -143,7 +123,7 @@ public class AuthAutoConfiguration {
     class WebMvcAuthConfiguration extends WebMvcConfigurerAdapter {
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-
+            argumentResolvers.add(new AuthPrincipalArgumentResolver());
         }
     }
 }
