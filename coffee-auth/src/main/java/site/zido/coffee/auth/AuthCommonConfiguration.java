@@ -54,7 +54,6 @@ public class AuthCommonConfiguration {
         return new RestLoginSuccessHandler(responseBodyFactory, mapper);
     }
 
-
     @Bean
     @ConditionalOnMissingBean(LoginFailureHandler.class)
     public LoginFailureHandler loginFailureHandler() {

@@ -3,6 +3,7 @@ package site.zido.coffee.auth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -18,16 +19,17 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.*;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.web.util.UrlPathHelper;
+import site.zido.coffee.auth.authentication.AuthenticationProvider;
 import site.zido.coffee.auth.authentication.AuthenticationTokenFactory;
+import site.zido.coffee.auth.authentication.ProviderManager;
 import site.zido.coffee.auth.authentication.account.UsernamePasswordTokenFactory;
 import site.zido.coffee.auth.config.DefaultAuthBeforeUserFiltersFactory;
 import site.zido.coffee.auth.config.ObjectPostProcessor;
@@ -38,15 +40,15 @@ import site.zido.coffee.auth.context.UserContextRepository;
 import site.zido.coffee.auth.user.annotations.AuthEntity;
 import site.zido.coffee.auth.web.FilterChainFilter;
 import site.zido.coffee.auth.web.FilterChainManager;
+import site.zido.coffee.auth.web.HttpSecurityManager;
 import site.zido.coffee.auth.web.UrlBasedFilterChainManager;
 import site.zido.coffee.auth.web.authentication.ConfigurableAuthenticationFilter;
 import site.zido.coffee.auth.web.utils.matcher.AntPathRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.OrRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.RequestMatcher;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.Filter;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -113,26 +115,36 @@ public class CoffeeAuthAutoConfiguration implements ResourceLoaderAware,
         return new UsernamePasswordTokenFactory();
     }
 
+    private class AuthClassIgnoreCondition implements Condition {
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            if (authClassNames == null || authClassNames.isEmpty()) {
+                LOGGER.info("not found any auth class");
+                return false;
+            }
+            return true;
+        }
+    }
+
     @Configuration
     @ConditionalOnMissingBean(FilterChainFilter.class)
     @Order
-    class AuthGlobalRegisterProcessor implements BeanDefinitionRegistryPostProcessor {
+    @Conditional(AuthClassIgnoreCondition.class)
+    class CoffeeAuthBuilders {
         private ObjectPostProcessor<Object> objectObjectPostProcessor;
         private UrlPathHelper urlPathHelper;
+        private HttpSecurityManager securityManager;
 
-        AuthGlobalRegisterProcessor(ObjectPostProcessor<Object> objectObjectPostProcessor) {
+        CoffeeAuthBuilders(ObjectPostProcessor<Object> objectObjectPostProcessor) {
             this.objectObjectPostProcessor = objectObjectPostProcessor;
         }
 
-        @Override
-        public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-            if (authClassNames == null || authClassNames.isEmpty()) {
-                LOGGER.info("not found any auth class");
-                return;
-            }
+        @Bean
+        public FilterChainFilter postProcessBeanDefinitionRegistry() {
             List<FilterChainManager> managers = new ArrayList<>();
             for (String className : authClassNames) {
-                Class<?> clazz = null;
+                Class<?> clazz;
                 try {
                     clazz = CoffeeAuthAutoConfiguration.class.getClassLoader().loadClass(className);
                 } catch (ClassNotFoundException ignore) {
@@ -160,31 +172,24 @@ public class CoffeeAuthAutoConfiguration implements ResourceLoaderAware,
                         Stream.of(methods).map(method ->
                                 new AntPathRequestMatcher(finalUrl, method, caseSensitive, urlPathHelper))
                                 .collect(Collectors.toList()));
-                List<String> filterRefs = new ArrayList<>(3);
+                List<Filter> filters = new ArrayList<>(3);
                 //认证上下文持久化过滤器
-                AbstractBeanDefinition beforeFilterDefinition = BeanDefinitionBuilder
-                        .genericBeanDefinition(AuthContextPersistenceFilter.class)
-                        .getBeanDefinition();
-                String beforeRef = prefix + "BeforeFilter";
-                registry.registerBeanDefinition(beforeRef,
-                        beforeFilterDefinition);
-                filterRefs.add(beforeRef);
-
+                AuthContextPersistenceFilter beforeFilter = objectObjectPostProcessor.postProcess(new AuthContextPersistenceFilter());
+                filters.add(beforeFilter);
                 //查询所有可用的tokenFactory，帮助填充到认证过滤器中
                 Map<String, AuthenticationTokenFactory> factories = BeanFactoryUtils
                         .beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory,
                                 AuthenticationTokenFactory.class);
 
                 //认证过滤器
-                AbstractBeanDefinition authenticationFilter = BeanDefinitionBuilder
-                        .genericBeanDefinition(ConfigurableAuthenticationFilter.class)
-                        .addConstructorArgValue(requestMatcher)
-                        .addConstructorArgValue(factories.values())
-                        .getBeanDefinition();
-                String authRef = prefix + "AuthenticationFilter";
-                registry.registerBeanDefinition(authRef,
-                        authenticationFilter);
-                filterRefs.add(authRef);
+                ConfigurableAuthenticationFilter authenticationFilter = objectObjectPostProcessor.postProcess(new ConfigurableAuthenticationFilter(requestMatcher, factories.values()));
+                Map<String, AuthenticationProvider> providers = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, AuthenticationProvider.class);
+                Collection<AuthenticationProvider> values = providers.values();
+
+                //TODO
+//                objectObjectPostProcessor.postProcess(new ProviderManager(.));
+//                authenticationFilter.setAuthenticationManager();
+                filters.add(authenticationFilter);
 
                 List<RequestMatcher> baseUrlMatchers = Stream.of(baseUrls).map(baseUrl -> {
                     if (!baseUrl.startsWith("/")) {
@@ -193,30 +198,25 @@ public class CoffeeAuthAutoConfiguration implements ResourceLoaderAware,
                     return new AntPathRequestMatcher(baseUrl);
                 }).collect(Collectors.toList());
                 OrRequestMatcher baseRequestMatcher = new OrRequestMatcher(baseUrlMatchers);
-                BeanDefinitionBuilder builder = BeanDefinitionBuilder
-                        .genericBeanDefinition(UrlBasedFilterChainManager.class)
-                        .addConstructorArgValue(baseRequestMatcher);
-                for (String ref : filterRefs) {
-                    builder.addConstructorArgReference(ref);
-                }
-                AbstractBeanDefinition filterChainManagerDefinition = builder.getBeanDefinition();
-                registry.registerBeanDefinition(prefix + "FilterChainManager",
-                        filterChainManagerDefinition);
+                UrlBasedFilterChainManager urlBasedFilterChainManager = objectObjectPostProcessor.postProcess(new UrlBasedFilterChainManager(baseRequestMatcher, filters));
+                managers.add(urlBasedFilterChainManager);
             }
-            AbstractBeanDefinition filterChainDefinition = BeanDefinitionBuilder
-                    .genericBeanDefinition(FilterChainFilter.class)
-                    .getBeanDefinition();
-            registry.registerBeanDefinition("filterChainFilter", filterChainDefinition);
-        }
-
-        @Override
-        public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
+            FilterChainFilter filterChainFilter = objectObjectPostProcessor.postProcess(new FilterChainFilter());
+            filterChainFilter.setFilterChainManagers(managers);
+            if (securityManager != null) {
+                filterChainFilter.setHttpSecurityManager(securityManager);
+            }
+            return filterChainFilter;
         }
 
         @Autowired(required = false)
         public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
             this.urlPathHelper = urlPathHelper;
+        }
+
+        @Autowired(required = false)
+        public void setSecurityManager(HttpSecurityManager securityManager) {
+            this.securityManager = securityManager;
         }
     }
 

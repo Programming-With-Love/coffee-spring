@@ -1,7 +1,8 @@
 package site.zido.coffee.auth.user;
 
-import site.zido.coffee.auth.user.UserDetails;
-
+/**
+ * @author zido
+ */
 public interface UserCache {
     UserDetails getUserFromCache(String username);
 

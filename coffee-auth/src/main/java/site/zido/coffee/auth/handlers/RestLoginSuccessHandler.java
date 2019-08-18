@@ -2,6 +2,7 @@ package site.zido.coffee.auth.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
+import site.zido.coffee.auth.core.Authentication;
 import site.zido.coffee.auth.user.IUser;
 import site.zido.coffee.auth.utils.ResponseUtils;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
@@ -35,8 +36,8 @@ public class RestLoginSuccessHandler implements LoginSuccessHandler {
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, IUser user) throws IOException, ServletException {
-        Object result = factory.success(user);
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        Object result = factory.success(authentication);
         ResponseUtils.json(response,
                 mapper.writeValueAsString(result));
     }

@@ -110,7 +110,6 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
         failureHandler.onAuthenticationFailure(request, response, failed);
     }
 
-    @Autowired
     public void setAuthenticationManager(AuthenticationManager authenticationmanager) {
         this.authenticationManager = authenticationmanager;
     }
@@ -128,7 +127,6 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
         return successHandler;
     }
 
-    @Autowired
     public void setSuccessHandler(LoginSuccessHandler successHandler) {
         this.successHandler = successHandler;
     }
@@ -137,12 +135,10 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
         return failureHandler;
     }
 
-    @Autowired
     public void setFailureHandler(LoginFailureHandler failureHandler) {
         this.failureHandler = failureHandler;
     }
 
-    @Autowired(required = false)
     public void setRememberMeService(RememberMeService rememberMeService) {
         this.rememberMeService = rememberMeService;
     }
