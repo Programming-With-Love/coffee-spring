@@ -3,27 +3,20 @@ package site.zido.coffee.auth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.*;
+import org.springframework.core.OrderComparator;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.web.util.UrlPathHelper;
@@ -60,23 +53,10 @@ import java.util.stream.Stream;
 @Configuration
 @AutoConfigureAfter(JpaRepositoriesAutoConfiguration.class)
 @Import(AuthCommonConfiguration.class)
-public class CoffeeAuthAutoConfiguration implements ResourceLoaderAware,
-        EnvironmentAware, BeanFactoryAware {
+public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
     private static Logger LOGGER = LoggerFactory.getLogger(CoffeeAuthAutoConfiguration.class);
-    private Environment environment;
-    private ResourceLoader resourceLoader;
     private List<String> authClassNames;
     private BeanFactory beanFactory;
-
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
-
-    @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-    }
 
     @Autowired(required = false)
     public void setUnitInfo(MutablePersistenceUnitInfo unitInfo) {
@@ -177,18 +157,22 @@ public class CoffeeAuthAutoConfiguration implements ResourceLoaderAware,
                 AuthContextPersistenceFilter beforeFilter = objectObjectPostProcessor.postProcess(new AuthContextPersistenceFilter());
                 filters.add(beforeFilter);
                 //查询所有可用的tokenFactory，帮助填充到认证过滤器中
-                Map<String, AuthenticationTokenFactory> factories = BeanFactoryUtils
+                Map<String, AuthenticationTokenFactory> factoryBeanMap = BeanFactoryUtils
                         .beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory,
                                 AuthenticationTokenFactory.class);
 
+                List<AuthenticationTokenFactory> factories = new ArrayList<>(factoryBeanMap.values());
+                factories.sort(AnnotationAwareOrderComparator.INSTANCE);
                 //认证过滤器
-                ConfigurableAuthenticationFilter authenticationFilter = objectObjectPostProcessor.postProcess(new ConfigurableAuthenticationFilter(requestMatcher, factories.values()));
-                Map<String, AuthenticationProvider> providers = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, AuthenticationProvider.class);
-                Collection<AuthenticationProvider> values = providers.values();
+                ConfigurableAuthenticationFilter authenticationFilter = objectObjectPostProcessor
+                        .postProcess(new ConfigurableAuthenticationFilter(requestMatcher, factories));
 
-                //TODO
-//                objectObjectPostProcessor.postProcess(new ProviderManager(.));
-//                authenticationFilter.setAuthenticationManager();
+                Map<String, AuthenticationProvider> providerBeanMap = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, AuthenticationProvider.class);
+                Collection<AuthenticationProvider> values = providerBeanMap.values();
+                List<AuthenticationProvider> providers = new ArrayList<>(values);
+                providers.sort(AnnotationAwareOrderComparator.INSTANCE);
+                ProviderManager providerManager = objectObjectPostProcessor.postProcess(new ProviderManager(providers));
+                authenticationFilter.setAuthenticationManager(providerManager);
                 filters.add(authenticationFilter);
 
                 List<RequestMatcher> baseUrlMatchers = Stream.of(baseUrls).map(baseUrl -> {
@@ -217,6 +201,29 @@ public class CoffeeAuthAutoConfiguration implements ResourceLoaderAware,
         @Autowired(required = false)
         public void setSecurityManager(HttpSecurityManager securityManager) {
             this.securityManager = securityManager;
+        }
+    }
+
+    private static class AnnotationAwareOrderComparator extends OrderComparator {
+        private static final AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
+
+        @Override
+        protected int getOrder(Object obj) {
+            return lookupOrder(obj);
+        }
+
+        private static int lookupOrder(Object obj) {
+            if (obj instanceof Ordered) {
+                return ((Ordered) obj).getOrder();
+            }
+            if (obj != null) {
+                Class<?> clazz = (obj instanceof Class ? (Class<?>) obj : obj.getClass());
+                Order order = AnnotationUtils.findAnnotation(clazz, Order.class);
+                if (order != null) {
+                    return order.value();
+                }
+            }
+            return Ordered.LOWEST_PRECEDENCE;
         }
     }
 

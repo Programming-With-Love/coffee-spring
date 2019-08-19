@@ -28,7 +28,7 @@ public class ConfigurableAuthenticationFilter extends AbstractAuthenticationProc
 
     private Collection<AuthenticationTokenFactory> tokenFactories;
 
-    public ConfigurableAuthenticationFilter(RequestMatcher entry, Collection<AuthenticationTokenFactory> tokenFactories) {
+    public ConfigurableAuthenticationFilter(RequestMatcher entry, List<AuthenticationTokenFactory> tokenFactories) {
         super(entry);
         Assert.notEmpty(tokenFactories, "token factories can't be null or empty");
         if (tokenFactories.contains(null)) {
