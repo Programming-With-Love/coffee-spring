@@ -18,7 +18,12 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.auth.authentication.AuthenticationProvider;
 import site.zido.coffee.auth.authentication.AuthenticationTokenFactory;
@@ -35,12 +40,13 @@ import site.zido.coffee.auth.web.FilterChainFilter;
 import site.zido.coffee.auth.web.FilterChainManager;
 import site.zido.coffee.auth.web.HttpSecurityManager;
 import site.zido.coffee.auth.web.UrlBasedFilterChainManager;
-import site.zido.coffee.auth.web.authentication.ConfigurableAuthenticationFilter;
+import site.zido.coffee.auth.web.authentication.UsernamePasswordAuthenticationFilter;
 import site.zido.coffee.auth.web.utils.matcher.AntPathRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.OrRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.RequestMatcher;
 
 import javax.servlet.Filter;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -123,6 +129,7 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
         @Bean
         public FilterChainFilter postProcessBeanDefinitionRegistry() {
             List<FilterChainManager> managers = new ArrayList<>();
+            MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory(ClassUtils.getDefaultClassLoader());
             for (String className : authClassNames) {
                 Class<?> clazz;
                 try {
@@ -131,6 +138,7 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
                     //not reachable
                     continue;
                 }
+
                 String simpleClassName = clazz.getSimpleName();
                 String prefix = simpleClassName.substring(0, 1).toLowerCase()
                         + simpleClassName.substring(1);
@@ -156,16 +164,10 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
                 //认证上下文持久化过滤器
                 AuthContextPersistenceFilter beforeFilter = objectObjectPostProcessor.postProcess(new AuthContextPersistenceFilter());
                 filters.add(beforeFilter);
-                //查询所有可用的tokenFactory，帮助填充到认证过滤器中
-                Map<String, AuthenticationTokenFactory> factoryBeanMap = BeanFactoryUtils
-                        .beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory,
-                                AuthenticationTokenFactory.class);
-
-                List<AuthenticationTokenFactory> factories = new ArrayList<>(factoryBeanMap.values());
-                factories.sort(AnnotationAwareOrderComparator.INSTANCE);
+                //查询所有可用的认证过滤器
                 //认证过滤器
-                ConfigurableAuthenticationFilter authenticationFilter = objectObjectPostProcessor
-                        .postProcess(new ConfigurableAuthenticationFilter(requestMatcher, factories));
+                UsernamePasswordAuthenticationFilter authenticationFilter = objectObjectPostProcessor
+                        .postProcess(new UsernamePasswordAuthenticationFilter(requestMatcher));
 
                 Map<String, AuthenticationProvider> providerBeanMap = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, AuthenticationProvider.class);
                 Collection<AuthenticationProvider> values = providerBeanMap.values();
