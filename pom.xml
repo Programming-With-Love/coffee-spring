@@ -7,7 +7,7 @@
     <groupId>site.zido</groupId>
     <artifactId>coffee-common-builder</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.1-release</version>
     <modules>
         <module>coffee-common</module>
         <module>coffee-extra</module>
@@ -25,6 +25,13 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>releases</name>
+            <url>http://maven.scustartup.com/nexus/content/repositories/releases</url>
+        </repository>
+    </distributionManagement>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -38,17 +45,17 @@
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-common</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>0.1.1-release</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-extra</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>0.1.1-release</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-auth</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>0.1.1-release</version>
             </dependency>
             <!-- others -->
             <dependency>
