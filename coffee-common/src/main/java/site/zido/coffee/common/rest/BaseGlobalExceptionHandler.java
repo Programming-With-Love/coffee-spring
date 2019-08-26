@@ -66,7 +66,7 @@ public abstract class BaseGlobalExceptionHandler {
 
     protected Result<?> handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request) {
         LOGGER.warn("business error:" + e.getMessage());
-        return Result.error(e.getCode(), e.getMessage());
+        return Result.error(e.getCode(), e.getMsg());
     }
 
     private Result<?> parseBindingResult(BindingResult bindingResult) {
