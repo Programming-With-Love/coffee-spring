@@ -18,7 +18,6 @@ public class HttpSessionUserContextRepository implements UserContextRepository {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final Object contextObject = UserHolder.createEmptyContext();
-    private boolean allowSessionCreation = true;
     private String userContextKey = USER_CONTEXT_KEY;
 
     @Override

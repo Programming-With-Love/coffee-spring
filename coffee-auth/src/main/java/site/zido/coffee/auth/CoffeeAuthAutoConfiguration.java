@@ -3,35 +3,19 @@ package site.zido.coffee.auth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.*;
-import org.springframework.core.OrderComparator;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
-import org.springframework.util.ClassUtils;
-import org.springframework.web.util.UrlPathHelper;
-import site.zido.coffee.auth.authentication.AuthenticationProvider;
-import site.zido.coffee.auth.authentication.AuthenticationTokenFactory;
-import site.zido.coffee.auth.authentication.ProviderManager;
-import site.zido.coffee.auth.authentication.account.UsernamePasswordTokenFactory;
-import site.zido.coffee.auth.config.DefaultAuthBeforeUserFiltersFactory;
-import site.zido.coffee.auth.config.ObjectPostProcessor;
-import site.zido.coffee.auth.config.UserFiltersFactory;
+import site.zido.coffee.auth.config.*;
 import site.zido.coffee.auth.context.AuthContextPersistenceFilter;
 import site.zido.coffee.auth.context.HttpSessionUserContextRepository;
 import site.zido.coffee.auth.context.UserContextRepository;
@@ -40,14 +24,14 @@ import site.zido.coffee.auth.web.FilterChainFilter;
 import site.zido.coffee.auth.web.FilterChainManager;
 import site.zido.coffee.auth.web.HttpSecurityManager;
 import site.zido.coffee.auth.web.UrlBasedFilterChainManager;
-import site.zido.coffee.auth.web.authentication.UsernamePasswordAuthenticationFilter;
 import site.zido.coffee.auth.web.utils.matcher.AntPathRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.OrRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.RequestMatcher;
 
 import javax.servlet.Filter;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,11 +42,10 @@ import java.util.stream.Stream;
  */
 @Configuration
 @AutoConfigureAfter(JpaRepositoriesAutoConfiguration.class)
-@Import(AuthCommonConfiguration.class)
-public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
+@Import({AuthCommonConfiguration.class, ObjectPostProcessorConfiguration.class})
+public class CoffeeAuthAutoConfiguration {
     private static Logger LOGGER = LoggerFactory.getLogger(CoffeeAuthAutoConfiguration.class);
     private List<String> authClassNames;
-    private BeanFactory beanFactory;
 
     @Autowired(required = false)
     public void setUnitInfo(MutablePersistenceUnitInfo unitInfo) {
@@ -95,12 +78,6 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
         return new HttpSessionUserContextRepository();
     }
 
-    @Bean
-    @ConditionalOnMissingBean(UsernamePasswordTokenFactory.class)
-    public AuthenticationTokenFactory usernamePasswordTokenFactory() {
-        return new UsernamePasswordTokenFactory();
-    }
-
     private class AuthClassIgnoreCondition implements Condition {
 
         @Override
@@ -117,10 +94,10 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
     @ConditionalOnMissingBean(FilterChainFilter.class)
     @Order
     @Conditional(AuthClassIgnoreCondition.class)
-    class CoffeeAuthBuilders {
+    class CoffeeAuthBuilders implements ApplicationContextAware {
         private ObjectPostProcessor<Object> objectObjectPostProcessor;
-        private UrlPathHelper urlPathHelper;
         private HttpSecurityManager securityManager;
+        private ApplicationContext context;
 
         CoffeeAuthBuilders(ObjectPostProcessor<Object> objectObjectPostProcessor) {
             this.objectObjectPostProcessor = objectObjectPostProcessor;
@@ -129,7 +106,8 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
         @Bean
         public FilterChainFilter postProcessBeanDefinitionRegistry() {
             List<FilterChainManager> managers = new ArrayList<>();
-            MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory(ClassUtils.getDefaultClassLoader());
+            Map<String, AuthenticationFilterFactory> authenticationFilterFactoryMap = BeanFactoryUtils.beansOfTypeIncludingAncestors(context,
+                    AuthenticationFilterFactory.class);
             for (String className : authClassNames) {
                 Class<?> clazz;
                 try {
@@ -138,45 +116,18 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
                     //not reachable
                     continue;
                 }
-
-                String simpleClassName = clazz.getSimpleName();
-                String prefix = simpleClassName.substring(0, 1).toLowerCase()
-                        + simpleClassName.substring(1);
                 AuthEntity authEntity = AnnotatedElementUtils
                         .findMergedAnnotation(clazz, AuthEntity.class);
-                boolean caseSensitive = authEntity.caseSensitive();
-                String[] methods = authEntity.method();
-                String[] roles = authEntity.roles();
                 String[] baseUrls = authEntity.baseUrl();
-                String url = authEntity.url();
-                if (url.length() == 0) {
-                    url = "/" + simpleClassName + "/login";
-                }
-                if (!url.startsWith("/")) {
-                    url = "/" + url;
-                }
-                String finalUrl = url;
-                OrRequestMatcher requestMatcher = new OrRequestMatcher(
-                        Stream.of(methods).map(method ->
-                                new AntPathRequestMatcher(finalUrl, method, caseSensitive, urlPathHelper))
-                                .collect(Collectors.toList()));
                 List<Filter> filters = new ArrayList<>(3);
                 //认证上下文持久化过滤器
-                AuthContextPersistenceFilter beforeFilter = objectObjectPostProcessor.postProcess(new AuthContextPersistenceFilter());
+                AuthContextPersistenceFilter beforeFilter = objectObjectPostProcessor
+                        .postProcess(new AuthContextPersistenceFilter());
                 filters.add(beforeFilter);
-                //查询所有可用的认证过滤器
-                //认证过滤器
-                UsernamePasswordAuthenticationFilter authenticationFilter = objectObjectPostProcessor
-                        .postProcess(new UsernamePasswordAuthenticationFilter(requestMatcher));
-
-                Map<String, AuthenticationProvider> providerBeanMap = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) beanFactory, AuthenticationProvider.class);
-                Collection<AuthenticationProvider> values = providerBeanMap.values();
-                List<AuthenticationProvider> providers = new ArrayList<>(values);
-                providers.sort(AnnotationAwareOrderComparator.INSTANCE);
-                ProviderManager providerManager = objectObjectPostProcessor.postProcess(new ProviderManager(providers));
-                authenticationFilter.setAuthenticationManager(providerManager);
-                filters.add(authenticationFilter);
-
+                for (AuthenticationFilterFactory factory : authenticationFilterFactoryMap.values()) {
+                    filters.add(factory.createFilter(clazz, objectObjectPostProcessor));
+                }
+                filters.sort(AnnotationAwareOrderComparator.INSTANCE);
                 List<RequestMatcher> baseUrlMatchers = Stream.of(baseUrls).map(baseUrl -> {
                     if (!baseUrl.startsWith("/")) {
                         baseUrl = "/" + baseUrl;
@@ -184,7 +135,8 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
                     return new AntPathRequestMatcher(baseUrl);
                 }).collect(Collectors.toList());
                 OrRequestMatcher baseRequestMatcher = new OrRequestMatcher(baseUrlMatchers);
-                UrlBasedFilterChainManager urlBasedFilterChainManager = objectObjectPostProcessor.postProcess(new UrlBasedFilterChainManager(baseRequestMatcher, filters));
+                UrlBasedFilterChainManager urlBasedFilterChainManager = objectObjectPostProcessor
+                        .postProcess(new UrlBasedFilterChainManager(baseRequestMatcher, filters));
                 managers.add(urlBasedFilterChainManager);
             }
             FilterChainFilter filterChainFilter = objectObjectPostProcessor.postProcess(new FilterChainFilter());
@@ -196,41 +148,14 @@ public class CoffeeAuthAutoConfiguration implements BeanFactoryAware {
         }
 
         @Autowired(required = false)
-        public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-            this.urlPathHelper = urlPathHelper;
-        }
-
-        @Autowired(required = false)
         public void setSecurityManager(HttpSecurityManager securityManager) {
             this.securityManager = securityManager;
         }
-    }
-
-    private static class AnnotationAwareOrderComparator extends OrderComparator {
-        private static final AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
 
         @Override
-        protected int getOrder(Object obj) {
-            return lookupOrder(obj);
-        }
-
-        private static int lookupOrder(Object obj) {
-            if (obj instanceof Ordered) {
-                return ((Ordered) obj).getOrder();
-            }
-            if (obj != null) {
-                Class<?> clazz = (obj instanceof Class ? (Class<?>) obj : obj.getClass());
-                Order order = AnnotationUtils.findAnnotation(clazz, Order.class);
-                if (order != null) {
-                    return order.value();
-                }
-            }
-            return Ordered.LOWEST_PRECEDENCE;
+        public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+            this.context = applicationContext;
         }
     }
 
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
-    }
 }
