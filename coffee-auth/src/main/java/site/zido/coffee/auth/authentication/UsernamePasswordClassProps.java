@@ -16,7 +16,6 @@ public class UsernamePasswordClassProps {
     private Class<? extends IUser> userClass;
     private Field usernameField;
     private Field passwordField;
-    private JpaRepository<? extends IUser, ? extends Serializable> repository;
     private PasswordEncoder passwordEncoder;
 
     public Class<? extends IUser> getUserClass() {
@@ -41,14 +40,6 @@ public class UsernamePasswordClassProps {
 
     public void setPasswordField(Field passwordField) {
         this.passwordField = passwordField;
-    }
-
-    public JpaRepository<? extends IUser, ? extends Serializable> getRepository() {
-        return repository;
-    }
-
-    public void setRepository(JpaRepository<? extends IUser, ? extends Serializable> repository) {
-        this.repository = repository;
     }
 
     public PasswordEncoder getPasswordEncoder() {

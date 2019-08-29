@@ -15,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.CommonAutoConfiguration;
+import site.zido.coffee.auth.config.UsernamePasswordAuthenticationFilterFactory;
 import site.zido.coffee.auth.context.AuthPrincipalArgumentResolver;
 import site.zido.coffee.auth.context.JpaSessionUserManager;
 import site.zido.coffee.auth.context.UserManager;
@@ -64,6 +65,12 @@ public class AuthCommonConfiguration {
     @ConditionalOnMissingBean(LoginExpectedHandler.class)
     public LoginExpectedHandler loginExpectedHandler() {
         return new RestLoginExceptedHandler(responseBodyFactory, mapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(UsernamePasswordAuthenticationFilterFactory.class)
+    public UsernamePasswordAuthenticationFilterFactory usernamePasswordAuthenticationFilterFactory() {
+        return new UsernamePasswordAuthenticationFilterFactory();
     }
 
     //    @Bean
@@ -119,7 +126,7 @@ public class AuthCommonConfiguration {
     }
 
     @Configuration
-    class WebMvcAuthConfiguration extends WebMvcConfigurerAdapter {
+    static class WebMvcAuthConfiguration extends WebMvcConfigurerAdapter {
         @Override
         public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
             argumentResolvers.add(new AuthPrincipalArgumentResolver());

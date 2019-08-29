@@ -19,7 +19,7 @@ import java.util.List;
 public class ProviderManager implements AuthenticationManager, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderManager.class);
 
-    private List<AuthenticationProvider> providers = Collections.emptyList();
+    private List<AuthenticationProvider> providers;
     private AuthenticationManager parent;
     private boolean eraseCredentialsAfterAuthentication = true;
 

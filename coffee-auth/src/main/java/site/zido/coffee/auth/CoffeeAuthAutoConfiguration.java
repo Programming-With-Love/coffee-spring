@@ -42,17 +42,24 @@ import java.util.stream.Stream;
  */
 @Configuration
 @AutoConfigureAfter(JpaRepositoriesAutoConfiguration.class)
-@Import({AuthCommonConfiguration.class, ObjectPostProcessorConfiguration.class})
+@Import({AuthCommonConfiguration.class,
+        ObjectPostProcessorConfiguration.class})
 public class CoffeeAuthAutoConfiguration {
     private static Logger LOGGER = LoggerFactory.getLogger(CoffeeAuthAutoConfiguration.class);
     private List<String> authClassNames;
 
+    /**
+     * unit info由spring boot data jpa注册，优先使用spring boot data jpa的扫描结果，
+     * 以尽量兼容spring boot data jpa的各种规范
+     *
+     * @param unitInfo unit info
+     */
     @Autowired(required = false)
     public void setUnitInfo(MutablePersistenceUnitInfo unitInfo) {
         authClassNames = new ArrayList<>();
         List<String> entityClassNames = unitInfo.getManagedClassNames();
         for (String entityClassName : entityClassNames) {
-            Class<?> clazz = null;
+            Class<?> clazz;
             try {
                 clazz = CoffeeAuthAutoConfiguration.class.getClassLoader().loadClass(entityClassName);
             } catch (ClassNotFoundException e) {
@@ -91,7 +98,6 @@ public class CoffeeAuthAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnMissingBean(FilterChainFilter.class)
     @Order
     @Conditional(AuthClassIgnoreCondition.class)
     class CoffeeAuthBuilders implements ApplicationContextAware {
@@ -104,7 +110,8 @@ public class CoffeeAuthAutoConfiguration {
         }
 
         @Bean
-        public FilterChainFilter postProcessBeanDefinitionRegistry() {
+        @ConditionalOnMissingBean(FilterChainFilter.class)
+        public FilterChainFilter buildFilterChainFilter() {
             List<FilterChainManager> managers = new ArrayList<>();
             Map<String, AuthenticationFilterFactory> authenticationFilterFactoryMap = BeanFactoryUtils.beansOfTypeIncludingAncestors(context,
                     AuthenticationFilterFactory.class);
