@@ -2,7 +2,6 @@ package site.zido.coffee.auth.utils.config;
 
 import example.User;
 import org.junit.Test;
-import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;

@@ -25,13 +25,24 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>releases</name>
-            <url>http://maven.scustartup.com/nexus/content/repositories/releases</url>
-        </repository>
-    </distributionManagement>
+    <scm>
+        <connection>scm:git@github.com:zidoshare/coffee-spring-boot-builder.git</connection>
+        <developerConnection>scm:git@github.com:zidoshare/coffee-spring-boot-builder.git</developerConnection>
+        <url>git@github.com:zidoshare/coffee-spring-boot-builder.git</url>
+        <tag>coffee-common-builder-1.0.0</tag>
+    </scm>
+    <developers>
+        <developer>
+            <id>zido</id>
+            <name>zido</name>
+            <email>wuhongxu1208@gmail.com</email>
+            <url>http://zido.site</url>
+        </developer>
+    </developers>
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/zidoshare/coffee-spring-boot-builder/issues</url>
+    </issueManagement>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -123,4 +134,65 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- Source -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- GPG -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>oss</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>oss</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>

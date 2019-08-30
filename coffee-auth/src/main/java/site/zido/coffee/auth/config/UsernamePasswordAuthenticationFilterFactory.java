@@ -72,6 +72,7 @@ public class UsernamePasswordAuthenticationFilterFactory implements Authenticati
                         .collect(Collectors.toList()));
         UsernamePasswordAuthenticationProvider provider = objectObjectPostProcessor
                 .postProcess(new UsernamePasswordAuthenticationProvider(userClass));
+        provider.setPasswordEncoder(props.getPasswordEncoder());
         ProviderManager providerManager = objectObjectPostProcessor
                 .postProcess(new ProviderManager(Collections.singletonList(provider)));
         UsernamePasswordAuthenticationFilter authenticationFilter = objectObjectPostProcessor
@@ -107,6 +108,7 @@ public class UsernamePasswordAuthenticationFilterFactory implements Authenticati
                 try {
                     PasswordEncoder passwordEncoder =
                             objectPostProcessor.postProcess(passwordEncoderClass.newInstance());
+                    props.setPasswordEncoder(passwordEncoder);
                 } catch (InstantiationException | IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
