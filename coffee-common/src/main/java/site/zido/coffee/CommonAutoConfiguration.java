@@ -135,7 +135,7 @@ public class CommonAutoConfiguration {
          * </ul>
          */
         @Autowired
-        public void setMapper(@Value("${spring.profiles.active}") List<String> profiles, ObjectMapper mapper) {
+        public void setMapper(@Value("${spring.profiles.active:prod}") List<String> profiles, ObjectMapper mapper) {
             if (profiles.contains("prod")) {
                 prodObjectMapper(mapper);
             }

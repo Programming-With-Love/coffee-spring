@@ -2,32 +2,24 @@ package site.zido.coffee.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.util.UrlPathHelper;
 import site.zido.coffee.CommonAutoConfiguration;
-import site.zido.coffee.auth.config.UsernamePasswordAuthenticationFilterFactory;
+import site.zido.coffee.auth.config.*;
 import site.zido.coffee.auth.context.AuthPrincipalArgumentResolver;
-import site.zido.coffee.auth.context.JpaSessionUserManager;
-import site.zido.coffee.auth.context.UserManager;
-import site.zido.coffee.auth.web.AuthenticationFilter;
-import site.zido.coffee.auth.web.PermissionInterceptor;
+import site.zido.coffee.auth.context.HttpSessionUserContextRepository;
+import site.zido.coffee.auth.context.UserContextRepository;
 import site.zido.coffee.auth.handlers.*;
-import site.zido.coffee.auth.authentication.*;
 import site.zido.coffee.auth.web.session.DefaultSecuritySessionStrategy;
 import site.zido.coffee.auth.web.session.SecuritySessionStrategy;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 /**
@@ -35,7 +27,6 @@ import java.util.List;
  */
 @Configuration
 @AutoConfigureAfter({
-        JpaRepositoriesAutoConfiguration.class,
         CommonAutoConfiguration.JsonAutoConfiguration.class
 })
 public class AuthCommonConfiguration {
@@ -74,15 +65,15 @@ public class AuthCommonConfiguration {
     }
 
     //    @Bean
-//    @ConditionalOnMissingBean(WechatAuthenticator.class)
-//    @ConditionalOnProperty({"auth.wechat.global.appId", "auth.wechat.global.appSecret"})
-//    public WechatAuthenticator wechatAuthenticator(@Value("${auth.wechat.global.appId}") String appId,
-//                                                   @Value("${auth.wechat.global.appSecret}") String appSecret) {
-//        WechatAuthenticator wechatAuthenticator = new WechatAuthenticator();
-//        wechatAuthenticator.setAppId(appId);
-//        wechatAuthenticator.setAppSecret(appSecret);
-//        return wechatAuthenticator;
-//    }
+    //    @ConditionalOnMissingBean(WechatAuthenticator.class)
+    //    @ConditionalOnProperty({"auth.wechat.global.appId", "auth.wechat.global.appSecret"})
+    //    public WechatAuthenticator wechatAuthenticator(@Value("${auth.wechat.global.appId}") String appId,
+    //                                                   @Value("${auth.wechat.global.appSecret}") String appSecret) {
+    //        WechatAuthenticator wechatAuthenticator = new WechatAuthenticator();
+    //        wechatAuthenticator.setAppId(appId);
+    //        wechatAuthenticator.setAppSecret(appSecret);
+    //        return wechatAuthenticator;
+    //    }
 
     @Bean
     @ConditionalOnMissingBean(SecuritySessionStrategy.class)
@@ -90,38 +81,37 @@ public class AuthCommonConfiguration {
         return new DefaultSecuritySessionStrategy();
     }
 
-    @Bean
-    @ConditionalOnMissingBean(UserManager.class)
-    public UserManager userManager(EntityManager manager) {
-        return new JpaSessionUserManager(manager);
-    }
+//        @Bean
+//        @ConditionalOnMissingBean(UserManager.class)
+//        public UserManager userManager(EntityManager manager) {
+//            return new JpaSessionUserManager(manager);
+//        }
 
-    @Autowired
+    @Autowired(required = false)
     public void setResponseBodyFactory(HttpResponseBodyFactory responseBodyFactory) {
         this.responseBodyFactory = responseBodyFactory;
     }
 
-    @Autowired
-    public void setMapper(ObjectMapper mapper) {
-        this.mapper = mapper;
+    @Bean
+    @ConditionalOnMissingBean(DefaultAuthBeforeUserFiltersFactory.class)
+    public UserFiltersFactory beforeUserFiltersFactory() {
+        return new DefaultAuthBeforeUserFiltersFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(UserContextRepository.class)
+    public HttpSessionUserContextRepository userContextRepository() {
+        return new HttpSessionUserContextRepository();
     }
 
     @Configuration
-    class PermissionInterceptorConfiguration extends WebMvcConfigurerAdapter {
-        private EntityManager manager;
-
-        @Override
-        public void addInterceptors(InterceptorRegistry registry) {
-            PermissionInterceptor interceptor = new PermissionInterceptor();
-            interceptor.setDisabledUserHandler(disabledUserHandler());
-            interceptor.setLoginExpectedHandler(loginExpectedHandler());
-            interceptor.setUserManager(userManager(manager));
-            registry.addInterceptor(interceptor);
-        }
-
-        @Autowired
-        public void setManager(EntityManager manager) {
-            this.manager = manager;
+    @Import(ObjectPostProcessorConfiguration.class)
+    @AutoConfigureAfter(
+            JpaRepositoriesAutoConfiguration.class)
+    static class BuilderConfiguration {
+        @Bean
+        public FilterChainFilterFactoryBean coffeeAuthBuilders(ObjectPostProcessor<Object> opp) {
+            return new FilterChainFilterFactoryBean(opp);
         }
     }
 
@@ -132,4 +122,30 @@ public class AuthCommonConfiguration {
             argumentResolvers.add(new AuthPrincipalArgumentResolver());
         }
     }
+
+    @Autowired(required = false)
+    public void setMapper(ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
+
+//        @Configuration
+//        class PermissionInterceptorConfiguration extends WebMvcConfigurerAdapter {
+//            private EntityManager manager;
+//
+//            @Override
+//            public void addInterceptors(InterceptorRegistry registry) {
+//                PermissionInterceptor interceptor = new PermissionInterceptor();
+//                interceptor.setDisabledUserHandler(disabledUserHandler());
+//                interceptor.setLoginExpectedHandler(loginExpectedHandler());
+//                interceptor.setUserManager(userManager(manager));
+//                registry.addInterceptor(interceptor);
+//            }
+//
+//            @Autowired
+//            public void setManager(EntityManager manager) {
+//                this.manager = manager;
+//            }
+//        }
+
+
 }
