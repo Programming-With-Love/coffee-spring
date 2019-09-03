@@ -9,8 +9,7 @@ import site.zido.coffee.auth.config.jpa.JpaAutoRegister;
 
 @Configuration
 @ConditionalOnClass(LocalContainerEntityManagerFactoryBean.class)
-public
-class RegisterJpaAutoRegister implements BeanPostProcessor {
+public class RegisterJpaAutoRegister implements BeanPostProcessor {
     private JpaAutoRegister register;
 
     RegisterJpaAutoRegister(JpaAutoRegister register) {

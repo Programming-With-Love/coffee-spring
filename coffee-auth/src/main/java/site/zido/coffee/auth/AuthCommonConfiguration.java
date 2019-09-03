@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import site.zido.coffee.CommonAutoConfiguration;
+import site.zido.coffee.auth.authentication.logout.LogoutSuccessHandler;
+import site.zido.coffee.auth.authentication.logout.RestLogoutSuccessHandler;
 import site.zido.coffee.auth.config.*;
 import site.zido.coffee.auth.context.AuthPrincipalArgumentResolver;
 import site.zido.coffee.auth.context.HttpSessionUserContextRepository;
@@ -64,28 +66,11 @@ public class AuthCommonConfiguration {
         return new UsernamePasswordAuthenticationFilterFactory();
     }
 
-    //    @Bean
-    //    @ConditionalOnMissingBean(WechatAuthenticator.class)
-    //    @ConditionalOnProperty({"auth.wechat.global.appId", "auth.wechat.global.appSecret"})
-    //    public WechatAuthenticator wechatAuthenticator(@Value("${auth.wechat.global.appId}") String appId,
-    //                                                   @Value("${auth.wechat.global.appSecret}") String appSecret) {
-    //        WechatAuthenticator wechatAuthenticator = new WechatAuthenticator();
-    //        wechatAuthenticator.setAppId(appId);
-    //        wechatAuthenticator.setAppSecret(appSecret);
-    //        return wechatAuthenticator;
-    //    }
-
     @Bean
     @ConditionalOnMissingBean(SecuritySessionStrategy.class)
     public SecuritySessionStrategy strategy() {
         return new DefaultSecuritySessionStrategy();
     }
-
-//        @Bean
-//        @ConditionalOnMissingBean(UserManager.class)
-//        public UserManager userManager(EntityManager manager) {
-//            return new JpaSessionUserManager(manager);
-//        }
 
     @Autowired(required = false)
     public void setResponseBodyFactory(HttpResponseBodyFactory responseBodyFactory) {
@@ -104,48 +89,15 @@ public class AuthCommonConfiguration {
         return new HttpSessionUserContextRepository();
     }
 
-    @Configuration
-    @Import(ObjectPostProcessorConfiguration.class)
-    @AutoConfigureAfter(
-            JpaRepositoriesAutoConfiguration.class)
-    static class BuilderConfiguration {
-        @Bean
-        public FilterChainFilterFactoryBean coffeeAuthBuilders(ObjectPostProcessor<Object> opp) {
-            return new FilterChainFilterFactoryBean(opp);
-        }
-    }
-
-    @Configuration
-    static class WebMvcAuthConfiguration extends WebMvcConfigurerAdapter {
-        @Override
-        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-            argumentResolvers.add(new AuthPrincipalArgumentResolver());
-        }
+    @Bean
+    @ConditionalOnMissingBean(LogoutSuccessHandler.class)
+    public LogoutSuccessHandler restLogoutSuccessHandler() {
+        return new RestLogoutSuccessHandler(responseBodyFactory, mapper);
     }
 
     @Autowired(required = false)
     public void setMapper(ObjectMapper mapper) {
         this.mapper = mapper;
     }
-
-//        @Configuration
-//        class PermissionInterceptorConfiguration extends WebMvcConfigurerAdapter {
-//            private EntityManager manager;
-//
-//            @Override
-//            public void addInterceptors(InterceptorRegistry registry) {
-//                PermissionInterceptor interceptor = new PermissionInterceptor();
-//                interceptor.setDisabledUserHandler(disabledUserHandler());
-//                interceptor.setLoginExpectedHandler(loginExpectedHandler());
-//                interceptor.setUserManager(userManager(manager));
-//                registry.addInterceptor(interceptor);
-//            }
-//
-//            @Autowired
-//            public void setManager(EntityManager manager) {
-//                this.manager = manager;
-//            }
-//        }
-
 
 }

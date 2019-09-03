@@ -11,7 +11,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.Assert;
 import site.zido.coffee.auth.CoffeeAuthAutoConfiguration;
+import site.zido.coffee.auth.authentication.logout.LogoutFilter;
+import site.zido.coffee.auth.authentication.logout.LogoutSuccessHandler;
 import site.zido.coffee.auth.context.AuthContextPersistenceFilter;
 import site.zido.coffee.auth.user.annotations.AuthEntity;
 import site.zido.coffee.auth.web.FilterChainFilter;
@@ -60,8 +63,12 @@ public class FilterChainFilterFactoryBean implements FactoryBean<FilterChainFilt
                     .postProcess(new AuthContextPersistenceFilter());
             filters.add(beforeFilter);
             for (AuthenticationFilterFactory factory : authenticationFilterFactoryMap.values()) {
-                filters.add(factory.createFilter(clazz, objectObjectPostProcessor));
+                Filter filter = factory.createFilter(clazz, objectObjectPostProcessor);
+                if (filter != null) {
+                    filters.add(filter);
+                }
             }
+
             filters.sort(AnnotationAwareOrderComparator.INSTANCE);
             List<RequestMatcher> baseUrlMatchers = Stream.of(baseUrls).map(baseUrl -> {
                 if (!baseUrl.startsWith("/")) {

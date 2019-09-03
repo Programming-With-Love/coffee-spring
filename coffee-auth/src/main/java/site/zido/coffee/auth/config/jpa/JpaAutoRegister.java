@@ -10,13 +10,16 @@ import site.zido.coffee.auth.user.annotations.AuthEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * unit info由spring boot data jpa注册，优先使用spring boot data jpa的扫描结果，
  * 以尽量兼容spring boot data jpa的各种规范
  */
 public class JpaAutoRegister implements PersistenceUnitPostProcessor,
-        AuthClassAutoRegistrar{
+        AuthClassAutoRegistrar {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaAutoRegister.class);
     private List<String> authClassNames;
 

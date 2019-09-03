@@ -3,14 +3,12 @@ package site.zido.coffee.auth.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.util.UrlPathHelper;
-import site.zido.coffee.auth.authentication.AuthenticationProvider;
 import site.zido.coffee.auth.authentication.ProviderManager;
 import site.zido.coffee.auth.authentication.UsernamePasswordAuthenticationProvider;
 import site.zido.coffee.auth.authentication.UsernamePasswordClassProps;
@@ -29,7 +27,6 @@ import java.util.stream.Stream;
 
 public class UsernamePasswordAuthenticationFilterFactory implements AuthenticationFilterFactory, ApplicationContextAware {
     private final static Logger LOGGER = LoggerFactory.getLogger(UsernamePasswordAuthenticationFilterFactory.class);
-    private ApplicationContext context;
     private static final String DEFAULT_USERNAME = "username";
     private static final String DEFAULT_PASSWORD = "password";
     private String usernamePropsName = DEFAULT_USERNAME;
@@ -39,7 +36,6 @@ public class UsernamePasswordAuthenticationFilterFactory implements Authenticati
 
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-        this.context = context;
     }
 
     @Override
