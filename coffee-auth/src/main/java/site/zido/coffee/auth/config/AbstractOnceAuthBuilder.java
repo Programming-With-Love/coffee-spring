@@ -19,5 +19,5 @@ public abstract class AbstractOnceAuthBuilder<O> implements AuthBuilder<O> {
         return result;
     }
 
-    protected abstract O doBuild();
+    protected abstract O doBuild() throws Exception;
 }
