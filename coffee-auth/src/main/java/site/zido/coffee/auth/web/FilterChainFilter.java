@@ -3,6 +3,7 @@ package site.zido.coffee.auth.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 import site.zido.coffee.auth.context.UserHolder;
 import site.zido.coffee.auth.web.utils.UrlUtils;
@@ -28,6 +29,14 @@ public class FilterChainFilter extends GenericFilterBean {
     private List<FilterChainManager> filterChainManagers;
 
     public FilterChainFilter() {
+    }
+
+    public FilterChainFilter(List<FilterChainManager> managers) {
+        Assert.notEmpty(managers, "managers cannot be empty or null");
+        for (FilterChainManager manager : managers) {
+            Assert.notNull(manager, "managers cannot contain null manager");
+        }
+        this.filterChainManagers = managers;
     }
 
     @Override

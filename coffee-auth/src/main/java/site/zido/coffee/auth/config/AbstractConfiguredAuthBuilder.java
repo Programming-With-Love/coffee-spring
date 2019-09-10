@@ -77,6 +77,18 @@ public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
         return new ArrayList<>(configs);
     }
 
+    public <C extends AuthConfigurer<O, B>> C getConfigurer(Class<C> clazz) {
+        List<AuthConfigurer<O, B>> configs = this.configurers.get(clazz);
+        if (configs == null) {
+            return null;
+        }
+        if (configs.size() != 1) {
+            throw new IllegalStateException("Only one configurer expected for type "
+                    + clazz + ", but got " + configs);
+        }
+        return (C) configs.get(0);
+    }
+
     public <C extends AuthConfigurer<O, B>> C removeConfigurer(Class<C> clazz) {
         List<AuthConfigurer<O, B>> configs = this.configurers.remove(clazz);
         if (configs == null) {

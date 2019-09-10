@@ -5,33 +5,42 @@ import site.zido.coffee.auth.web.FilterChainFilter;
 import site.zido.coffee.auth.web.FilterChainManager;
 import site.zido.coffee.auth.web.HttpSecurityManager;
 
+import javax.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilterChainFilterBuilder {
-    private ObjectPostProcessor<Object> objectPostProcessor;
-    private List<FilterChainManager> filterChainManagers;
+public class FilterChainFilterBuilder
+        extends AbstractConfiguredAuthBuilder<Filter, FilterChainFilterBuilder>
+        implements AuthBuilder<Filter> {
+    private List<AuthBuilder<? extends FilterChainManager>> filterChainManagerBuilders = new ArrayList<>();
     private HttpSecurityManager securityManager;
 
     public FilterChainFilterBuilder(ObjectPostProcessor<Object> postProcessor) {
-        Assert.notNull(postProcessor, "objectPostProcessor cannot be null");
-        this.objectPostProcessor = postProcessor;
+        super(postProcessor);
     }
 
-    public FilterChainFilter build() {
-        FilterChainFilter filterChainFilter = objectPostProcessor.postProcess(new FilterChainFilter());
-        filterChainFilter.setFilterChainManagers(filterChainManagers);
-        if (securityManager == null) {
+    @Override
+    protected Filter performBuild() throws Exception {
+        Assert.state(!filterChainManagerBuilders.isEmpty(), "At least one SecurityBuilder<? extends SecurityFilterChain> needs to be specified. "
+                + "Typically this done by adding a @Configuration that extends WebSecurityConfigurerAdapter. "
+                + "More advanced users can invoke "
+                + FilterChainFilterBuilder.class.getSimpleName()
+                + ".addSecurityFilterChainBuilder directly");
+        List<FilterChainManager> filterChainManagers = new ArrayList<>(filterChainManagerBuilders.size());
+        for (AuthBuilder<? extends FilterChainManager> filterChainManagerBuilder : filterChainManagerBuilders) {
+            filterChainManagers.add(filterChainManagerBuilder.build());
+        }
+        FilterChainFilter filterChainFilter = new FilterChainFilter(filterChainManagers);
+        if (securityManager != null) {
             filterChainFilter.setHttpSecurityManager(securityManager);
         }
+        filterChainFilter.afterPropertiesSet();
         return filterChainFilter;
     }
 
-    public FilterChainFilterBuilder addFilterChainManager(FilterChainManager manager) {
-        if (filterChainManagers == null) {
-            filterChainManagers = new ArrayList<>();
-        }
-        filterChainManagers.add(manager);
+    public FilterChainFilterBuilder addFilterChainManagerBuilder(
+            AuthBuilder<? extends FilterChainManager> filterChainManagerBuilder) {
+        this.filterChainManagerBuilders.add(filterChainManagerBuilder);
         return this;
     }
 

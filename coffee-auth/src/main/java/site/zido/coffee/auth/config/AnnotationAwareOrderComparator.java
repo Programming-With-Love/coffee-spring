@@ -14,7 +14,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
         return lookupOrder(obj);
     }
 
-    private static int lookupOrder(Object obj) {
+    public static int lookupOrder(Object obj) {
         if (obj instanceof Ordered) {
             return ((Ordered) obj).getOrder();
         }
