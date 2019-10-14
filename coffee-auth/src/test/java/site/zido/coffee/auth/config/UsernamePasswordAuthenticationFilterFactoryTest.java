@@ -1,4 +1,4 @@
-package site.zido.coffee.auth.utils.config;
+package site.zido.coffee.auth.config;
 
 import example.User;
 import org.junit.Test;

@@ -11,10 +11,12 @@ import java.util.List;
 public class LogoutFilterFactory implements AuthenticationFilterFactory {
     private List<LogoutHandler> logoutHandlers;
     private LogoutSuccessHandler logoutSuccessHandler;
+
     @Override
     public Filter createFilter(Class<?> userClass, ObjectPostProcessor<Object> objectObjectPostProcessor) {
         AuthEntity authEntity = AnnotatedElementUtils.findMergedAnnotation(userClass, AuthEntity.class);
-
+        //TODO
+        return null;
     }
 
     public void setLogoutSuccessHandler(LogoutSuccessHandler logoutSuccessHandler) {

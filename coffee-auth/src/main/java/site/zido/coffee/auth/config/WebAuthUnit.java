@@ -1,7 +1,7 @@
 package site.zido.coffee.auth.config;
 
-import site.zido.coffee.auth.web.FilterChainManager;
 import site.zido.coffee.auth.web.UrlBasedFilterChainManager;
+import site.zido.coffee.auth.web.utils.matcher.AntPathRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.AnyRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.RequestMatcher;
 
@@ -9,6 +9,9 @@ import javax.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author zido
+ */
 public class WebAuthUnit extends
         AbstractConfiguredAuthBuilder<UrlBasedFilterChainManager, WebAuthUnit>
         implements AuthBuilder<UrlBasedFilterChainManager> {
@@ -19,14 +22,20 @@ public class WebAuthUnit extends
         super(objectPostProcessor);
     }
 
-
     @Override
     protected UrlBasedFilterChainManager performBuild() throws Exception {
         filters.sort(AnnotationAwareOrderComparator.INSTANCE);
         return new UrlBasedFilterChainManager(requestMatcher, filters);
     }
 
-    //TODO build web auth unit
+    public WebAuthUnit requestMatcher(RequestMatcher requestMatcher) {
+        this.requestMatcher = requestMatcher;
+        return this;
+    }
+
+    public WebAuthUnit antMatcher(String pattern) {
+        return requestMatcher(new AntPathRequestMatcher(pattern));
+    }
 
     public WebAuthUnit addFilter(Filter filter) {
         Class<? extends Filter> filterClass = filter.getClass();
