@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class WebAuthUnit extends
         AbstractConfiguredAuthBuilder<UrlBasedFilterChainManager, WebAuthUnit>
-        implements AuthBuilder<UrlBasedFilterChainManager> {
+        implements HttpAuthBuilder<UrlBasedFilterChainManager> {
     private List<Filter> filters = new ArrayList<>();
     private RequestMatcher requestMatcher = AnyRequestMatcher.INSTANCE;
 

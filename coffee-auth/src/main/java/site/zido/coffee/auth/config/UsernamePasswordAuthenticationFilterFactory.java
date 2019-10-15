@@ -25,7 +25,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class UsernamePasswordAuthenticationFilterFactory implements AuthenticationFilterFactory, ApplicationContextAware {
+/**
+ * @author zido
+ */
+public class UsernamePasswordAuthenticationFilterFactory
+        implements AuthenticationFilterFactory, ApplicationContextAware {
     private final static Logger LOGGER = LoggerFactory.getLogger(UsernamePasswordAuthenticationFilterFactory.class);
     private static final String DEFAULT_USERNAME = "username";
     private static final String DEFAULT_PASSWORD = "password";

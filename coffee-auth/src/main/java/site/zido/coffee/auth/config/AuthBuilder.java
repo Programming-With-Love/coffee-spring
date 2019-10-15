@@ -2,6 +2,8 @@ package site.zido.coffee.auth.config;
 
 /**
  * 认证建造者接口
+ *
+ * @author zido
  */
 public interface AuthBuilder<O> {
     /**

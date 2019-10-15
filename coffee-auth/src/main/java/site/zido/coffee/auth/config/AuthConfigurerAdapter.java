@@ -15,7 +15,6 @@ public abstract class AuthConfigurerAdapter<O, B extends AuthBuilder<O>>
 
     @Override
     public void init(B builder) throws Exception {
-
     }
 
     @Override
