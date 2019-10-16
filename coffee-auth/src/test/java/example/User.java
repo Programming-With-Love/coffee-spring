@@ -1,13 +1,13 @@
 package example;
 
-import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.IDUser;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class User implements IUser {
+public class User implements IDUser {
     private static final long serialVersionUID = 8117135970630725956L;
     @Id
     @GeneratedValue

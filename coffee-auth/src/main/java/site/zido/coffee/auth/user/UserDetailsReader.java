@@ -5,12 +5,12 @@ package site.zido.coffee.auth.user;
  *
  * @author zido
  */
-public interface UserDetailsReader {
+public interface UserDetailsReader<T extends IUser> {
     /**
      * 解析用户对象
      *
      * @param user 任意用户对象
      * @return user details
      */
-    UserDetails parseUser(Object user);
+    T parseUser(Object user);
 }

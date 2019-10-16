@@ -6,6 +6,9 @@ import org.springframework.util.Assert;
 
 import java.util.*;
 
+/**
+ * @author zido
+ */
 public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
         extends AbstractOnceAuthBuilder<O> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -34,6 +37,7 @@ public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
         this.allowConfigurersOfSameType = allowConfigurersOfSameType;
     }
 
+    @SuppressWarnings("unchecked")
     public <C extends AuthConfigurerAdapter<O, B>> C apply(C configurer)
             throws Exception {
         configurer.addObjectPostProcessor(objectPostProcessor);
@@ -47,6 +51,7 @@ public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
         return configurer;
     }
 
+    @SuppressWarnings("unchecked")
     private <C extends AuthConfigurer<O, B>> void add(C configurer) throws Exception {
         Assert.notNull(configurer, "configurer cannot be null");
         Class<? extends AuthConfigurer<O, B>> clazz =
@@ -69,6 +74,7 @@ public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
         }
     }
 
+    @SuppressWarnings("unchecked")
     public <C extends AuthConfigurer<O, B>> List<C> getConfigurers(Class<C> clazz) {
         List<C> configs = (List<C>) this.configurers.get(clazz);
         if (configs == null) {
@@ -77,6 +83,7 @@ public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
         return new ArrayList<>(configs);
     }
 
+    @SuppressWarnings("unchecked")
     public <C extends AuthConfigurer<O, B>> C getConfigurer(Class<C> clazz) {
         List<AuthConfigurer<O, B>> configs = this.configurers.get(clazz);
         if (configs == null) {
@@ -132,6 +139,7 @@ public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
 
     protected abstract O performBuild() throws Exception;
 
+    @SuppressWarnings("unchecked")
     private void configure() throws Exception {
         Collection<AuthConfigurer<O, B>> configurers = getConfigurers();
         for (AuthConfigurer<O, B> configurer : configurers) {
@@ -143,6 +151,7 @@ public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
 
     }
 
+    @SuppressWarnings("unchecked")
     private void init() throws Exception {
         Collection<AuthConfigurer<O, B>> configurers = getConfigurers();
         for (AuthConfigurer<O, B> configurer : configurers) {

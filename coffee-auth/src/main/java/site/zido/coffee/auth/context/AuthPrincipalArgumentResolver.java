@@ -7,7 +7,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.user.IUser;
 
 import java.lang.annotation.Annotation;
 

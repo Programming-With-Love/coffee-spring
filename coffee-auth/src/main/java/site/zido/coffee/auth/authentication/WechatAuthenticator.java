@@ -11,7 +11,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import site.zido.coffee.auth.core.exceptions.NoSuchUserException;
-import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.IDUser;
 import site.zido.coffee.auth.user.annotations.AuthColumnWechatOpenId;
 import site.zido.coffee.auth.user.annotations.AuthColumnWechatUnionId;
 import site.zido.coffee.auth.handlers.NoSuchUserHandler;
@@ -32,7 +32,7 @@ import java.util.Map;
 public class WechatAuthenticator implements Authenticator, InitializingBean {
     private static final String DEFAULT_WECHAT_OPEN_ID_FIELD_NAME = "wechatOpenId";
     private static final String DEFAULT_WECHAT_UNION_ID_FIELD_NAME = "wechatUnionId";
-    private Map<Class<? extends IUser>, WechatClassProps> propsCache =
+    private Map<Class<? extends IDUser>, WechatClassProps> propsCache =
             new HashMap<>();
     /**
      * 微信appId
@@ -45,15 +45,15 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
     /**
      * 用户未查询到处理器
      */
-    private NoSuchUserHandler<? extends IUser> noSuchUserHandler;
+    private NoSuchUserHandler<? extends IDUser> noSuchUserHandler;
     private ObjectMapper mapper;
 
     public WechatAuthenticator() {
     }
 
     @Override
-    public boolean prepare(Class<? extends IUser> userClass,
-                           JpaRepository<? extends IUser, ? extends Serializable> repository) {
+    public boolean prepare(Class<? extends IDUser> userClass,
+                           JpaRepository<? extends IDUser, ? extends Serializable> repository) {
         if (propsCache.containsKey(userClass)) {
             return true;
         }
@@ -90,7 +90,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
      * @throws AbstractAuthenticationException 当认证失败时会抛出{@link NoSuchUserException}
      */
     @Override
-    public IUser auth(HttpServletRequest request) throws AbstractAuthenticationException {
+    public IDUser auth(HttpServletRequest request) throws AbstractAuthenticationException {
         String encryptedData = request.getParameter("encryptedData");
         String iv = request.getParameter("iv");
         String code = request.getParameter("code");
@@ -110,7 +110,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
             String unionId = jsonNode.get("unionId").asText();
             String openId = jsonNode.get("openId").asText();
             for (WechatClassProps props : propsCache.values()) {
-                IUser tempUser;
+                IDUser tempUser;
                 if (StringUtils.hasText(unionId) && props.getWechatUnionIdField() != null) {
                     try {
                         tempUser = props.getUserClass().newInstance();
@@ -129,7 +129,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
                 String nickName = jsonNode.get("nickName").asText();
                 String avatarUrl = jsonNode.get("avatarUrl").asText();
                 Integer gender = jsonNode.get("gender").asInt();
-                IUser user = props.getRepository().findOne((Example) Example.of(tempUser));
+                IDUser user = props.getRepository().findOne((Example) Example.of(tempUser));
                 if (user != null) {
                     return user;
                 }
@@ -154,7 +154,7 @@ public class WechatAuthenticator implements Authenticator, InitializingBean {
     }
 
     @Autowired(required = false)
-    public void setNoSuchUserHandler(NoSuchUserHandler<? extends IUser> noSuchUserHandler) {
+    public void setNoSuchUserHandler(NoSuchUserHandler<? extends IDUser> noSuchUserHandler) {
         this.noSuchUserHandler = noSuchUserHandler;
     }
 

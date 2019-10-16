@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.util.ReflectionUtils;
 import site.zido.coffee.auth.Constants;
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.IDUser;
 import site.zido.coffee.auth.user.annotations.AuthColumnKey;
 import site.zido.coffee.auth.handlers.FieldVal;
 import site.zido.coffee.auth.utils.CachedFieldUtils;
@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zido
  */
 public abstract class AbstractSessionUserManager implements UserManager {
-    private static final Map<Class<? extends IUser>, FieldVal> KEY_METHOD_CACHE
+    private static final Map<Class<? extends IDUser>, FieldVal> KEY_METHOD_CACHE
             = new ConcurrentHashMap<>();
     protected String sessionKey = Constants.DEFAULT_SESSION_ATTRIBUTE_NAME;
 
@@ -36,7 +35,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
      * @param userClass  查询目标类
      * @return user
      */
-    protected abstract Authentication getUserByKey(Object fieldValue, String fieldName, Class<? extends IUser> userClass);
+    protected abstract Authentication getUserByKey(Object fieldValue, String fieldName, Class<? extends IDUser> userClass);
 
     @Override
     @SuppressWarnings("unchecked")
@@ -51,8 +50,8 @@ public abstract class AbstractSessionUserManager implements UserManager {
                 || (key = session.getAttribute(sessionKey)) == null) {
             return null;
         }
-        Class<? extends IUser> userClass =
-                (Class<? extends IUser>) session.getAttribute(
+        Class<? extends IDUser> userClass =
+                (Class<? extends IDUser>) session.getAttribute(
                         getClassAttrName(sessionKey));
         String name = (String) session.getAttribute(
                 getFieldNameAttrName(sessionKey));
@@ -75,7 +74,7 @@ public abstract class AbstractSessionUserManager implements UserManager {
      * @param authResult 用户
      */
     @Override
-    public void bindUser(HttpServletRequest request, IUser authResult) {
+    public void bindUser(HttpServletRequest request, IDUser authResult) {
         //反射缓存查询
         FieldVal val = KEY_METHOD_CACHE.computeIfAbsent(authResult.getClass(), clazz -> {
             Field[] fields = new Field[1];

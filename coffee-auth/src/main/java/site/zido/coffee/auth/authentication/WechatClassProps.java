@@ -2,7 +2,7 @@ package site.zido.coffee.auth.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.jpa.repository.JpaRepository;
-import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.IDUser;
 import site.zido.coffee.auth.handlers.NoSuchUserHandler;
 
 import java.io.Serializable;
@@ -16,12 +16,12 @@ import java.lang.reflect.Field;
 public class WechatClassProps {
     private Field wechatOpenIdField;
     private Field wechatUnionIdField;
-    private Class<? extends IUser> userClass;
-    private JpaRepository<? extends IUser, ? extends Serializable> repository;
+    private Class<? extends IDUser> userClass;
+    private JpaRepository<? extends IDUser, ? extends Serializable> repository;
     private ObjectMapper mapper;
     private String appId;
     private String appSecret;
-    private NoSuchUserHandler<? extends IUser> noSuchUserHandler;
+    private NoSuchUserHandler<? extends IDUser> noSuchUserHandler;
 
     public Field getWechatOpenIdField() {
         return wechatOpenIdField;
@@ -39,19 +39,19 @@ public class WechatClassProps {
         this.wechatUnionIdField = wechatUnionIdField;
     }
 
-    public Class<? extends IUser> getUserClass() {
+    public Class<? extends IDUser> getUserClass() {
         return userClass;
     }
 
-    public void setUserClass(Class<? extends IUser> userClass) {
+    public void setUserClass(Class<? extends IDUser> userClass) {
         this.userClass = userClass;
     }
 
-    public JpaRepository<? extends IUser, ? extends Serializable> getRepository() {
+    public JpaRepository<? extends IDUser, ? extends Serializable> getRepository() {
         return repository;
     }
 
-    public void setRepository(JpaRepository<? extends IUser, ? extends Serializable> repository) {
+    public void setRepository(JpaRepository<? extends IDUser, ? extends Serializable> repository) {
         this.repository = repository;
     }
 
@@ -79,11 +79,11 @@ public class WechatClassProps {
         this.appSecret = appSecret;
     }
 
-    public NoSuchUserHandler<? extends IUser> getNoSuchUserHandler() {
+    public NoSuchUserHandler<? extends IDUser> getNoSuchUserHandler() {
         return noSuchUserHandler;
     }
 
-    public void setNoSuchUserHandler(NoSuchUserHandler<? extends IUser> noSuchUserHandler) {
+    public void setNoSuchUserHandler(NoSuchUserHandler<? extends IDUser> noSuchUserHandler) {
         this.noSuchUserHandler = noSuchUserHandler;
     }
 }

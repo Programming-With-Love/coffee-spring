@@ -3,7 +3,6 @@ package site.zido.coffee.auth.user;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-import site.zido.coffee.auth.core.CredentialsContainer;
 import site.zido.coffee.auth.core.GrantedAuthority;
 
 import java.io.Serializable;
@@ -14,7 +13,7 @@ import static site.zido.coffee.auth.Constants.COFFEE_AUTH_VERSION;
 /**
  * @author zido
  */
-public class User implements UserDetails, CredentialsContainer {
+public class User implements IUser {
     private static final long serialVersionUID = COFFEE_AUTH_VERSION;
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(User.class);
@@ -86,11 +85,6 @@ public class User implements UserDetails, CredentialsContainer {
         return sortedAuthorities;
     }
 
-    @Override
-    public void eraseCredentials() {
-
-    }
-
     private static class AuthorityComparator implements Comparator<GrantedAuthority>,
             Serializable {
 
@@ -128,7 +122,6 @@ public class User implements UserDetails, CredentialsContainer {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString()).append(": ");
         sb.append("Username: ").append(this.userKey).append("; ");
-        sb.append("Password: [PROTECTED]; ");
         sb.append("Enabled: ").append(this.enabled).append("; ");
         sb.append("AccountNonExpired: ").append(this.accountNonExpired).append("; ");
         sb.append("credentialsNonExpired: ").append(this.credentialsNonExpired)

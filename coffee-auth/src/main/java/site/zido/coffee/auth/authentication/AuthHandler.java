@@ -1,6 +1,6 @@
 package site.zido.coffee.auth.authentication;
 
-import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.IDUser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,5 +20,5 @@ public interface AuthHandler {
      * @return 用户
      * @throws AbstractAuthenticationException ex
      */
-    IUser attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AbstractAuthenticationException;
+    IDUser attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AbstractAuthenticationException;
 }

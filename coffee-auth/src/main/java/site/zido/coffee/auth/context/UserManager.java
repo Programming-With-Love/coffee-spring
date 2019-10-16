@@ -1,7 +1,7 @@
 package site.zido.coffee.auth.context;
 
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.IDUser;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public interface UserManager {
      * @param request    request
      * @param authResult result
      */
-    void bindUser(HttpServletRequest request, IUser authResult);
+    void bindUser(HttpServletRequest request, IDUser authResult);
 
     /**
      * 清楚绑定

@@ -3,7 +3,6 @@ package site.zido.coffee.auth.handlers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 import site.zido.coffee.auth.core.Authentication;
-import site.zido.coffee.auth.user.IUser;
 import site.zido.coffee.auth.utils.ResponseUtils;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 

@@ -4,9 +4,9 @@ package site.zido.coffee.auth.user;
  * @author zido
  */
 public interface UserCache {
-    UserDetails getUserFromCache(String username);
+    IUser getUserFromCache(String username);
 
-    void putUserInCache(UserDetails user);
+    void putUserInCache(IUser user);
 
     void removeUserFromCache(Object username);
 }

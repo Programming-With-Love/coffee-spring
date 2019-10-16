@@ -15,23 +15,23 @@ public class SpringUserCache implements UserCache {
     }
 
     @Override
-    public UserDetails getUserFromCache(String username) {
+    public IUser getUserFromCache(String username) {
         Cache.ValueWrapper element = username != null ? cache.get(username) : null;
         LOGGER.debug("Cache hit: {}; username:{}", element != null, username);
         if (element == null) {
             return null;
         } else {
-            return (UserDetails) element.get();
+            return (IUser) element.get();
         }
     }
 
     @Override
-    public void putUserInCache(UserDetails user) {
+    public void putUserInCache(IUser user) {
         LOGGER.debug("Cache put: {}", user.getKey());
         cache.put(user.getKey(), user);
     }
 
-    public void removeUserFromCache(UserDetails user) {
+    public void removeUserFromCache(IUser user) {
         this.removeUserFromCache(user.getKey());
     }
 

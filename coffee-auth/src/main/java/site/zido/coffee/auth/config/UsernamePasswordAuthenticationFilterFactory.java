@@ -71,7 +71,7 @@ public class UsernamePasswordAuthenticationFilterFactory
                         new AntPathRequestMatcher(finalUrl, method, caseSensitive, urlPathHelper))
                         .collect(Collectors.toList()));
         UsernamePasswordAuthenticationProvider provider = objectObjectPostProcessor
-                .postProcess(new UsernamePasswordAuthenticationProvider(userClass));
+                .postProcess(new UsernamePasswordAuthenticationProvider(null));
         provider.setPasswordEncoder(props.getPasswordEncoder());
         ProviderManager providerManager = objectObjectPostProcessor
                 .postProcess(new ProviderManager(Collections.singletonList(provider)));
