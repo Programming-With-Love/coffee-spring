@@ -2,12 +2,12 @@ package site.zido.coffee.auth.user;
 
 public class NullUserCache implements UserCache {
     @Override
-    public UserDetails getUserFromCache(String username) {
+    public IUser getUserFromCache(String username) {
         return null;
     }
 
     @Override
-    public void putUserInCache(UserDetails user) {
+    public void putUserInCache(IUser user) {
 
     }
 

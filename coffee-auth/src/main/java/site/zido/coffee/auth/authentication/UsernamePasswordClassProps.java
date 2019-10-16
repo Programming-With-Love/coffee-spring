@@ -1,10 +1,8 @@
 package site.zido.coffee.auth.authentication;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.IDUser;
 import site.zido.coffee.auth.security.PasswordEncoder;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 
 /**
@@ -13,16 +11,16 @@ import java.lang.reflect.Field;
  * @author zido
  */
 public class UsernamePasswordClassProps {
-    private Class<? extends IUser> userClass;
+    private Class<? extends IDUser> userClass;
     private Field usernameField;
     private Field passwordField;
     private PasswordEncoder passwordEncoder;
 
-    public Class<? extends IUser> getUserClass() {
+    public Class<? extends IDUser> getUserClass() {
         return userClass;
     }
 
-    public void setUserClass(Class<? extends IUser> userClass) {
+    public void setUserClass(Class<? extends IDUser> userClass) {
         this.userClass = userClass;
     }
 

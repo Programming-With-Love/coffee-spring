@@ -5,7 +5,7 @@ import site.zido.coffee.auth.core.Authentication;
 /**
  * @author zido
  */
-public interface AuthenticationProvider {
+public interface AuthenticationProvider<T extends Authentication> {
     /**
      * 认证
      *
@@ -13,7 +13,7 @@ public interface AuthenticationProvider {
      * @return 已认证的凭据
      * @throws AbstractAuthenticationException ex
      */
-    Authentication authenticate(Authentication authentication)
+    Authentication authenticate(T authentication)
             throws AbstractAuthenticationException;
 
 

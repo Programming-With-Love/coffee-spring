@@ -1,5 +1,5 @@
 package site.zido.coffee.auth.user;
 
-public interface IUserService {
-    Object loadUser(Object fieldValue, String fieldName, Class<?> userClass);
+public interface IUserService<T extends IUser> {
+    T loadUser(Object fieldValue);
 }

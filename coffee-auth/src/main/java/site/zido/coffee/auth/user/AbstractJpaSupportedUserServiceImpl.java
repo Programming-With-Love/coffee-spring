@@ -1,6 +1,6 @@
 package site.zido.coffee.auth.user;
 
-import site.zido.coffee.auth.authentication.UsernameNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -14,21 +14,31 @@ import javax.persistence.criteria.Root;
  *
  * @author zido
  */
-public class JpaSupportedUserServiceImpl implements IUserService {
+public abstract class AbstractJpaSupportedUserServiceImpl<T extends IUser> implements IUserService<T> {
     private EntityManager em;
+    private Class<?> userClass;
+    private String fieldName;
 
-    public JpaSupportedUserServiceImpl(EntityManager em) {
+    public AbstractJpaSupportedUserServiceImpl(Class<?> userClass, String fieldName) {
+        this.userClass = userClass;
+        this.fieldName = fieldName;
+    }
+
+    @Autowired
+    public void setEntityManager(EntityManager em) {
         this.em = em;
     }
 
     @Override
-    public Object loadUser(Object fieldValue, String fieldName, Class<?> userClass) {
+    public T loadUser(Object fieldValue) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<?> query = criteriaBuilder.createQuery(userClass);
         Root<?> root = query.from(userClass);
         Predicate pre = criteriaBuilder.equal(root.get(fieldName), fieldValue);
         query = query.where(pre);
         TypedQuery<?> typedQuery = em.createQuery(query);
-        return typedQuery.getSingleResult();
+        return packageUser(typedQuery.getSingleResult());
     }
+
+    protected abstract T packageUser(Object userEntity);
 }

@@ -11,6 +11,9 @@ import org.springframework.core.type.AnnotationMetadata;
 import javax.servlet.Filter;
 import java.util.List;
 
+/**
+ * @author zido
+ */
 @Configuration
 public class WebAuthConfiguration implements ImportAware {
     private FilterChainFilterBuilder globalBuilder;

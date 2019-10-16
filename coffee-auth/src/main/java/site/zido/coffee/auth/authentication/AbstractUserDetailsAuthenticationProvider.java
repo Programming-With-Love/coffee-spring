@@ -12,74 +12,71 @@ import site.zido.coffee.auth.core.Authentication;
 /**
  * @author zido
  */
-public abstract class AbstractUserDetailsAuthenticationProvider implements
-        AuthenticationProvider, InitializingBean {
+public abstract class AbstractUserDetailsAuthenticationProvider<T extends Authentication, U extends IUser>
+        implements AuthenticationProvider<T>, InitializingBean {
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private UserCache userCache = new NullUserCache();
     protected MessageSourceAccessor messages = CoffeeAuthMessageSource.getAccessor();
     private UserChecker preAuthenticationChecks = new DefaultPreAuthenticationChecks();
     private UserChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
     private boolean forcePrincipalAsString = false;
-    private UserDetailsReader reader = AnnotatedUserDetailsReader.getInstance();
 
     @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(this.userCache, "UserCache can't be null");
         Assert.notNull(this.messages, "Message source can't be null");
-        Assert.notNull(this.reader, "User Reader can't be null");
     }
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AbstractAuthenticationException {
+    @SuppressWarnings("unchecked")
+    public Authentication authenticate(T authentication) throws AbstractAuthenticationException {
         String userKey = (authentication.getPrincipal() == null) ? "NONE_PROVIDED"
                 : authentication.getName();
 
         boolean cacheWasUsed = true;
-        UserDetails userDetails = this.userCache.getUserFromCache(userKey);
-        Object principal = null;
-        if (userDetails == null) {
+        U user = (U) this.userCache.getUserFromCache(userKey);
+        if (user == null) {
             cacheWasUsed = false;
-            principal = retrieveUser(authentication);
-            userDetails = reader.parseUser(principal);
-            Assert.notNull(userDetails,
+            user = retrieveUser(userKey, authentication);
+            Assert.notNull(user,
                     "retrieveUser returned null - a violation of the interface contract");
         }
         try {
-            preAuthenticationChecks.check(userDetails);
-            additionalAuthenticationChecks(userDetails, authentication, principal);
+            preAuthenticationChecks.check(user);
+            additionalAuthenticationChecks(user, authentication);
         } catch (AbstractAuthenticationException ex) {
             if (cacheWasUsed) {
                 cacheWasUsed = false;
-                userDetails = reader.parseUser(retrieveUser(authentication));
-                preAuthenticationChecks.check(userDetails);
-                additionalAuthenticationChecks(userDetails,
-                        authentication, principal);
+                user = retrieveUser(userKey, authentication);
+                preAuthenticationChecks.check(user);
+                additionalAuthenticationChecks(user, authentication);
             } else {
                 throw ex;
             }
         }
-        postAuthenticationChecks.check(userDetails);
+        postAuthenticationChecks.check(user);
 
         if (!cacheWasUsed) {
-            this.userCache.putUserInCache(userDetails);
+            this.userCache.putUserInCache(user);
         }
-        Object principalToReturn = userDetails;
+        Object principalToReturn = user;
 
         if (forcePrincipalAsString) {
-            principalToReturn = userDetails.getKey();
+            principalToReturn = user.getKey();
         }
-        return createSuccessAuthentication(principalToReturn, authentication, userDetails);
+        return createSuccessAuthentication(principalToReturn, authentication, user);
     }
 
-    protected abstract Object retrieveUser(Authentication authentication)
+    protected abstract U retrieveUser(Object userKey, T authentication)
             throws AbstractAuthenticationException;
 
-    protected abstract void additionalAuthenticationChecks(UserDetails userDetails,
-                                                           Authentication authentication, Object principal)
+    protected abstract void additionalAuthenticationChecks(U user,
+                                                           Authentication authentication
+    )
             throws AbstractAuthenticationException;
 
     protected Authentication createSuccessAuthentication(Object principal,
-                                                         Authentication authentication, UserDetails user) {
+                                                         Authentication authentication, IUser user) {
         UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
                 principal, authentication.getCredentials(),
                 user.getAuthorities());
@@ -108,17 +105,9 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
         this.postAuthenticationChecks = postAuthenticationChecks;
     }
 
-    public void setReader(UserDetailsReader reader) {
-        this.reader = reader;
-    }
-
-    public UserDetailsReader getReader() {
-        return reader;
-    }
-
     private class DefaultPreAuthenticationChecks implements UserChecker {
         @Override
-        public void check(UserDetails user) {
+        public void check(IUser user) {
             if (!user.isAccountNonLocked()) {
                 LOGGER.debug("User account is locked");
                 throw new LockedException(messages.getMessage(
@@ -147,7 +136,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements
 
     private class DefaultPostAuthenticationChecks implements UserChecker {
         @Override
-        public void check(UserDetails user) {
+        public void check(IUser user) {
             if (!user.isCredentialsNonExpired()) {
                 LOGGER.debug("User account credentials have expired");
 

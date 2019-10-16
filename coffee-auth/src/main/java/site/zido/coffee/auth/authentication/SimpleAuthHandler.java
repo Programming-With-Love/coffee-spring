@@ -1,6 +1,6 @@
 package site.zido.coffee.auth.authentication;
 
-import site.zido.coffee.auth.user.IUser;
+import site.zido.coffee.auth.user.IDUser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,10 +27,10 @@ public class SimpleAuthHandler implements AuthHandler {
      * @throws AbstractAuthenticationException ex
      */
     @Override
-    public IUser attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+    public IDUser attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AbstractAuthenticationException {
         for (Authenticator authenticator : authenticators) {
-            IUser auth = authenticator.auth(request);
+            IDUser auth = authenticator.auth(request);
             if (auth != null) {
                 return auth;
             }
