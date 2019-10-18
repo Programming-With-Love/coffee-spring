@@ -101,7 +101,7 @@ public class UsernamePasswordAuthenticationProvider
     }
 
     @Override
-    public boolean supports(Class<?> authentication) {
+    public boolean supports(Class<? extends Authentication> authentication) {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
 

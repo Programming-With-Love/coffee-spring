@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import site.zido.coffee.auth.config.jpa.JpaAutoRegister;
 
+/**
+ * @author zido
+ */
 @Configuration
 @ConditionalOnClass(LocalContainerEntityManagerFactoryBean.class)
 public class RegisterJpaAutoRegister implements BeanPostProcessor {

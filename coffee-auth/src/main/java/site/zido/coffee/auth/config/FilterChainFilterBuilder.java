@@ -9,6 +9,9 @@ import javax.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author zido
+ */
 public class FilterChainFilterBuilder
         extends AbstractConfiguredAuthBuilder<Filter, FilterChainFilterBuilder>
         implements AuthBuilder<Filter> {

@@ -23,5 +23,5 @@ public interface AuthenticationProvider<T extends Authentication> {
      * @param authentication authentication
      * @return true/false
      */
-    boolean supports(Class<?> authentication);
+    boolean supports(Class<? extends Authentication> authentication);
 }

@@ -118,6 +118,7 @@ public abstract class AbstractConfiguredAuthBuilder<O, B extends AuthBuilder<O>>
         return this.objectPostProcessor.postProcess(object);
     }
 
+    @Override
     protected final O doBuild() throws Exception {
         synchronized (configurers) {
             buildState = BuildState.INITIALIZING;

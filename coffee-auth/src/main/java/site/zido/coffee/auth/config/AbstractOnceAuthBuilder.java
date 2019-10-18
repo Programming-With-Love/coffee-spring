@@ -11,6 +11,7 @@ public abstract class AbstractOnceAuthBuilder<O> implements AuthBuilder<O> {
     private AtomicBoolean building = new AtomicBoolean();
     private O result;
 
+    @Override
     public final O build() throws Exception {
         if (this.building.compareAndSet(false, true)) {
             this.result = doBuild();

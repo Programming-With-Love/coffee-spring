@@ -1,5 +1,7 @@
 package site.zido.coffee.auth.config;
 
+import site.zido.coffee.auth.authentication.AuthenticationProvider;
+import site.zido.coffee.auth.user.IUserService;
 import site.zido.coffee.auth.web.UrlBasedFilterChainManager;
 import site.zido.coffee.auth.web.utils.matcher.AntPathRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.AnyRequestMatcher;
@@ -14,7 +16,8 @@ import java.util.List;
  */
 public class WebAuthUnit extends
         AbstractConfiguredAuthBuilder<UrlBasedFilterChainManager, WebAuthUnit>
-        implements HttpAuthBuilder<UrlBasedFilterChainManager> {
+        implements HttpAuthBuilder<WebAuthUnit>,
+        AuthBuilder<UrlBasedFilterChainManager> {
     private List<Filter> filters = new ArrayList<>();
     private RequestMatcher requestMatcher = AnyRequestMatcher.INSTANCE;
 
@@ -37,10 +40,23 @@ public class WebAuthUnit extends
         return requestMatcher(new AntPathRequestMatcher(pattern));
     }
 
+    @Override
     public WebAuthUnit addFilter(Filter filter) {
         Class<? extends Filter> filterClass = filter.getClass();
         this.filters.add(filter);
         return this;
+    }
+
+    @Override
+    public WebAuthUnit authenticationProvider(AuthenticationProvider provider) {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public WebAuthUnit userService(IUserService userService) throws Exception {
+        //TODO
+        return null;
     }
 
     private <C extends AuthConfigurerAdapter<UrlBasedFilterChainManager, WebAuthUnit>> C getOrApply(
