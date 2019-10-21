@@ -9,18 +9,19 @@ import site.zido.coffee.auth.user.*;
  */
 public class UsernamePasswordAuthenticationConfigurer
         <B extends ProviderManagerBuilder<B>,
-                C extends UsernamePasswordAuthenticationConfigurer<B, C, U>,
                 U extends IUserService<PasswordUser>>
         extends AbstractUserAwareConfigurer<B, U> {
-    private final U userService;
+    private U userService;
     private PasswordEncoder passwordEncoder;
     private IUserPasswordService passwordService;
     private Boolean hideUserNotFoundExceptions;
     private Class<?> userClass;
 
-    public UsernamePasswordAuthenticationConfigurer(Class<?> userClass,
-                                                    U userService) {
+    public UsernamePasswordAuthenticationConfigurer(Class<?> userClass) {
         this.userClass = userClass;
+    }
+
+    public UsernamePasswordAuthenticationConfigurer(U userService) {
         this.userService = userService;
     }
 
@@ -30,27 +31,30 @@ public class UsernamePasswordAuthenticationConfigurer
     }
 
     @SuppressWarnings("unchecked")
-    public C passwordEncoder(PasswordEncoder passwordEncoder) {
+    public <T extends UsernamePasswordAuthenticationConfigurer<B, U>> T passwordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
-        return (C) this;
+        return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    public C userPasswordManager(IUserPasswordService passwordService) {
+    public <T extends UsernamePasswordAuthenticationConfigurer<B, U>> T userPasswordManager(IUserPasswordService passwordService) {
         this.passwordService = passwordService;
-        return (C) this;
+        return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    public C hideUserNotFoundException(boolean hideUserNotFoundException) {
+    public <T extends UsernamePasswordAuthenticationConfigurer<B, U>> T hideUserNotFoundException(boolean hideUserNotFoundException) {
         this.hideUserNotFoundExceptions = hideUserNotFoundException;
-        return (C) this;
+        return (T) this;
     }
 
     @Override
     public void configure(B builder) throws Exception {
         UsernamePasswordAuthenticationProvider provider;
         if (userService == null) {
+            if (userClass == null) {
+                throw new IllegalStateException("the user class and userService cannot be null at the same time");
+            }
             PasswordUserReader reader = new PasswordUserReader(userClass);
             AbstractJpaSupportedUserServiceImpl<PasswordUser> userService = postProcess(
                     new AbstractJpaSupportedUserServiceImpl<PasswordUser>(userClass,

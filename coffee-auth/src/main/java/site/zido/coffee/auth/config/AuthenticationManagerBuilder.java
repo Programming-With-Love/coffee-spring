@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import site.zido.coffee.auth.authentication.AuthenticationManager;
 import site.zido.coffee.auth.authentication.AuthenticationProvider;
 import site.zido.coffee.auth.authentication.ProviderManager;
+import site.zido.coffee.auth.user.IUserService;
+import site.zido.coffee.auth.user.PasswordUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,11 @@ public class AuthenticationManagerBuilder extends
     public AuthenticationManagerBuilder eraseCredentials(boolean eraseCredentials) {
         this.eraseCredentials = eraseCredentials;
         return this;
+    }
+
+    public <T extends IUserService<PasswordUser>>
+    UsernamePasswordAuthenticationConfigurer<AuthenticationManagerBuilder, IUserService<PasswordUser>> userService(T userService) throws Exception {
+        return apply(new UsernamePasswordAuthenticationConfigurer<>(userService));
     }
 
     @Override
