@@ -1,8 +1,13 @@
 package site.zido.coffee.auth.config;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import site.zido.coffee.auth.authentication.UsernamePasswordAuthenticationProvider;
 import site.zido.coffee.auth.security.PasswordEncoder;
 import site.zido.coffee.auth.user.*;
+
+import javax.persistence.EntityManager;
 
 /**
  * @author zido
@@ -10,12 +15,14 @@ import site.zido.coffee.auth.user.*;
 public class UsernamePasswordAuthenticationConfigurer
         <B extends ProviderManagerBuilder<B>,
                 U extends IUserService<PasswordUser>>
-        extends AbstractUserAwareConfigurer<B, U> {
+        extends AbstractUserAwareConfigurer<B, U>
+        implements ApplicationContextAware {
     private U userService;
     private PasswordEncoder passwordEncoder;
     private IUserPasswordService passwordService;
     private Boolean hideUserNotFoundExceptions;
     private Class<?> userClass;
+    private ApplicationContext context;
 
     public UsernamePasswordAuthenticationConfigurer(Class<?> userClass) {
         this.userClass = userClass;
@@ -56,9 +63,10 @@ public class UsernamePasswordAuthenticationConfigurer
                 throw new IllegalStateException("the user class and userService cannot be null at the same time");
             }
             PasswordUserReader reader = new PasswordUserReader(userClass);
+            EntityManager em = context.getBean(EntityManager.class);
             AbstractJpaSupportedUserServiceImpl<PasswordUser> userService = postProcess(
                     new AbstractJpaSupportedUserServiceImpl<PasswordUser>(userClass,
-                            reader.getPasswordField().getName()) {
+                            reader.getPasswordField().getName(), em) {
                         @Override
                         protected PasswordUser packageUser(Object userEntity) {
                             return reader.parseUser(userEntity);
@@ -79,5 +87,10 @@ public class UsernamePasswordAuthenticationConfigurer
             provider.setHideUserNotFoundExceptions(hideUserNotFoundExceptions);
         }
         builder.authenticationProvider(provider);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.context = applicationContext;
     }
 }

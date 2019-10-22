@@ -19,13 +19,9 @@ public abstract class AbstractJpaSupportedUserServiceImpl<T extends IUser> imple
     private Class<?> userClass;
     private String fieldName;
 
-    public AbstractJpaSupportedUserServiceImpl(Class<?> userClass, String fieldName) {
+    public AbstractJpaSupportedUserServiceImpl(Class<?> userClass, String fieldName, EntityManager em) {
         this.userClass = userClass;
         this.fieldName = fieldName;
-    }
-
-    @Autowired
-    public void setEntityManager(EntityManager em) {
         this.em = em;
     }
 
