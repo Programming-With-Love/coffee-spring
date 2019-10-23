@@ -4,23 +4,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import site.zido.coffee.auth.authentication.AuthenticationManager;
 import site.zido.coffee.auth.security.NullPasswordEncoder;
 import site.zido.coffee.auth.security.PasswordEncoder;
-import site.zido.coffee.auth.user.IUserService;
 
 /**
  * @author zido
  */
-public class WebAuthConfigurerAdapter implements WebAuthConfigurer<FilterChainFilterBuilder>, ApplicationContextAware {
+public abstract class WebAuthConfigurerAdapter implements WebAuthConfigurer<FilterChainFilterBuilder>, ApplicationContextAware {
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private ApplicationContext context;
-    private boolean defaults;
     private WebAuthUnit unit;
+    private ObjectPostProcessor<Object> objectPostProcessor;
     private boolean authenticationManagerInitialized;
     private AuthenticationManagerBuilder authenticationManagerBuilder;
+    private AuthenticationManager authenticationManager;
+
+    protected WebAuthConfigurerAdapter() {
+    }
 
     @Override
     public void init(FilterChainFilterBuilder builder) throws Exception {
@@ -28,33 +31,39 @@ public class WebAuthConfigurerAdapter implements WebAuthConfigurer<FilterChainFi
         builder.addFilterChainManagerBuilder(unit);
     }
 
-    private WebAuthUnit getUnit() {
+    private WebAuthUnit getUnit() throws Exception {
         if (unit != null) {
             return unit;
         }
         AuthenticationManager authenticationManager = authenticationManager();
+        unit = new WebAuthUnit(objectPostProcessor);
+        configure(unit);
         return unit;
     }
 
-    protected AuthenticationManager authenticationManager() {
+    protected void configure(WebAuthUnit unit) {
+
+    }
+
+    protected AuthenticationManager authenticationManager() throws Exception {
         if (!authenticationManagerInitialized) {
-            configure();
+            authenticationManager = authenticationManagerBuilder.build();
+            authenticationManagerInitialized = true;
         }
+        return authenticationManager;
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.context = context;
-        ObjectPostProcessor objectPostProcessor = context.getBean(ObjectPostProcessor.class);
+    @SuppressWarnings("unchecked")
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
+        ObjectPostProcessor<Object> objectPostProcessor = context.getBean(ObjectPostProcessor.class);
         LazyPasswordEncoder passwordEncoder = new LazyPasswordEncoder(context);
-        authenticationManagerBuilder = new DefaultPasswordEncoderAuthenticationManagerBuilder(objectPostProcessor, passwordEncoder) {
-            @Override
-            public AuthenticationManagerBuilder eraseCredentials(boolean eraseCredentials) {
-                authenticationManagerBuilder.eraseCredentials(eraseCredentials);
-                return super.eraseCredentials(eraseCredentials);
-            }
-        };
+        authenticationManagerBuilder = new DefaultPasswordEncoderAuthenticationManagerBuilder(objectPostProcessor, passwordEncoder);
+    }
 
+    @Autowired
+    public void setObjectPostProcessor(ObjectPostProcessor<Object> objectPostProcessor) {
+        this.objectPostProcessor = objectPostProcessor;
     }
 
     static class DefaultPasswordEncoderAuthenticationManagerBuilder extends AuthenticationManagerBuilder {

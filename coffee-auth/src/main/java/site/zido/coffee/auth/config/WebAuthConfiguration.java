@@ -15,7 +15,7 @@ import java.util.List;
  * @author zido
  */
 @Configuration
-public class WebAuthConfiguration implements ImportAware {
+public class WebAuthConfiguration {
     private FilterChainFilterBuilder globalBuilder;
     private List<AuthConfigurer<Filter, FilterChainFilterBuilder>> globalConfigurers;
 
@@ -26,6 +26,17 @@ public class WebAuthConfiguration implements ImportAware {
     public static AutowiredWebAuthConfigurersScanner globalWebAuthScanner(
             ConfigurableListableBeanFactory beanFactory) {
         return new AutowiredWebAuthConfigurersScanner(beanFactory);
+    }
+
+    @Bean
+    public Filter coffeeAuthFilterChainFilter() throws Exception {
+        boolean hasConfigurers = globalConfigurers != null && !globalConfigurers.isEmpty();
+        if (!hasConfigurers) {
+            WebAuthConfigurerAdapter adapter = objectPostProcessor.postProcess(new WebAuthConfigurerAdapter() {
+            });
+            globalBuilder.apply(adapter);
+        }
+        return globalBuilder.build();
     }
 
     @Autowired(required = false)
@@ -41,8 +52,4 @@ public class WebAuthConfiguration implements ImportAware {
         this.globalConfigurers = globalConfigurers;
     }
 
-    @Override
-    public void setImportMetadata(AnnotationMetadata importMetadata) {
-
-    }
 }
