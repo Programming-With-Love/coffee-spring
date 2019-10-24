@@ -2,10 +2,7 @@ package site.zido.coffee.auth.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.util.UrlPathHelper;
@@ -20,7 +17,6 @@ import site.zido.coffee.auth.web.authentication.UsernamePasswordAuthenticationFi
 import site.zido.coffee.auth.web.utils.matcher.AntPathRequestMatcher;
 import site.zido.coffee.auth.web.utils.matcher.OrRequestMatcher;
 
-import javax.servlet.Filter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,33 +24,33 @@ import java.util.stream.Stream;
 /**
  * @author zido
  */
-public class UsernamePasswordAuthenticationFilterFactory
-        implements AuthenticationFilterFactory, ApplicationContextAware {
-    private final static Logger LOGGER = LoggerFactory.getLogger(UsernamePasswordAuthenticationFilterFactory.class);
+public class AnnotationWebAuthConfigurerAdapter<T> extends WebAuthConfigurerAdapter {
+    private final static Logger LOGGER = LoggerFactory.getLogger(AnnotationWebAuthConfigurerAdapter.class);
     private static final String DEFAULT_USERNAME = "username";
     private static final String DEFAULT_PASSWORD = "password";
     private String usernamePropsName = DEFAULT_USERNAME;
     private String passwordPropsName = DEFAULT_PASSWORD;
     private PasswordEncoder passwordEncoder;
     private UrlPathHelper urlPathHelper;
+    private Class<T> userClass;
 
-    @Override
-    public void setApplicationContext(ApplicationContext context) throws BeansException {
+    public AnnotationWebAuthConfigurerAdapter(Class<T> userClass) {
+        this.userClass = userClass;
     }
 
     @Override
-    public Filter createFilter(Class<?> userClass, ObjectPostProcessor<Object> objectObjectPostProcessor) {
+    protected void configure(WebAuthUnit unit) {
         String simpleClassName = userClass.getSimpleName();
         simpleClassName = simpleClassName.substring(0, 1).toLowerCase() + simpleClassName.substring(1);
         AuthEntity authEntity = AnnotatedElementUtils
                 .findMergedAnnotation(userClass, AuthEntity.class);
         if (authEntity == null) {
-            return null;
+            return;
         }
-        UsernamePasswordClassProps props = readProps(userClass, objectObjectPostProcessor);
+        UsernamePasswordClassProps props = readProps(userClass, objectPostProcessor);
         if (props.getUsernameField() == null || props.getPasswordField() == null) {
             //不注册
-            return null;
+            return;
         }
         boolean caseSensitive = authEntity.caseSensitive();
         String[] methods = authEntity.method();
@@ -70,12 +66,12 @@ public class UsernamePasswordAuthenticationFilterFactory
                 Stream.of(methods).map(method ->
                         new AntPathRequestMatcher(finalUrl, method, caseSensitive, urlPathHelper))
                         .collect(Collectors.toList()));
-        UsernamePasswordAuthenticationProvider provider = objectObjectPostProcessor
+        UsernamePasswordAuthenticationProvider provider = objectPostProcessor
                 .postProcess(new UsernamePasswordAuthenticationProvider(null));
         provider.setPasswordEncoder(props.getPasswordEncoder());
-        ProviderManager providerManager = objectObjectPostProcessor
+        ProviderManager providerManager = objectPostProcessor
                 .postProcess(new ProviderManager(Collections.singletonList(provider)));
-        UsernamePasswordAuthenticationFilter authenticationFilter = objectObjectPostProcessor
+        UsernamePasswordAuthenticationFilter authenticationFilter = objectPostProcessor
                 .postProcess(new UsernamePasswordAuthenticationFilter(requestMatcher));
         authenticationFilter.setAuthenticationManager(providerManager);
         if (LOGGER.isDebugEnabled()) {
@@ -90,7 +86,6 @@ public class UsernamePasswordAuthenticationFilterFactory
                     props.getPasswordEncoder(),
                     requestMatcher);
         }
-        return authenticationFilter;
     }
 
     private UsernamePasswordClassProps readProps(Class<?> userClass,
@@ -137,4 +132,5 @@ public class UsernamePasswordAuthenticationFilterFactory
     public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
         this.urlPathHelper = urlPathHelper;
     }
+
 }

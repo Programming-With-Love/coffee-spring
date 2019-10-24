@@ -4,25 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import site.zido.coffee.CommonAutoConfiguration;
 import site.zido.coffee.auth.authentication.logout.LogoutSuccessHandler;
 import site.zido.coffee.auth.authentication.logout.RestLogoutSuccessHandler;
 import site.zido.coffee.auth.config.*;
-import site.zido.coffee.auth.context.AuthPrincipalArgumentResolver;
 import site.zido.coffee.auth.context.HttpSessionUserContextRepository;
 import site.zido.coffee.auth.context.UserContextRepository;
 import site.zido.coffee.auth.handlers.*;
 import site.zido.coffee.auth.web.session.DefaultSecuritySessionStrategy;
 import site.zido.coffee.auth.web.session.SecuritySessionStrategy;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
-
-import java.util.List;
 
 /**
  * @author zido
@@ -61,9 +54,9 @@ public class AuthCommonConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(UsernamePasswordAuthenticationFilterFactory.class)
-    public UsernamePasswordAuthenticationFilterFactory usernamePasswordAuthenticationFilterFactory() {
-        return new UsernamePasswordAuthenticationFilterFactory();
+    @ConditionalOnMissingBean(AnnotationWebAuthConfigurerAdapter.class)
+    public AnnotationWebAuthConfigurerAdapter usernamePasswordAuthenticationFilterFactory() {
+        return new AnnotationWebAuthConfigurerAdapter(userClass);
     }
 
     @Bean

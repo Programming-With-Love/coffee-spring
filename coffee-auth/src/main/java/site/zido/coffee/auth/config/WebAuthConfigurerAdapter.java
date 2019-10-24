@@ -17,7 +17,7 @@ import site.zido.coffee.auth.security.PasswordEncoder;
 public abstract class WebAuthConfigurerAdapter implements WebAuthConfigurer<FilterChainFilterBuilder>, ApplicationContextAware {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private WebAuthUnit unit;
-    private ObjectPostProcessor<Object> objectPostProcessor;
+    protected ObjectPostProcessor<Object> objectPostProcessor;
     private boolean authenticationManagerInitialized;
     private AuthenticationManagerBuilder authenticationManagerBuilder;
     private AuthenticationManager authenticationManager;
