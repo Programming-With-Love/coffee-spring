@@ -17,6 +17,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
+import site.zido.coffee.security.managers.MobileCodeManager;
 
 import java.io.Serializable;
 
