@@ -1,4 +1,4 @@
-package site.zido.coffee.security;
+package site.zido.coffee.security.authentication;
 
 import java.io.Serializable;
 

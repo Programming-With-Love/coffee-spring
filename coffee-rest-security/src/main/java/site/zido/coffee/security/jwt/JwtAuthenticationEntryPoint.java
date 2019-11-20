@@ -1,4 +1,4 @@
-package site.zido.coffee.security;
+package site.zido.coffee.security.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +29,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        ResponseUtils.json(response, HttpServletResponse.SC_UNAUTHORIZED, jsonError);
+        if (!response.isCommitted()) {
+            ResponseUtils.json(response, HttpServletResponse.SC_UNAUTHORIZED, jsonError);
+        }
     }
 }

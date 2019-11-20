@@ -1,4 +1,4 @@
-package site.zido.coffee.security;
+package site.zido.coffee.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

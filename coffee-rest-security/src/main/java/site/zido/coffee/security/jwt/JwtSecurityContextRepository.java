@@ -1,4 +1,4 @@
-package site.zido.coffee.security;
+package site.zido.coffee.security.jwt;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.StringUtils;
+import site.zido.coffee.security.authentication.IdUser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +36,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         Object authentication = tokenProvider.getAuthenticationFromJwt(token);
         if (!(authentication instanceof SecurityContext)) {
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("token did not contain a SecurityContext but contained: '"
+                LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
                         + authentication
                         + "'; are you improperly modifying the HttpSession directly "
                         + "(you should always use SecurityContextHolder) or using the Authentication attribute "
@@ -79,5 +80,9 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 
     public void setTokenProvider(JwtTokenProvider tokenProvider) {
         this.tokenProvider = tokenProvider;
+    }
+
+    public void setTrustResolver(AuthenticationTrustResolver trustResolver) {
+        this.trustResolver = trustResolver;
     }
 }
