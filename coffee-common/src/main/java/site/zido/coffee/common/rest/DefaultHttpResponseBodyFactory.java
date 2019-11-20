@@ -2,6 +2,8 @@ package site.zido.coffee.common.rest;
 
 /**
  * 默认rest响应体实现类
+ *
+ * @author zido
  */
 public class DefaultHttpResponseBodyFactory implements HttpResponseBodyFactory {
     @Override

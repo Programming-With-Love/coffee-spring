@@ -27,15 +27,18 @@ public class GlobalResultHandler implements ResponseBodyAdvice<Object> {
     }
 
     @Override
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
-                                  Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+    public Object beforeBodyWrite(Object body, MethodParameter returnType,
+                                  MediaType selectedContentType,
+                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                  ServerHttpRequest request,
+                                  ServerHttpResponse response) {
         OriginalResponse methodAnnotation = returnType.getMethodAnnotation(OriginalResponse.class);
         if (methodAnnotation != null || returnType.getDeclaringClass().getAnnotation(OriginalResponse.class) != null) {
             return body;
         }
         Class<?> returnClass = returnType.getMethod().getReturnType();
         if (returnClass.equals(String.class) && body == null) {
-            return body;
+            return null;
         }
         return factory.success(body);
     }

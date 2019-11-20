@@ -29,44 +29,15 @@ import java.util.List;
  * @author zido
  */
 @Configuration
-@ConditionalOnClass({GlobalResultHandler.class, ObjectMapper.class})
 @ConditionalOnBean(ObjectMapper.class)
 public class CommonAutoConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommonAutoConfiguration.class);
-
-    /**
-     * 全局响应体封装类
-     *
-     * @return result annotations
-     */
-    @Bean
-    @ConditionalOnMissingBean(GlobalResultHandler.class)
-    public GlobalResultHandler handler(HttpResponseBodyFactory factory) {
-        LOGGER.debug("Set global result to wrap " + Result.class);
-        return new GlobalResultHandler(factory);
-    }
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(CommonAutoConfiguration.class);
 
     @Bean
     @ConditionalOnMissingBean(HttpResponseBodyFactory.class)
     public HttpResponseBodyFactory bodyFactory() {
         return new DefaultHttpResponseBodyFactory();
-    }
-
-    /**
-     * 配合全局响应封装的消息转换器
-     *
-     * @param converter message converter
-     * @return configure
-     */
-    @Bean
-    public WebMvcConfigurerAdapter adapterForMessageConverter(StringToResultHttpMessageConverter converter) {
-        return new WebMvcConfigurerAdapter() {
-            @Override
-            public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-                LOGGER.debug("Add json string http message converter");
-                converters.add(0, converter);
-            }
-        };
     }
 
     /**
@@ -77,7 +48,7 @@ public class CommonAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(GlobalExceptionAdvice.class)
     public GlobalExceptionAdvice advice() {
-        return new GlobalExceptionAdvice();
+        return new GlobalExceptionAdvice(bodyFactory());
     }
 
 
@@ -90,7 +61,7 @@ public class CommonAutoConfiguration {
     @ConditionalOnMissingBean(AbstractRequestLoggingFilter.class)
     public AbstractRequestLoggingFilter filter() {
         AbstractRequestLoggingFilter filter = new AbstractRequestLoggingFilter() {
-            final Logger logger = LoggerFactory.getLogger("request log");
+            final Logger logger = LoggerFactory.getLogger("RequestLog");
 
             @Override
             protected boolean shouldLog(HttpServletRequest request) {
@@ -104,6 +75,7 @@ public class CommonAutoConfiguration {
 
             @Override
             protected void afterRequest(HttpServletRequest httpServletRequest, String s) {
+                logger.info(s);
             }
         };
         filter.setIncludeClientInfo(true);
@@ -115,8 +87,8 @@ public class CommonAutoConfiguration {
     }
 
     @Bean
-    public StringToResultHttpMessageConverter stringToResultHttpMessageConverter(ObjectMapper mapper) {
-        return new StringToResultHttpMessageConverter().setMapper(mapper);
+    public StringToResultHttpMessageConverter stringToResultHttpMessageConverter() {
+        return new StringToResultHttpMessageConverter();
     }
 
     /**
@@ -125,7 +97,10 @@ public class CommonAutoConfiguration {
      * @author zido
      */
     @Configuration
-    @ConditionalOnProperty(prefix = "site.zido.json.auto-switch", value = "enable", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "site.zido.json.auto-switch",
+            value = "enable",
+            havingValue = "true",
+            matchIfMissing = true)
     @AutoConfigureAfter(JacksonAutoConfiguration.class)
     public static class JsonAutoConfiguration {
         /**
@@ -135,7 +110,8 @@ public class CommonAutoConfiguration {
          * </ul>
          */
         @Autowired
-        public void setMapper(@Value("${spring.profiles.active:prod}") List<String> profiles, ObjectMapper mapper) {
+        public void setMapper(@Value("${spring.profiles.active:prod}") List<String> profiles,
+                              ObjectMapper mapper) {
             if (profiles.contains("prod")) {
                 prodObjectMapper(mapper);
             }

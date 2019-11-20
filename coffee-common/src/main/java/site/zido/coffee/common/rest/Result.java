@@ -16,7 +16,6 @@ public class Result<T> implements Serializable {
     private static final long serialVersionUID = -3266931205943696705L;
     private T result;
     private int code = 0;
-    private boolean success = true;
     private String message;
 
     public static <T> Result<T> success(T result) {
@@ -32,7 +31,6 @@ public class Result<T> implements Serializable {
     public static <T> Result<T> error() {
         Result<T> result = new Result<>();
         result.code = CommonErrorCode.UNKNOWN;
-        result.success = false;
         return result;
     }
 
@@ -47,7 +45,6 @@ public class Result<T> implements Serializable {
     public static <T> Result<T> error(int code, String message, T data) {
         Result<T> result = new Result<>();
         result.code = code;
-        result.success = false;
         result.message = message;
         result.result = data;
         return result;
@@ -68,15 +65,6 @@ public class Result<T> implements Serializable {
 
     public Result<T> setCode(int code) {
         this.code = code;
-        return this;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public Result<T> setSuccess(boolean success) {
-        this.success = success;
         return this;
     }
 

@@ -1,6 +1,7 @@
 package site.zido.coffee.common.rest;
 
 
+import org.springframework.util.Assert;
 import site.zido.coffee.common.CommonErrorCode;
 import site.zido.coffee.common.exceptions.CommonBusinessException;
 import org.slf4j.Logger;
@@ -27,8 +28,14 @@ import java.util.Set;
 public abstract class BaseGlobalExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseGlobalExceptionHandler.class);
     private static final String HANDLE_EXCEPTION_TEMPLATE = "handle %s,url:%s,caused by:";
+    private HttpResponseBodyFactory factory;
 
-    protected Result<?> handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
+    protected BaseGlobalExceptionHandler(HttpResponseBodyFactory factory) {
+        Assert.notNull(factory, "http response body factory cannot be null");
+        this.factory = factory;
+    }
+
+    protected Object handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
         Iterator<ConstraintViolation<?>> iterator = constraintViolations.iterator();
         if (iterator.hasNext()) {
@@ -41,35 +48,35 @@ public abstract class BaseGlobalExceptionHandler {
             }
             //参数错误提示
             String message = "[" + name + "] " + next.getMessage();
-            return Result.error(CommonErrorCode.INVALID_PARAMETERS, message);
+            return factory.error(CommonErrorCode.INVALID_PARAMETERS, message, null);
         }
-        return Result.error(CommonErrorCode.INVALID_PARAMETERS);
+        return factory.error(CommonErrorCode.INVALID_PARAMETERS, null, null);
     }
 
-    protected Result<?> handleConstraintViolationException(HttpMessageNotReadableException e, HttpServletRequest request) {
-        return Result.error(CommonErrorCode.INVALID_PARAMETERS, e.getMessage());
+    protected Object handleConstraintViolationException(HttpMessageNotReadableException e, HttpServletRequest request) {
+        return factory.error(CommonErrorCode.INVALID_PARAMETERS, e.getMessage(), null);
     }
 
-    protected Result<?> handleBindException(BindException e, HttpServletRequest request) {
+    protected Object handleBindException(BindException e, HttpServletRequest request) {
         BindingResult bindingResult = e.getBindingResult();
         return parseBindingResult(bindingResult);
     }
 
-    protected Result<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    protected Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         return parseBindingResult(e.getBindingResult());
     }
 
-    protected Result<?> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
+    protected Object handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         logWithTemplate(e.getClass().getName(), request, e);
-        return Result.error(CommonErrorCode.UNKNOWN, e.getMessage());
+        return factory.error(CommonErrorCode.UNKNOWN, e.getMessage(), null);
     }
 
-    protected Result<?> handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request) {
+    protected Object handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request) {
         LOGGER.warn("business error:" + e.getMessage());
-        return Result.error(e.getCode(), e.getMsg());
+        return factory.error(e.getCode(), e.getMsg(), null);
     }
 
-    private Result<?> parseBindingResult(BindingResult bindingResult) {
+    private Object parseBindingResult(BindingResult bindingResult) {
         List<FieldError> errors = bindingResult.getFieldErrors();
         if (errors.size() > 0) {
             //仅获取第一个异常
@@ -77,12 +84,14 @@ public abstract class BaseGlobalExceptionHandler {
             String name = next.getField();
             String message = next.getDefaultMessage();
             message = "[" + name + "] " + message;
-            return Result.error(CommonErrorCode.INVALID_PARAMETERS, message);
+            return factory.error(CommonErrorCode.INVALID_PARAMETERS, message, null);
         }
-        return Result.error(CommonErrorCode.INVALID_PARAMETERS);
+        return factory.error(CommonErrorCode.INVALID_PARAMETERS, null, null);
     }
 
     private void logWithTemplate(String exceptionName, HttpServletRequest request, Throwable e) {
-        LOGGER.error(String.format(HANDLE_EXCEPTION_TEMPLATE, exceptionName, request.getRequestURI()), e);
+        LOGGER.error(
+                String.format(HANDLE_EXCEPTION_TEMPLATE, exceptionName, request.getRequestURI()),
+                e);
     }
 }

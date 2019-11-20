@@ -20,6 +20,10 @@ import javax.validation.ConstraintViolationException;
 @RestControllerAdvice
 @Order
 public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
+    public GlobalExceptionAdvice(HttpResponseBodyFactory factory) {
+        super(factory);
+    }
+
     /**
      * dto参数校验异常处理
      *
@@ -28,13 +32,13 @@ public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     @Override
-    public Result<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    public Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         return super.handleMethodArgumentNotValidException(e, request);
     }
 
     @ExceptionHandler(value = BindException.class)
     @Override
-    protected Result<?> handleBindException(BindException e, HttpServletRequest request) {
+    protected Object handleBindException(BindException e, HttpServletRequest request) {
         return super.handleBindException(e, request);
     }
 
@@ -46,7 +50,7 @@ public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
     @Override
-    public Result<?> handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
+    public Object handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
         return super.handleConstraintViolationException(e, request);
     }
 
@@ -58,19 +62,19 @@ public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @Override
-    public Result<?> handleConstraintViolationException(HttpMessageNotReadableException e, HttpServletRequest request) {
+    public Object handleConstraintViolationException(HttpMessageNotReadableException e, HttpServletRequest request) {
         return super.handleConstraintViolationException(e, request);
     }
 
     @ExceptionHandler(RuntimeException.class)
     @Override
-    protected Result<?> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
+    protected Object handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         return super.handleRuntimeException(e, request);
     }
 
     @ExceptionHandler(CommonBusinessException.class)
     @Override
-    protected Result<?> handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request) {
+    protected Object handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request) {
         return super.handleCommonBusinessException(e, request);
     }
 
