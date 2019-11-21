@@ -1,11 +1,16 @@
-package site.zido.coffee.security.jwt;
+package site.zido.coffee.security.configurers;
 
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.web.context.SecurityContextRepository;
+import site.zido.coffee.security.jwt.JwtSecurityContextRepository;
+import site.zido.coffee.security.jwt.JwtTokenProvider;
 
+/**
+ * @author zido
+ */
 public class JwtTokenManagementConfigurer<H extends HttpSecurityBuilder<H>>
         extends AbstractHttpConfigurer<SessionManagementConfigurer<H>, H> {
     private JwtTokenProvider providedJwtTokenProvider;

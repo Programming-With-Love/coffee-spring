@@ -25,16 +25,17 @@ import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.PortMapper;
 import org.springframework.security.web.PortMapperImpl;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.*;
 import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
-import site.zido.coffee.security.jwt.JwtTokenManagementConfigurer;
+import site.zido.coffee.security.configurers.JwtSecurityContextConfigurer;
+import site.zido.coffee.security.configurers.JwtTokenManagementConfigurer;
+import site.zido.coffee.security.configurers.RestExceptionHandlingConfigurer;
+import site.zido.coffee.security.configurers.RestFormLoginConfigurer;
 
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServletRequest;
@@ -1003,8 +1004,8 @@ public final class RestHttpSecurity extends
      * @return the {@link ExceptionHandlingConfigurer} for further customizations
      * @throws Exception
      */
-    public ExceptionHandlingConfigurer<RestHttpSecurity> exceptionHandling() throws Exception {
-        return getOrApply(new ExceptionHandlingConfigurer<>());
+    public RestExceptionHandlingConfigurer<RestHttpSecurity> exceptionHandling() throws Exception {
+        return getOrApply(new RestExceptionHandlingConfigurer<>());
     }
 
     /**
@@ -1042,8 +1043,8 @@ public final class RestHttpSecurity extends
      * @return the {@link RestHttpSecurity} for further customizations
      * @throws Exception
      */
-    public RestHttpSecurity exceptionHandling(Customizer<ExceptionHandlingConfigurer<RestHttpSecurity>> exceptionHandlingCustomizer) throws Exception {
-        exceptionHandlingCustomizer.customize(getOrApply(new ExceptionHandlingConfigurer<>()));
+    public RestHttpSecurity exceptionHandling(Customizer<RestExceptionHandlingConfigurer<RestHttpSecurity>> exceptionHandlingCustomizer) throws Exception {
+        exceptionHandlingCustomizer.customize(getOrApply(new RestExceptionHandlingConfigurer<>()));
         return RestHttpSecurity.this;
     }
 
@@ -1055,8 +1056,8 @@ public final class RestHttpSecurity extends
      * @return the {@link SecurityContextConfigurer} for further customizations
      * @throws Exception
      */
-    public SecurityContextConfigurer<RestHttpSecurity> securityContext() throws Exception {
-        return getOrApply(new SecurityContextConfigurer<>());
+    public JwtSecurityContextConfigurer<RestHttpSecurity> securityContext() throws Exception {
+        return getOrApply(new JwtSecurityContextConfigurer<>());
     }
 
     /**
@@ -1087,8 +1088,8 @@ public final class RestHttpSecurity extends
      * @return the {@link RestHttpSecurity} for further customizations
      * @throws Exception
      */
-    public RestHttpSecurity securityContext(Customizer<SecurityContextConfigurer<RestHttpSecurity>> securityContextCustomizer) throws Exception {
-        securityContextCustomizer.customize(getOrApply(new SecurityContextConfigurer<>()));
+    public RestHttpSecurity securityContext(Customizer<JwtSecurityContextConfigurer<RestHttpSecurity>> securityContextCustomizer) throws Exception {
+        securityContextCustomizer.customize(getOrApply(new JwtSecurityContextConfigurer<>()));
         return RestHttpSecurity.this;
     }
 
@@ -1171,8 +1172,8 @@ public final class RestHttpSecurity extends
      * @return the {@link LogoutConfigurer} for further customizations
      * @throws Exception
      */
-    public LogoutConfigurer<RestHttpSecurity> logout() throws Exception {
-        return getOrApply(new LogoutConfigurer<>());
+    public RestLogoutConfigurer<RestHttpSecurity> logout() throws Exception {
+        return getOrApply(new RestLogoutConfigurer<>());
     }
 
     /**
@@ -1217,9 +1218,9 @@ public final class RestHttpSecurity extends
      * @return the {@link RestHttpSecurity} for further customizations
      * @throws Exception
      */
-    public RestHttpSecurity logout(Customizer<LogoutConfigurer<RestHttpSecurity>> logoutCustomizer) throws Exception {
-        logoutCustomizer.customize(getOrApply(new LogoutConfigurer<>()));
-        return RestHttpSecurity.this;
+    public RestHttpSecurity logout(Customizer<RestLogoutConfigurer<RestHttpSecurity>> logoutCustomizer) throws Exception {
+        logoutCustomizer.customize(getOrApply(new RestLogoutConfigurer<>()));
+        return this;
     }
 
     /**
@@ -1427,8 +1428,8 @@ public final class RestHttpSecurity extends
      * @throws Exception
      * @see FormLoginConfigurer#loginPage(String)
      */
-    public FormLoginConfigurer<RestHttpSecurity> formLogin() throws Exception {
-        return getOrApply(new FormLoginConfigurer<>());
+    public RestFormLoginConfigurer<RestHttpSecurity> formLogin() throws Exception {
+        return getOrApply(new RestFormLoginConfigurer<>());
     }
 
     /**
@@ -1492,8 +1493,8 @@ public final class RestHttpSecurity extends
      * @throws Exception
      * @see FormLoginConfigurer#loginPage(String)
      */
-    public RestHttpSecurity formLogin(Customizer<FormLoginConfigurer<RestHttpSecurity>> formLoginCustomizer) throws Exception {
-        formLoginCustomizer.customize(getOrApply(new FormLoginConfigurer<>()));
+    public RestHttpSecurity formLogin(Customizer<RestFormLoginConfigurer<RestHttpSecurity>> formLoginCustomizer) throws Exception {
+        formLoginCustomizer.customize(getOrApply(new RestFormLoginConfigurer<>()));
         return RestHttpSecurity.this;
     }
 

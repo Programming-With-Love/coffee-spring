@@ -18,13 +18,16 @@ import java.io.IOException;
  */
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private final String jsonError;
-    private HttpResponseBodyFactory factory;
 
     public JwtAuthenticationEntryPoint(HttpResponseBodyFactory factory,
-                                       ObjectMapper mapper) throws JsonProcessingException {
-        jsonError = mapper.writeValueAsString(
-                factory.error(CommonErrorCode.LIMIT,
-                        "Sorry, You're not authorized to access this resource."));
+                                       ObjectMapper mapper) {
+        try {
+            jsonError = mapper.writeValueAsString(
+                    factory.error(CommonErrorCode.LIMIT,
+                            "Sorry, You're not authorized to access this resource."));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

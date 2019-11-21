@@ -17,26 +17,38 @@ public class ResponseUtils {
     public static void json(HttpServletResponse response, Object body) throws IOException {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(mapper.writeValueAsString(body));
+        if (body != null) {
+            response.getWriter().write(mapper.writeValueAsString(body));
+        }
     }
 
     public static void json(HttpServletResponse response, String body) throws IOException {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(body);
+        if (body != null) {
+            response.getWriter().write(body);
+        }
+    }
+
+    public static void json(HttpServletResponse response, int status) throws IOException {
+        json(response, status, null);
     }
 
     public static void json(HttpServletResponse response, int status, String body) throws IOException {
         response.setStatus(status);
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(body);
+        if (body != null) {
+            response.getWriter().write(body);
+        }
     }
 
     public static void json(HttpServletResponse response, int status, Object body) throws IOException {
         response.setStatus(status);
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(mapper.writeValueAsString(body));
+        if (body != null) {
+            response.getWriter().write(mapper.writeValueAsString(body));
+        }
     }
 }
