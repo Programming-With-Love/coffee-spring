@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>site.zido</groupId>
-            <artifactId>coffee-auth</artifactId>
+            <artifactId>coffee-rest-security</artifactId>
         </dependency>
     </dependencies>
 

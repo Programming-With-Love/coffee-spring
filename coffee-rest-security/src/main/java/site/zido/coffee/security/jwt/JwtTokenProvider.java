@@ -3,6 +3,7 @@ package site.zido.coffee.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.util.StringUtils;
 
 import java.util.Base64;
 import java.util.Date;
@@ -34,6 +35,9 @@ public class JwtTokenProvider {
     }
 
     public Object getAuthenticationFromJwt(String token) {
+        if (StringUtils.isEmpty(token)) {
+            return null;
+        }
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)

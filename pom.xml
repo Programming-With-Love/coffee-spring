@@ -12,7 +12,6 @@
         <module>coffee-common</module>
         <module>coffee-extra</module>
         <module>coffee-spring-boot-starter</module>
-        <module>coffee-auth</module>
         <module>coffee-rest-security</module>
     </modules>
     <properties>
@@ -88,7 +87,7 @@
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
-                <artifactId>coffee-auth</artifactId>
+                <artifactId>coffee-rest-security</artifactId>
                 <version>0.1.1-release</version>
             </dependency>
             <!-- others -->

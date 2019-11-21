@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.StringUtils;
@@ -34,6 +35,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         HttpServletRequest request = requestResponseHolder.getRequest();
         String token = request.getHeader(authHeaderName);
         Object authentication = tokenProvider.getAuthenticationFromJwt(token);
+
         if (!(authentication instanceof SecurityContext)) {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
@@ -43,12 +45,17 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
                         + "reserved for this class?");
             }
 
-            return null;
+            authentication = generateNewContext();
         }
+
         LOGGER.debug("Obtained a valid SecurityContext from " + authHeaderName
                 + " in request header"
                 + ": '" + authentication + "'");
         return (SecurityContext) authentication;
+    }
+
+    protected SecurityContext generateNewContext() {
+        return SecurityContextHolder.createEmptyContext();
     }
 
     @Override
