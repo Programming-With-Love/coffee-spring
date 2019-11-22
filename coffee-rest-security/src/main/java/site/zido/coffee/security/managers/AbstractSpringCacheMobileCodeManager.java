@@ -12,7 +12,7 @@ import java.util.Random;
  *
  * @author zido
  */
-public abstract class AbstractSpringCacheMobileCodeManager {
+public abstract class AbstractSpringCacheMobileCodeManager implements MobileCodeManager {
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractSpringCacheMobileCodeManager.class);
     private int codeLength = 6;
     private Cache cache;
@@ -23,6 +23,7 @@ public abstract class AbstractSpringCacheMobileCodeManager {
         this.cache = cache;
     }
 
+    @Override
     public void sendCode(String mobile) {
         StringBuilder builder = new StringBuilder();
         Random random = new Random();
@@ -41,12 +42,13 @@ public abstract class AbstractSpringCacheMobileCodeManager {
      */
     protected abstract void doSendCode(String mobile);
 
+    @Override
     public boolean validateCode(String mobile, String code) {
         Cache.ValueWrapper wrapper = cache.get(prefix + mobile);
         if (wrapper == null) {
             return false;
         }
-        return wrapper.get().equals(code);
+        return code.equals(wrapper.get());
     }
 
     public void setPrefix(String prefix) {

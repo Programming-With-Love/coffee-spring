@@ -24,6 +24,7 @@ import org.springframework.security.context.DelegatingApplicationListener;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+import site.zido.coffee.security.RestSecurityConfigurationAdapter;
 
 import javax.servlet.Filter;
 import java.util.List;
@@ -67,8 +68,8 @@ public class RestSecurityConfiguration implements ImportAware, BeanClassLoaderAw
         boolean hasConfigurers = webSecurityConfigurers != null
                 && !webSecurityConfigurers.isEmpty();
         if (!hasConfigurers) {
-            WebSecurityConfigurerAdapter adapter = objectObjectPostProcessor
-                    .postProcess(new WebSecurityConfigurerAdapter() {
+            RestSecurityConfigurationAdapter adapter = objectObjectPostProcessor
+                    .postProcess(new RestSecurityConfigurationAdapter() {
                     });
             webSecurity.apply(adapter);
         }

@@ -13,18 +13,13 @@
         <module>coffee-extra</module>
         <module>coffee-spring-boot-starter</module>
         <module>coffee-rest-security</module>
+        <module>coffee-dependencies</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-    </dependencies>
     <scm>
         <connection>scm:git@github.com:zidoshare/coffee-spring-boot-builder.git</connection>
         <developerConnection>scm:git@github.com:zidoshare/coffee-spring-boot-builder.git</developerConnection>
@@ -68,6 +63,10 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>2.2.1.RELEASE</version>
@@ -83,6 +82,11 @@
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-extra</artifactId>
+                <version>0.1.1-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-rest-security</artifactId>
                 <version>0.1.1-release</version>
             </dependency>
             <dependency>

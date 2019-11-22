@@ -44,6 +44,9 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import java.lang.reflect.Field;
 import java.util.*;
 
+/**
+ * @author zido
+ */
 public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<WebSecurity> {
     private final Logger logger = LoggerFactory.getLogger(RestSecurityConfigurationAdapter.class);
     private ApplicationContext context;

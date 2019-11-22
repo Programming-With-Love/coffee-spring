@@ -35,7 +35,9 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         HttpServletRequest request = requestResponseHolder.getRequest();
         String token = request.getHeader(authHeaderName);
         Object authentication = tokenProvider.getAuthenticationFromJwt(token);
-
+        if (authentication == null) {
+            authentication = generateNewContext();
+        }
         if (!(authentication instanceof SecurityContext)) {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
