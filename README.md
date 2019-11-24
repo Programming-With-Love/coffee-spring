@@ -51,9 +51,9 @@ maven 加入依赖
 
 ## 认证模块 (coffee-auth)
 
-可实现几乎0配置的自动认证模块
-
-**请注意，必须使用spring-data-jpa作为orm框架**
+可实现几乎0配置的自动认证模块，基于spring security的自动化配置，
+并添加了spring security曾经不（完全）具有的rest能力，使用jwt作为token规范，
+可自行扩展使用其他token规则
 
 自带的登录功能包括：
 
@@ -63,18 +63,15 @@ maven 加入依赖
 
 ### 使用
 
-只需要实体类实现**IUser**接口即可完成自动登录的配置
+与spring security完全相同的配置，只需要将spring security的@EnableWebSecurity注解换成@EnableRestSecurity
+即可，不改变其他任何使用方式。
 
-登录接口约定为`/user/login`。如需定制接口，可使用**AuthEntity**注解，并配置**url**。
+如果需要自定义配置，你需要继承RestSecurityConfigurationAdapter
+而不是Spring security的WebSecurityConfigurerAdapter
 
-请注意：当有多个实体类需要登录时，必须使用**AuthEntity**注解标记，并配置不同的url。
+RestSecurityConfigurationAdapter去除了其他rest不需要的配置，新增了适合rest风格的自动配置
 
-扫描器进行相关登录的搜寻自动配置：
-
-* 如包含**username**和**password**字样，会自动加入用户名密码登录功能，如需要使用其他字段，
-请加入**AuthColumnUsername**和**AuthColumnPassword**注解到相关字段上。
-* 如包含**wechatOpenId**或者**wechatUnionId**字样，会自动加入微信小程序登录。如需要使用其他字段，
-请加入**AuthColumnWechatOpenId**或者**AuthColumnWechatUnionId**注解到相关字段上
+除此之外，其他使用与[spring security官方文档](https://spring.io/projects/spring-security)完全相同
 
 ## 注解式限流 (coffee-extra)
 
