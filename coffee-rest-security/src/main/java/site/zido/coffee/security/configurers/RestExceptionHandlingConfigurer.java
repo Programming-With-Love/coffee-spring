@@ -1,6 +1,5 @@
 package site.zido.coffee.security.configurers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,8 +15,6 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
-import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 import site.zido.coffee.security.jwt.JwtAuthenticationEntryPoint;
 
 import java.util.LinkedHashMap;
@@ -208,15 +205,7 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
 
     private AuthenticationEntryPoint createDefaultEntryPoint(H http) {
         if (this.defaultEntryPointMappings.isEmpty()) {
-            HttpResponseBodyFactory factory = http.getSharedObject(HttpResponseBodyFactory.class);
-            if (factory == null) {
-                factory = new DefaultHttpResponseBodyFactory();
-            }
-            ObjectMapper mapper = http.getSharedObject(ObjectMapper.class);
-            if (mapper == null) {
-                mapper = new ObjectMapper();
-            }
-            return new JwtAuthenticationEntryPoint(factory, mapper);
+            return new JwtAuthenticationEntryPoint();
         }
         if (this.defaultEntryPointMappings.size() == 1) {
             return this.defaultEntryPointMappings.values().iterator().next();

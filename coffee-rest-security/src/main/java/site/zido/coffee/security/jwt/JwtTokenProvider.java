@@ -34,7 +34,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public Object getAuthenticationFromJwt(String token) {
+    public String getAuthenticationFromJwt(String token) {
         if (StringUtils.isEmpty(token)) {
             return null;
         }
