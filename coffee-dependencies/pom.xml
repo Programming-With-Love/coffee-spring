@@ -12,5 +12,8 @@
     <artifactId>coffee-dependencies</artifactId>
     <packaging>pom</packaging>
 
+    <dependencyManagement>
+
+    </dependencyManagement>
 
 </project>
