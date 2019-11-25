@@ -1,4 +1,4 @@
-package site.zido.coffee.security.authentication;
+package site.zido.coffee.security.authentication.phone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,26 +15,24 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
-import site.zido.coffee.security.managers.MobileCodeManager;
-
-import java.io.Serializable;
 
 /**
+ * 手机号验证码用户认证
+ *
  * @author zido
  */
-public class MobileAuthUserAuthenticationProvider implements AuthenticationProvider, InitializingBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MobileAuthUserAuthenticationProvider.class);
-    private MobileCodeManager codeManager;
-    private MobileAuthUserService<? extends Serializable> userService;
+public class PhoneAuthUserAuthenticationProvider implements AuthenticationProvider, InitializingBean {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PhoneAuthUserAuthenticationProvider.class);
+    private PhoneAuthUserService userService;
     protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
-    private Cache userCache = new NoOpCache("mobile");
+    private Cache userCache = new NoOpCache("phone");
+    private CodeValidator codeValidator = new CustomCodeValidator();
 
-    public MobileAuthUserAuthenticationProvider(MobileCodeManager codeManager,
-                                                MobileAuthUserService<? extends Serializable> userService) {
-        this.codeManager = codeManager;
+    public PhoneAuthUserAuthenticationProvider(PhoneAuthUserService userService) {
         this.userService = userService;
     }
 
@@ -50,19 +48,19 @@ public class MobileAuthUserAuthenticationProvider implements AuthenticationProvi
         }
         String principal = (authentication.getPrincipal() == null) ? "NONE_PROVIDED"
                 : authentication.getName();
-        if (!codeManager.validateCode(principal, (String) authentication.getCredentials())) {
+        if (!codeValidator.validate(principal, (String) authentication.getCredentials())) {
             throw new BadCredentialsException(messages.getMessage(
                     "AbstractUserDetailsAuthenticationProvider.badCredentials",
                     "Bad credentials"));
         }
         Cache.ValueWrapper wrapper = this.userCache.get(principal);
-        MobileAuthUser<? extends Serializable> user = null;
+        UserDetails user = null;
         if (wrapper != null) {
-            user = (MobileAuthUser<? extends Serializable>) wrapper.get();
+            user = (UserDetails) wrapper.get();
         }
         if (user == null) {
             try {
-                user = userService.loadByMobile(principal);
+                user = userService.loadByPhone(principal);
                 userCache.put(principal, user);
             } catch (UsernameNotFoundException | InternalAuthenticationServiceException ex) {
                 throw ex;
@@ -80,7 +78,7 @@ public class MobileAuthUserAuthenticationProvider implements AuthenticationProvi
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return (MobileCodeAuthenticationToken.class
+        return (PhoneCodeAuthenticationToken.class
                 .isAssignableFrom(authentication));
     }
 
@@ -90,6 +88,10 @@ public class MobileAuthUserAuthenticationProvider implements AuthenticationProvi
 
     public void setAuthoritiesMapper(GrantedAuthoritiesMapper authoritiesMapper) {
         this.authoritiesMapper = authoritiesMapper;
+    }
+
+    public void setCodeValidator(CodeValidator codeValidator) {
+        this.codeValidator = codeValidator;
     }
 
     @Override

@@ -61,6 +61,11 @@ maven 加入依赖
 并添加了spring security曾经不（完全）具有的rest能力，使用jwt作为token规范，
 可自行扩展使用其他token规则
 
+自带登录模块：
+
+用户名密码登录(spring security自带，并加入rest相关自动配置)
+手机号验证码登录(需自行配置)
+
 ### 使用
 
 与spring security完全相同的配置，只需要将spring security的@EnableWebSecurity注解换成@EnableRestSecurity

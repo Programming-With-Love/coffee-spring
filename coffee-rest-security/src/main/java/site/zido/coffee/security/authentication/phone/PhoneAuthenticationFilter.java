@@ -1,5 +1,6 @@
-package site.zido.coffee.security.authentication;
+package site.zido.coffee.security.authentication.phone;
 
+import org.springframework.cache.Cache;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -8,7 +9,6 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import site.zido.coffee.security.managers.MobileCodeManager;
 import site.zido.coffee.security.validations.MobileValidator;
 
 import javax.servlet.FilterChain;
@@ -22,31 +22,36 @@ import java.io.IOException;
 /**
  * @author zido
  */
-public class MobileAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private RequestMatcher codeRequestMatcher = new AntPathRequestMatcher("/mobile/code", "POST");
     private MobileValidator mobileValidator = new MobileValidator();
-    private MobileCodeManager mobileCodeManager;
-    private String mobileParameter = "mobile";
+    private PhoneCodeService phoneCodeService;
+    private CodeGenerator codeGenerator = new CustomCodeGenerator();
+    private Cache cache;
+    private String cachePrefix = "";
+    private String phoneParameter = "phone";
     private String codeParameter = "code";
 
-    public MobileAuthenticationFilter(MobileCodeManager mobileCodeManager) {
+    public PhoneAuthenticationFilter(PhoneCodeService phoneCodeService) {
         super(new AntPathRequestMatcher("/mobile/sessions", "POST"));
-        this.mobileCodeManager = mobileCodeManager;
+        this.phoneCodeService = phoneCodeService;
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
-        String mobile = obtainMobile(request);
+        String phone = obtainPhone(request);
         if (requireCreateCode(request)) {
-            if (mobile == null || !mobileValidator.isValid(mobile, null)) {
+            if (phone == null || !mobileValidator.isValid(phone, null)) {
                 throw new BadCredentialsException(messages.getMessage(
                         "AbstractUserDetailsAuthenticationProvider.badCredentials",
-                        "Bad mobile"));
+                        "Bad phone"));
             }
-            mobileCodeManager.sendCode(mobile);
+            String code = codeGenerator.generateCode(phone);
+            phoneCodeService.sendCode(phone, code);
+            cache.put(getCacheKey(phone), code);
             chain.doFilter(request, response);
             return;
         }
@@ -67,13 +72,17 @@ public class MobileAuthenticationFilter extends AbstractAuthenticationProcessing
     }
 
 
-    protected String obtainMobile(HttpServletRequest request) {
-        return request.getParameter(mobileParameter);
+    protected String obtainPhone(HttpServletRequest request) {
+        return request.getParameter(phoneParameter);
     }
 
-    public void setMobileParameter(String mobileParameter) {
-        Assert.hasLength(mobileParameter, "mobile parameter cannot be null or empty");
-        this.mobileParameter = mobileParameter;
+    protected String getCacheKey(String mobile) {
+        return cachePrefix + mobile;
+    }
+
+    public void setPhoneParameter(String phone) {
+        Assert.hasLength(phone, "mobile parameter cannot be null or empty");
+        this.phoneParameter = phone;
     }
 
     public void setCodeParameter(String codeParameter) {
@@ -83,15 +92,15 @@ public class MobileAuthenticationFilter extends AbstractAuthenticationProcessing
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
-        String mobile = obtainMobile(request);
-        if (mobile == null) {
-            mobile = "";
+        String phone = obtainPhone(request);
+        if (phone == null) {
+            phone = "";
         }
         String code = obtainCode(request);
         if (code == null) {
             code = "";
         }
-        MobileCodeAuthenticationToken authRequest = new MobileCodeAuthenticationToken(mobile, code);
+        PhoneCodeAuthenticationToken authRequest = new PhoneCodeAuthenticationToken(phone, code);
         setDetails(request, authRequest);
         return this.getAuthenticationManager().authenticate(authRequest);
     }
@@ -104,5 +113,18 @@ public class MobileAuthenticationFilter extends AbstractAuthenticationProcessing
     @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
+        Assert.notNull(cache, "cache cannot be null or empty");
+    }
+
+    public void setCachePrefix(String cachePrefix) {
+        this.cachePrefix = cachePrefix;
+    }
+
+    public void setCache(Cache cache) {
+        this.cache = cache;
+    }
+
+    public void setCodeGenerator(CodeGenerator codeGenerator) {
+        this.codeGenerator = codeGenerator;
     }
 }
