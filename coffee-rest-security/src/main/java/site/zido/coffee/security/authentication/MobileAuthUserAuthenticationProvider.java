@@ -21,6 +21,9 @@ import site.zido.coffee.security.managers.MobileCodeManager;
 
 import java.io.Serializable;
 
+/**
+ * @author zido
+ */
 public class MobileAuthUserAuthenticationProvider implements AuthenticationProvider, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(MobileAuthUserAuthenticationProvider.class);
     private MobileCodeManager codeManager;
