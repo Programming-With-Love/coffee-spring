@@ -89,11 +89,6 @@
                 <artifactId>coffee-rest-security</artifactId>
                 <version>0.1.1-release</version>
             </dependency>
-            <dependency>
-                <groupId>site.zido</groupId>
-                <artifactId>coffee-rest-security</artifactId>
-                <version>0.1.1-release</version>
-            </dependency>
             <!-- others -->
             <dependency>
                 <groupId>com.github.kstyrc</groupId>
