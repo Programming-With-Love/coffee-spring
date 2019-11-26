@@ -16,6 +16,7 @@
         <module>coffee-dependencies</module>
     </modules>
     <properties>
+        <revision>0.1.1-release</revision>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -87,6 +88,11 @@
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-rest-security</artifactId>
+                <version>0.1.1-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-spring-boot-starter</artifactId>
                 <version>0.1.1-release</version>
             </dependency>
             <!-- others -->
