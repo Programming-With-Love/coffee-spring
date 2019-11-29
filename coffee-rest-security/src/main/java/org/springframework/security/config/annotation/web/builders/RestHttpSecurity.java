@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
-import site.zido.coffee.security.configurers.JwtSecurityContextConfigurer;
+import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
 import site.zido.coffee.security.configurers.JwtTokenManagementConfigurer;
 import site.zido.coffee.security.configurers.RestExceptionHandlingConfigurer;
 import site.zido.coffee.security.configurers.RestFormLoginConfigurer;
@@ -1056,8 +1056,8 @@ public final class RestHttpSecurity extends
      * @return the {@link SecurityContextConfigurer} for further customizations
      * @throws Exception
      */
-    public JwtSecurityContextConfigurer<RestHttpSecurity> securityContext() throws Exception {
-        return getOrApply(new JwtSecurityContextConfigurer<>());
+    public RestSecurityContextConfigurer<RestHttpSecurity> securityContext() throws Exception {
+        return getOrApply(new RestSecurityContextConfigurer<>());
     }
 
     /**
@@ -1088,8 +1088,8 @@ public final class RestHttpSecurity extends
      * @return the {@link RestHttpSecurity} for further customizations
      * @throws Exception
      */
-    public RestHttpSecurity securityContext(Customizer<JwtSecurityContextConfigurer<RestHttpSecurity>> securityContextCustomizer) throws Exception {
-        securityContextCustomizer.customize(getOrApply(new JwtSecurityContextConfigurer<>()));
+    public RestHttpSecurity securityContext(Customizer<RestSecurityContextConfigurer<RestHttpSecurity>> securityContextCustomizer) throws Exception {
+        securityContextCustomizer.customize(getOrApply(new RestSecurityContextConfigurer<>()));
         return RestHttpSecurity.this;
     }
 

@@ -27,10 +27,10 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     private static Logger LOGGER = LoggerFactory.getLogger(JwtSecurityContextRepository.class);
     private String authHeaderName = DEFAULT_AUTH_HEADER_NAME;
     private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
-    private JwtTokenProvider tokenProvider;
+    private TokenProvider tokenProvider;
     private ObjectMapper mapper;
 
-    public JwtSecurityContextRepository(JwtTokenProvider tokenProvider) {
+    public JwtSecurityContextRepository(TokenProvider tokenProvider) {
         this.tokenProvider = tokenProvider;
         mapper = new ObjectMapper();
         ClassLoader loader = getClass().getClassLoader();
@@ -42,7 +42,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
         HttpServletRequest request = requestResponseHolder.getRequest();
         String token = request.getHeader(authHeaderName);
-        String json = tokenProvider.getAuthenticationFromJwt(token);
+        String json = tokenProvider.parseAuthentication(token);
         SecurityContext authentication;
         if (json == null) {
             authentication = generateNewContext();
@@ -96,7 +96,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         this.authHeaderName = authHeaderName;
     }
 
-    public void setTokenProvider(JwtTokenProvider tokenProvider) {
+    public void setTokenProvider(TokenProvider tokenProvider) {
         this.tokenProvider = tokenProvider;
     }
 

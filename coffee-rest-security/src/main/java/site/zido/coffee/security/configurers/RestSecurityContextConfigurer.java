@@ -6,21 +6,21 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
 import site.zido.coffee.security.jwt.JwtSecurityContextRepository;
-import site.zido.coffee.security.jwt.JwtTokenProvider;
+import site.zido.coffee.security.jwt.TokenProvider;
 
 /**
  * @author zido
  */
-public class JwtSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> extends
-        AbstractHttpConfigurer<JwtSecurityContextConfigurer<H>, H> {
-    private JwtTokenProvider providedJwtTokenProvider;
+public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> extends
+        AbstractHttpConfigurer<RestSecurityContextConfigurer<H>, H> {
+    private TokenProvider providedTokenProvider;
 
     /**
      * Creates a new instance
      *
      * @see HttpSecurity#securityContext()
      */
-    public JwtSecurityContextConfigurer() {
+    public RestSecurityContextConfigurer() {
     }
 
     /**
@@ -29,7 +29,7 @@ public class JwtSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> exte
      * @param securityContextRepository the {@link SecurityContextRepository} to use
      * @return the {@link HttpSecurity} for further customizations
      */
-    public JwtSecurityContextConfigurer<H> securityContextRepository(
+    public RestSecurityContextConfigurer<H> securityContextRepository(
             SecurityContextRepository securityContextRepository) {
         getBuilder().setSharedObject(SecurityContextRepository.class,
                 securityContextRepository);
@@ -43,12 +43,12 @@ public class JwtSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> exte
         SecurityContextRepository securityContextRepository = restHttp
                 .getSharedObject(SecurityContextRepository.class);
         if (securityContextRepository == null) {
-            JwtTokenProvider provider = restHttp.getSharedObject(JwtTokenProvider.class);
+            TokenProvider provider = restHttp.getSharedObject(TokenProvider.class);
             if (provider == null) {
-                if (this.providedJwtTokenProvider == null) {
-                    provider = new JwtTokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
+                if (this.providedTokenProvider == null) {
+                    provider = new TokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
                 } else {
-                    provider = this.providedJwtTokenProvider;
+                    provider = this.providedTokenProvider;
                 }
             }
             securityContextRepository = new JwtSecurityContextRepository(provider);
@@ -60,7 +60,7 @@ public class JwtSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> exte
         restHttp.addFilter(securityContextFilter);
     }
 
-    public void setProvidedJwtTokenProvider(JwtTokenProvider providedJwtTokenProvider) {
-        this.providedJwtTokenProvider = providedJwtTokenProvider;
+    public void setProvidedTokenProvider(TokenProvider providedTokenProvider) {
+        this.providedTokenProvider = providedTokenProvider;
     }
 }

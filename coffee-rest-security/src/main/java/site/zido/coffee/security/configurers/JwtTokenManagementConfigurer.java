@@ -6,14 +6,14 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.web.context.SecurityContextRepository;
 import site.zido.coffee.security.jwt.JwtSecurityContextRepository;
-import site.zido.coffee.security.jwt.JwtTokenProvider;
+import site.zido.coffee.security.jwt.TokenProvider;
 
 /**
  * @author zido
  */
 public class JwtTokenManagementConfigurer<H extends HttpSecurityBuilder<H>>
         extends AbstractHttpConfigurer<SessionManagementConfigurer<H>, H> {
-    private JwtTokenProvider providedJwtTokenProvider;
+    private TokenProvider providedTokenProvider;
 
     public JwtTokenManagementConfigurer() {
     }
@@ -23,12 +23,12 @@ public class JwtTokenManagementConfigurer<H extends HttpSecurityBuilder<H>>
         SecurityContextRepository securityContextRepository = restHttp
                 .getSharedObject(SecurityContextRepository.class);
         if (securityContextRepository == null) {
-            JwtTokenProvider provider = restHttp.getSharedObject(JwtTokenProvider.class);
+            TokenProvider provider = restHttp.getSharedObject(TokenProvider.class);
             if (provider == null) {
-                if (this.providedJwtTokenProvider == null) {
-                    provider = new JwtTokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
+                if (this.providedTokenProvider == null) {
+                    provider = new TokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
                 } else {
-                    provider = this.providedJwtTokenProvider;
+                    provider = this.providedTokenProvider;
                 }
             }
             JwtSecurityContextRepository repository = new JwtSecurityContextRepository(provider);
@@ -42,8 +42,8 @@ public class JwtTokenManagementConfigurer<H extends HttpSecurityBuilder<H>>
         }
     }
 
-    public void setProvidedJwtTokenProvider(JwtTokenProvider providedJwtTokenProvider) {
-        this.providedJwtTokenProvider = providedJwtTokenProvider;
+    public void setProvidedTokenProvider(TokenProvider providedTokenProvider) {
+        this.providedTokenProvider = providedTokenProvider;
     }
 
 }
