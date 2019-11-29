@@ -9,16 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import site.zido.coffee.common.rest.*;
+import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
+import site.zido.coffee.common.rest.GlobalExceptionAdvice;
+import site.zido.coffee.common.rest.HttpResponseBodyFactory;
+import site.zido.coffee.common.rest.StringToResultHttpMessageConverter;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -102,6 +102,7 @@ public class CommonAutoConfiguration {
             havingValue = "true",
             matchIfMissing = true)
     @AutoConfigureAfter(JacksonAutoConfiguration.class)
+    @ConditionalOnBean(ObjectMapper.class)
     public static class JsonAutoConfiguration {
         /**
          * 配置全局json序列化(开发模式)

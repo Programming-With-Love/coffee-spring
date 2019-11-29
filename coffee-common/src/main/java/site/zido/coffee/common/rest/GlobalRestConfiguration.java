@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class GlobalRestConfiguration {
      * @return configure
      */
     @Bean
-    public WebMvcConfigurerAdapter adapterForMessageConverter(StringToResultHttpMessageConverter converter) {
+    public WebMvcConfigurer adapterForMessageConverter(StringToResultHttpMessageConverter converter) {
         return new WebMvcConfigurerAdapter() {
             @Override
             public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {

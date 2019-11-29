@@ -13,7 +13,28 @@
     <packaging>pom</packaging>
 
     <dependencyManagement>
-
+        <dependencies>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-common</artifactId>
+                <version>0.1.1-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-extra</artifactId>
+                <version>0.1.1-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-rest-security</artifactId>
+                <version>0.1.1-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-spring-boot-starter</artifactId>
+                <version>0.1.1-release</version>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
 </project>
