@@ -12,7 +12,7 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import site.zido.coffee.security.authentication.RestAuthenticationFailureHandler;
 import site.zido.coffee.security.authentication.RestAuthenticationSuccessHandler;
-import site.zido.coffee.security.jwt.JwtAuthenticationEntryPoint;
+import site.zido.coffee.security.token.JwtAuthenticationEntryPoint;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -272,7 +272,6 @@ public abstract class AbstractRestAuthenticationFilterConfigurer<B extends HttpS
             PermitAllSupport.permitAll(http, loginProcessingUrl);
         }
     }
-
 
 
     @SuppressWarnings("unchecked")

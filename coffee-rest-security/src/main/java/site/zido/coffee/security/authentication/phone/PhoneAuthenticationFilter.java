@@ -27,15 +27,14 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
     private RequestMatcher codeRequestMatcher = new AntPathRequestMatcher("/mobile/code", "POST");
     private MobileValidator mobileValidator = new MobileValidator();
     private PhoneCodeService phoneCodeService;
-    private CodeGenerator codeGenerator = new CustomCodeGenerator();
+    private CodeGenerator codeGenerator = new CustomCodeGenerator(CustomCodeGenerator.Mode.NUMBER);
     private Cache cache;
     private String cachePrefix = "";
     private String phoneParameter = "phone";
     private String codeParameter = "code";
 
-    public PhoneAuthenticationFilter(PhoneCodeService phoneCodeService) {
+    public PhoneAuthenticationFilter() {
         super(new AntPathRequestMatcher("/mobile/sessions", "POST"));
-        this.phoneCodeService = phoneCodeService;
     }
 
     @Override
@@ -126,5 +125,9 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
 
     public void setCodeGenerator(CodeGenerator codeGenerator) {
         this.codeGenerator = codeGenerator;
+    }
+
+    public void setPhoneCodeService(PhoneCodeService phoneCodeService) {
+        this.phoneCodeService = phoneCodeService;
     }
 }

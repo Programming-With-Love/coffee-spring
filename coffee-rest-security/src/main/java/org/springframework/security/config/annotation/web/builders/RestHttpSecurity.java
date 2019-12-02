@@ -32,10 +32,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
-import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
-import site.zido.coffee.security.configurers.JwtTokenManagementConfigurer;
-import site.zido.coffee.security.configurers.RestExceptionHandlingConfigurer;
-import site.zido.coffee.security.configurers.RestFormLoginConfigurer;
+import site.zido.coffee.security.authentication.phone.PhoneAuthenticationFilter;
+import site.zido.coffee.security.configurers.*;
 
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServletRequest;
@@ -66,6 +64,7 @@ public final class RestHttpSecurity extends
                             AuthenticationManagerBuilder authenticationBuilder,
                             Map<Class<?>, Object> sharedObjects) {
         super(objectPostProcessor);
+        comparator.registerBefore(PhoneAuthenticationFilter.class, UsernamePasswordAuthenticationFilter.class);
         Assert.notNull(authenticationBuilder, "authenticationBuilder cannot be null");
         setSharedObject(AuthenticationManagerBuilder.class, authenticationBuilder);
         for (Map.Entry<Class<?>, Object> entry : sharedObjects
@@ -1430,6 +1429,15 @@ public final class RestHttpSecurity extends
      */
     public RestFormLoginConfigurer<RestHttpSecurity> formLogin() throws Exception {
         return getOrApply(new RestFormLoginConfigurer<>());
+    }
+
+    public PhoneCodeLoginConfigurer<RestHttpSecurity> phoneCodeLogin() throws Exception {
+        return getOrApply(new PhoneCodeLoginConfigurer<>());
+    }
+
+    public RestHttpSecurity phoneCodeLogin(Customizer<PhoneCodeLoginConfigurer<RestHttpSecurity>> phoneCodeLoginCustomizer) throws Exception {
+        phoneCodeLoginCustomizer.customize(getOrApply(new PhoneCodeLoginConfigurer<>()));
+        return RestHttpSecurity.this;
     }
 
     /**

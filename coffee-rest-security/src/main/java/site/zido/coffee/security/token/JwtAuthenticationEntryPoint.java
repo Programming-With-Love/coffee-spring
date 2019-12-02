@@ -1,4 +1,4 @@
-package site.zido.coffee.security.jwt;
+package site.zido.coffee.security.token;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;

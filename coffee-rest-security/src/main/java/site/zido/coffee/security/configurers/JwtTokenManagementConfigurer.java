@@ -5,8 +5,9 @@ import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.web.context.SecurityContextRepository;
-import site.zido.coffee.security.jwt.JwtSecurityContextRepository;
-import site.zido.coffee.security.jwt.TokenProvider;
+import site.zido.coffee.security.token.JwtSecurityContextRepository;
+import site.zido.coffee.security.token.JwtTokenProvider;
+import site.zido.coffee.security.token.TokenProvider;
 
 /**
  * @author zido
@@ -26,7 +27,7 @@ public class JwtTokenManagementConfigurer<H extends HttpSecurityBuilder<H>>
             TokenProvider provider = restHttp.getSharedObject(TokenProvider.class);
             if (provider == null) {
                 if (this.providedTokenProvider == null) {
-                    provider = new TokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
+                    provider = new JwtTokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
                 } else {
                     provider = this.providedTokenProvider;
                 }
@@ -42,7 +43,7 @@ public class JwtTokenManagementConfigurer<H extends HttpSecurityBuilder<H>>
         }
     }
 
-    public void setProvidedTokenProvider(TokenProvider providedTokenProvider) {
+    public void setProvidedTokenProvider(JwtTokenProvider providedTokenProvider) {
         this.providedTokenProvider = providedTokenProvider;
     }
 

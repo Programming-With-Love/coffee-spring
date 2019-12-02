@@ -15,7 +15,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import site.zido.coffee.security.jwt.JwtAuthenticationEntryPoint;
+import site.zido.coffee.security.token.JwtAuthenticationEntryPoint;
 
 import java.util.LinkedHashMap;
 

@@ -5,6 +5,7 @@ import io.jsonwebtoken.lang.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 默认验证码生成器
@@ -22,14 +23,18 @@ public class CustomCodeGenerator implements CodeGenerator {
     private int minLength = 6;
     private int maxLength = 6;
     private List<Character> arr = new ArrayList<>();
+    private Random random = new Random();
 
     public CustomCodeGenerator(Mode... modes) {
-        this.setMode(modes);
+        if (modes == null || modes.length == 0) {
+            this.setMode(Mode.NUMBER);
+        } else {
+            this.setMode(modes);
+        }
     }
 
     @Override
     public String generateCode(String phone) {
-        Random random = new Random(System.currentTimeMillis());
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < maxLength; i++) {
             int index = random.nextInt(arr.size());

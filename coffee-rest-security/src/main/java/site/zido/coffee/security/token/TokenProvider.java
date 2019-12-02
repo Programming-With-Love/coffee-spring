@@ -1,4 +1,4 @@
-package site.zido.coffee.security;
+package site.zido.coffee.security.token;
 
 import org.springframework.security.core.context.SecurityContext;
 

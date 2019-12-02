@@ -58,13 +58,6 @@ public class RestFormLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
         initDefaultLoginFilter(http);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.security.config.annotation.web.configurers.
-     * AbstractAuthenticationFilterConfigurer
-     * #createLoginProcessingUrlMatcher(java.lang.String)
-     */
     @Override
     protected RequestMatcher createLoginProcessingUrlMatcher(String loginProcessingUrl) {
         return new AntPathRequestMatcher(loginProcessingUrl, "POST");
