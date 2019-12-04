@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Rest相关安全自动配置类，用于构建生成一个{@link WebSecurity}
+ *
  * @author zido
  */
 @Configuration(proxyBeanMethods = false)

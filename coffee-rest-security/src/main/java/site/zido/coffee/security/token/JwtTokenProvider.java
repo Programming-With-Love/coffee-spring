@@ -26,19 +26,34 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
 
     private String jwtSecret;
 
-    private int jwtExpirationInMs;
+    private long jwtExpirationInMs;
 
     private UserDetailsService userService;
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
-    public JwtTokenProvider(String jwtSecret, int jwtExpirationInMs) {
+    public JwtTokenProvider() {
+    }
+
+    public JwtTokenProvider(String jwtSecret, long jwtExpirationInMs) {
         this.jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes());
         this.jwtExpirationInMs = jwtExpirationInMs;
     }
 
     public void setUserService(UserDetailsService userService) {
         this.userService = userService;
+    }
+
+    public void setJwtSecret(String jwtSecret) {
+        this.jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes());
+    }
+
+    public void setJwtExpirationInMs(long jwtExpirationInMs) {
+        this.jwtExpirationInMs = jwtExpirationInMs;
+    }
+
+    public void setAuthoritiesMapper(GrantedAuthoritiesMapper authoritiesMapper) {
+        this.authoritiesMapper = authoritiesMapper;
     }
 
     @Override

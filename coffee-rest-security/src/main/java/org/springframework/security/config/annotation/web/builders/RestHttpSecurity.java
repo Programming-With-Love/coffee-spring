@@ -524,15 +524,6 @@ public final class RestHttpSecurity extends
         return RestHttpSecurity.this;
     }
 
-    public JwtTokenManagementConfigurer<RestHttpSecurity> jwtTokenManagement() throws Exception {
-        return getOrApply(new JwtTokenManagementConfigurer<>());
-    }
-
-    public RestHttpSecurity jwtTokenManagement(Customizer<JwtTokenManagementConfigurer<RestHttpSecurity>> jwtTokenManagementConfigurerCustomizer) throws Exception {
-        jwtTokenManagementConfigurerCustomizer.customize(getOrApply(new JwtTokenManagementConfigurer<>()));
-        return this;
-    }
-
     /**
      * Allows configuring a {@link PortMapper} that is available from
      * {@link RestHttpSecurity#getSharedObject(Class)}. Other provided
