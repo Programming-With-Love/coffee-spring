@@ -1,6 +1,7 @@
 package site.zido.coffee.security.authentication.phone;
 
 import io.jsonwebtoken.lang.Assert;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author zido
  */
-public class CustomCodeGenerator implements CodeGenerator {
+public class CustomCodeGenerator implements CodeGenerator, InitializingBean {
     private static char[] ARR_NUMBER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     private static char[] ARR_LOWER_CHAR = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
             'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
@@ -49,21 +50,26 @@ public class CustomCodeGenerator implements CodeGenerator {
     }
 
     public void setMode(Mode... modes) {
-        Assert.notEmpty(modes, "modes cannot be null or empty");
         this.arr.clear();
-        for (Mode mode : modes) {
-            switch (mode) {
-                case NUMBER:
-                    addArr(ARR_NUMBER);
-                    break;
-                case LOWER_CHAR:
-                    addArr(ARR_LOWER_CHAR);
-                    break;
-                case UPPER_CHAR:
-                    addArr(ARR_UPPER_CHAR);
-                    break;
-                default:
-                    throw new IllegalStateException("unreachable");
+        addMode(modes);
+    }
+
+    public void addMode(Mode... modes) {
+        if (modes != null && modes.length > 0) {
+            for (Mode mode : modes) {
+                switch (mode) {
+                    case NUMBER:
+                        addArr(ARR_NUMBER);
+                        break;
+                    case LOWER_CHAR:
+                        addArr(ARR_LOWER_CHAR);
+                        break;
+                    case UPPER_CHAR:
+                        addArr(ARR_UPPER_CHAR);
+                        break;
+                    default:
+                        throw new IllegalStateException("unreachable");
+                }
             }
         }
     }
@@ -80,6 +86,11 @@ public class CustomCodeGenerator implements CodeGenerator {
 
     public void setMaxLength(int maxLength) {
         this.maxLength = maxLength;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.notEmpty(this.arr, "char array cannot be empty");
     }
 
     /**

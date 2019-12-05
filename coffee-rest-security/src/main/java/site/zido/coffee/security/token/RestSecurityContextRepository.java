@@ -17,14 +17,14 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author zido
  */
-public class JwtSecurityContextRepository implements SecurityContextRepository {
+public class RestSecurityContextRepository implements SecurityContextRepository {
     public static final String DEFAULT_AUTH_HEADER_NAME = "Authorization";
-    private static Logger LOGGER = LoggerFactory.getLogger(JwtSecurityContextRepository.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(RestSecurityContextRepository.class);
     private String authHeaderName = DEFAULT_AUTH_HEADER_NAME;
     private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
     private TokenProvider tokenProvider;
 
-    public JwtSecurityContextRepository(TokenProvider tokenProvider) {
+    public RestSecurityContextRepository(TokenProvider tokenProvider) {
         this.tokenProvider = tokenProvider;
     }
 

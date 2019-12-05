@@ -14,6 +14,7 @@ import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.util.Assert;
 
 /**
  * 手机号验证码用户认证
@@ -25,6 +26,7 @@ public class PhoneAuthUserAuthenticationProvider extends AbstractUserDetailsAuth
     private UserDetailsService userDetailsService;
     protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
     private CodeValidator codeValidator = new CustomCodeValidator();
+    private PhoneCodeCache phoneCodeCache;
 
     @Override
     protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
@@ -48,6 +50,12 @@ public class PhoneAuthUserAuthenticationProvider extends AbstractUserDetailsAuth
                 .isAssignableFrom(authentication));
     }
 
+    @Override
+    protected void doAfterPropertiesSet() {
+        Assert.notNull(this.phoneCodeCache, "phone code cache must be set");
+        Assert.notNull(this.userDetailsService, "A UserDetailsService must be set");
+    }
+
     public void setCodeValidator(CodeValidator codeValidator) {
         this.codeValidator = codeValidator;
     }
@@ -63,7 +71,8 @@ public class PhoneAuthUserAuthenticationProvider extends AbstractUserDetailsAuth
         }
         String principal = (authentication.getPrincipal() == null) ? "NONE_PROVIDED"
                 : authentication.getName();
-        if (!codeValidator.validate(principal, authentication.getCredentials().toString())) {
+        if (!codeValidator.validate(phoneCodeCache.getCode(principal),
+                authentication.getCredentials().toString())) {
             throw new BadCredentialsException(messages.getMessage(
                     "AbstractUserDetailsAuthenticationProvider.badCredentials",
                     "Bad credentials"));
@@ -76,5 +85,9 @@ public class PhoneAuthUserAuthenticationProvider extends AbstractUserDetailsAuth
 
     public void setUserDetailsService(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
+    }
+
+    public void setPhoneCodeCache(PhoneCodeCache phoneCodeCache) {
+        this.phoneCodeCache = phoneCodeCache;
     }
 }

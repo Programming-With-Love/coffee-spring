@@ -40,6 +40,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
+import site.zido.coffee.security.authentication.phone.PhoneAuthUserAuthenticationProvider;
+import site.zido.coffee.security.authentication.phone.PhoneCodeService;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -116,7 +118,6 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
                     .addFilter(new WebAsyncManagerIntegrationFilter())
                     .exceptionHandling().and()
                     .headers().and()
-                    .jwtTokenManagement().and()
                     .securityContext().and()
                     .anonymous().and()
                     .servletApi().and()
@@ -217,6 +218,10 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
                 .getBean(AuthenticationManagerBuilder.class);
         return new RestSecurityConfigurationAdapter.UserDetailsServiceDelegator(Arrays.asList(
                 localConfigureAuthenticationBldr, globalAuthBuilder));
+    }
+
+    protected PhoneCodeService phoneCodeService() {
+        return null;
     }
 
     @Override
@@ -320,6 +325,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         Map<Class<?>, Object> sharedObjects = new HashMap<>();
         sharedObjects.putAll(localConfigureAuthenticationBldr.getSharedObjects());
         sharedObjects.put(UserDetailsService.class, userDetailsService());
+        sharedObjects.put(PhoneCodeService.class, phoneCodeService());
         sharedObjects.put(ApplicationContext.class, context);
         sharedObjects.put(ContentNegotiationStrategy.class, contentNegotiationStrategy);
         sharedObjects.put(AuthenticationTrustResolver.class, trustResolver);

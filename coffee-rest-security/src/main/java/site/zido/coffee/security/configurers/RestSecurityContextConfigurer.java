@@ -4,10 +4,11 @@ import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
-import site.zido.coffee.security.token.JwtSecurityContextRepository;
+import site.zido.coffee.security.token.RestSecurityContextRepository;
 import site.zido.coffee.security.token.JwtTokenProvider;
 import site.zido.coffee.security.token.TokenProvider;
 
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> extends
         AbstractHttpConfigurer<RestSecurityContextConfigurer<H>, H> {
     private TokenProvider tokenProvider;
+    private String authHeaderName;
 
     /**
      * Creates a new instance
@@ -49,14 +51,21 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             if (this.tokenProvider == null) {
                 this.tokenProvider = restHttp.getSharedObject(TokenProvider.class);
                 if (this.tokenProvider == null) {
-                    this.tokenProvider = new JwtTokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
+                    JwtTokenProvider provider = new JwtTokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
+                    UserDetailsService userDetailsService = restHttp.getSharedObject(UserDetailsService.class);
+                    provider.setUserService(userDetailsService);
+                    postProcess(provider);
+                    this.tokenProvider = provider;
                 }
             }
-            JwtSecurityContextRepository repo = new JwtSecurityContextRepository(this.tokenProvider);
+            RestSecurityContextRepository repo = new RestSecurityContextRepository(this.tokenProvider);
             AuthenticationTrustResolver trustResolver = restHttp
                     .getSharedObject(AuthenticationTrustResolver.class);
             if (trustResolver != null) {
                 repo.setTrustResolver(trustResolver);
+            }
+            if (this.authHeaderName != null) {
+                repo.setAuthHeaderName(authHeaderName);
             }
             restHttp.setSharedObject(SecurityContextRepository.class, repo);
         }
@@ -78,25 +87,32 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
         return this;
     }
 
+    public RestSecurityContextConfigurer<H> authHeaderName(String authHeaderName) {
+        this.authHeaderName = authHeaderName;
+        return this;
+    }
+
     public JwtTokenProviderConfig jwt() {
-        return new JwtTokenProviderConfig(getBuilder());
+        return new JwtTokenProviderConfig();
     }
 
     public class JwtTokenProviderConfig {
         private JwtTokenProvider tokenProvider;
-        private H restHttp;
 
-        private JwtTokenProviderConfig(H restHttp) {
-            this.restHttp = restHttp;
+        private JwtTokenProviderConfig() {
             enable();
         }
 
         public JwtTokenProviderConfig enable() {
-            restHttp.setSharedObject(JwtTokenProvider.class, new JwtTokenProvider());
+            if (this.tokenProvider == null) {
+                this.tokenProvider = new JwtTokenProvider();
+                getBuilder().setSharedObject(JwtTokenProvider.class, tokenProvider);
+            }
             return this;
         }
 
         public RestSecurityContextConfigurer<H> disable() {
+            getBuilder().setSharedObject(JwtTokenProvider.class, null);
             this.tokenProvider = null;
             return RestSecurityContextConfigurer.this;
         }
@@ -121,8 +137,13 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             return this;
         }
 
-        public RestSecurityContextConfigurer<H> and() {
-            return RestSecurityContextConfigurer.this;
+        public JwtTokenProviderConfig authoritiesMapper(GrantedAuthoritiesMapper mapper) {
+            tokenProvider.setAuthoritiesMapper(mapper);
+            return this;
+        }
+
+        public H and() {
+            return getBuilder();
         }
     }
 }

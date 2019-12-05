@@ -20,4 +20,8 @@ public class CustomCodeValidator implements CodeValidator {
     public boolean validate(String originalCode, String inputCode) {
         return ignoreCase ? (originalCode != null && originalCode.equalsIgnoreCase(inputCode)) : Objects.equals(originalCode, inputCode);
     }
+
+    public void setIgnoreCase(boolean ignoreCase) {
+        this.ignoreCase = ignoreCase;
+    }
 }

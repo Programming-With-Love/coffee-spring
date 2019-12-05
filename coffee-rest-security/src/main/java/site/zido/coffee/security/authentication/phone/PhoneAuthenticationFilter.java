@@ -1,6 +1,5 @@
 package site.zido.coffee.security.authentication.phone;
 
-import org.springframework.cache.Cache;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,7 +27,7 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
     private MobileValidator mobileValidator = new MobileValidator();
     private PhoneCodeService phoneCodeService;
     private CodeGenerator codeGenerator = new CustomCodeGenerator(CustomCodeGenerator.Mode.NUMBER);
-    private Cache cache;
+    private PhoneCodeCache cache;
     private String cachePrefix = "";
     private String phoneParameter = "phone";
     private String codeParameter = "code";
@@ -112,14 +111,14 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
     @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
-        Assert.notNull(cache, "cache cannot be null or empty");
+        Assert.notNull(cache, "cache cannot be null");
     }
 
     public void setCachePrefix(String cachePrefix) {
         this.cachePrefix = cachePrefix;
     }
 
-    public void setCache(Cache cache) {
+    public void setCache(PhoneCodeCache cache) {
         this.cache = cache;
     }
 
