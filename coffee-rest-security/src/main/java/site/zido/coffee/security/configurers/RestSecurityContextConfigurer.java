@@ -51,7 +51,7 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             if (this.tokenProvider == null) {
                 this.tokenProvider = restHttp.getSharedObject(TokenProvider.class);
                 if (this.tokenProvider == null) {
-                    JwtTokenProvider provider = new JwtTokenProvider("coffee-jwt", 24 * 60 * 60 * 1000);
+                    JwtTokenProvider provider = new JwtTokenProvider("coffee-jwt", 1000);
                     UserDetailsService userDetailsService = restHttp.getSharedObject(UserDetailsService.class);
                     provider.setUserService(userDetailsService);
                     postProcess(provider);

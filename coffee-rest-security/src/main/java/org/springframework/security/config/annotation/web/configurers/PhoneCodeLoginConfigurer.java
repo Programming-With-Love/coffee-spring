@@ -1,14 +1,12 @@
-package site.zido.coffee.security.configurers;
+package org.springframework.security.config.annotation.web.configurers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.cache.Cache;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
-import org.springframework.security.config.annotation.web.configurers.AbstractRestAuthenticationFilterConfigurer;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -38,6 +36,7 @@ public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
     @Override
     public void init(H http) throws Exception {
         super.init(http);
+        PermitAllSupport.permitAll(http, getAuthenticationFilter().getCodeRequestMatcher());
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
         if (phoneCodeService == null) {
             phoneCodeService = http.getSharedObject(PhoneCodeService.class);
@@ -78,7 +77,7 @@ public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
 
     private PhoneCodeService defaultPhoneCodeService() {
         LOGGER.warn("使用控制台输出手机号验证码仅用于调试，" +
-                "如果需要真是发送验证码请实现 PhoneCodeService" +
+                "如果需要真实发送验证码请实现 PhoneCodeService" +
                 "注入到spring容器中");
         return new PhoneCodeService() {
             private Logger logger = LoggerFactory.getLogger(PhoneCodeService.class);

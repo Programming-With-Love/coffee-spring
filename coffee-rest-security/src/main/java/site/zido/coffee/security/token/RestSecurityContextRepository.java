@@ -32,16 +32,22 @@ public class RestSecurityContextRepository implements SecurityContextRepository 
     public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
         HttpServletRequest request = requestResponseHolder.getRequest();
         String token = request.getHeader(authHeaderName);
-        SecurityContext authentication = tokenProvider.parse(token);
-        if (authentication == null) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
-                        + authentication
-                        + "'; are you improperly modifying the HttpSession directly "
-                        + "(you should always use SecurityContextHolder) or using the Authentication attribute "
-                        + "reserved for this class?");
-            }
+        SecurityContext authentication;
+        if (token == null) {
+            LOGGER.debug("No token currently exists");
             authentication = generateNewContext();
+        } else {
+            authentication = tokenProvider.parse(token);
+            if (authentication == null) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
+                            + authentication
+                            + "'; are you improperly modifying the HttpSession directly "
+                            + "(you should always use SecurityContextHolder) or using the Authentication attribute "
+                            + "reserved for this class?");
+                }
+                authentication = generateNewContext();
+            }
         }
 
         LOGGER.debug("Obtained a valid SecurityContext from " + authHeaderName

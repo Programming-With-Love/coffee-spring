@@ -1,8 +1,6 @@
 package site.zido.coffee.security.token;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.lang.Assert;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +25,8 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
     private String jwtSecret;
 
     private long jwtExpirationInMs;
+
+    private String issue = "coffee-security";
 
     private UserDetailsService userService;
 
@@ -64,6 +64,7 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
         return Jwts.builder()
                 .setSubject(subject.getAuthentication().getName())
                 .setIssuedAt(new Date())
+                .setIssuer(issue)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
@@ -74,10 +75,16 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
         if (StringUtils.isEmpty(token)) {
             return null;
         }
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
+        Claims claims;
+        try {
+            claims = Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            claims = e.getClaims();
+
+        }
         String username = claims.getSubject();
         if (username == null) {
             return null;
@@ -93,5 +100,13 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(userService, "User Service Cannot be null");
+    }
+
+    public String getIssue() {
+        return issue;
+    }
+
+    public void setIssue(String issue) {
+        this.issue = issue;
     }
 }

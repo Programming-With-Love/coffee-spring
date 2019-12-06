@@ -50,7 +50,6 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
             String code = codeGenerator.generateCode(phone);
             phoneCodeService.sendCode(phone, code);
             cache.put(getCacheKey(phone), code);
-            chain.doFilter(request, response);
             return;
         }
         super.doFilter(req, res, chain);
@@ -128,5 +127,9 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
 
     public void setPhoneCodeService(PhoneCodeService phoneCodeService) {
         this.phoneCodeService = phoneCodeService;
+    }
+
+    public RequestMatcher getCodeRequestMatcher() {
+        return codeRequestMatcher;
     }
 }
