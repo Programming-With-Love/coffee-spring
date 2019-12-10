@@ -25,5 +25,5 @@ public interface TokenProvider {
      * @param response response,例如jwt等会需要response对象进行续期操作
      * @return json字符串
      */
-    SecurityContext parse(String token, HttpServletResponse response);
+    SecurityContext parse(String token, HttpServletResponse response) throws TokenInvalidException;
 }

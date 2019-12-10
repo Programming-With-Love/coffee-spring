@@ -16,4 +16,10 @@ public class IndexController {
     public String index(@AuthenticationPrincipal UserDetails user) {
         return "hello world : " + user.getUsername();
     }
+
+    @PreAuthorize("hasRole('admin')")
+    @RequestMapping("/admin")
+    public String admin(@AuthenticationPrincipal UserDetails user) {
+        return "hello world : " + user.getUsername();
+    }
 }

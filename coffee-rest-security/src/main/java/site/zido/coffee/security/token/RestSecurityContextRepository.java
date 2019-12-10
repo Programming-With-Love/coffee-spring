@@ -33,28 +33,32 @@ public class RestSecurityContextRepository implements SecurityContextRepository 
         HttpServletRequest request = requestResponseHolder.getRequest();
         HttpServletResponse response = requestResponseHolder.getResponse();
         String token = request.getHeader(authHeaderName);
-        SecurityContext authentication;
+        SecurityContext context;
         if (token == null) {
             LOGGER.debug("No token currently exists");
-            authentication = generateNewContext();
+            context = generateNewContext();
         } else {
-            authentication = tokenProvider.parse(token, response);
-            if (authentication == null) {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
-                            + authentication
-                            + "'; are you improperly modifying the HttpSession directly "
-                            + "(you should always use SecurityContextHolder) or using the Authentication attribute "
-                            + "reserved for this class?");
+            try {
+                context = tokenProvider.parse(token, response);
+                if (context == null) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
+                                + context
+                                + "'; are you improperly modifying the HttpSession directly "
+                                + "(you should always use SecurityContextHolder) or using the Authentication attribute "
+                                + "reserved for this class?");
+                    }
+                    context = generateNewContext();
                 }
-                authentication = generateNewContext();
+            } catch (TokenInvalidException e) {
+                context = generateNewContext();
             }
         }
 
         LOGGER.debug("Obtained a valid SecurityContext from " + authHeaderName
                 + " in request header"
-                + ": '" + authentication + "'");
-        return authentication;
+                + ": '" + context + "'");
+        return context;
     }
 
     protected SecurityContext generateNewContext() {
@@ -63,13 +67,13 @@ public class RestSecurityContextRepository implements SecurityContextRepository 
 
     @Override
     public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
-        Authentication authentication = context.getAuthentication();
-        if (authentication != null && !trustResolver.isAnonymous(authentication)) {
-            String token = tokenProvider.generate(context);
-            response.setHeader(authHeaderName, token);
-            LOGGER.debug("SecurityContext '" + context
-                    + "' stored to response.header: " + authHeaderName);
-        }
+//        Authentication authentication = context.getAuthentication();
+//        if (authentication != null && !trustResolver.isAnonymous(authentication)) {
+//            String token = tokenProvider.generate(context);
+//            response.setHeader(authHeaderName, token);
+//            LOGGER.debug("SecurityContext '" + context
+//                    + "' stored to response.header: " + authHeaderName);
+//        }
     }
 
     @Override

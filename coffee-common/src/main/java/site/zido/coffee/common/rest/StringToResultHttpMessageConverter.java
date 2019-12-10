@@ -31,7 +31,7 @@ public class StringToResultHttpMessageConverter extends AbstractHttpMessageConve
     }
 
     public StringToResultHttpMessageConverter(Charset charset) {
-        super(charset, MediaType.APPLICATION_JSON_UTF8, MediaType.ALL);
+        super(charset, MediaType.APPLICATION_JSON, MediaType.ALL);
     }
 
     @Override
@@ -49,9 +49,9 @@ public class StringToResultHttpMessageConverter extends AbstractHttpMessageConve
     protected void writeInternal(Object o, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         Charset charset = getContentTypeCharset(outputMessage.getHeaders().getContentType());
         if (o instanceof String) {
-            StreamUtils.copy((String) o, charset, outputMessage.getBody());
+            outputMessage.getBody().write(((String) o).getBytes(charset));
         } else {
-            StreamUtils.copy(mapper.writeValueAsString(o), charset, outputMessage.getBody());
+            outputMessage.getBody().write(mapper.writeValueAsBytes(o));
         }
     }
 

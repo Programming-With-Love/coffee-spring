@@ -42,6 +42,7 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import site.zido.coffee.security.authentication.phone.PhoneAuthUserAuthenticationProvider;
 import site.zido.coffee.security.authentication.phone.PhoneCodeService;
+import site.zido.coffee.security.configurers.RestAccessDeniedHandlerImpl;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -116,7 +117,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         if (!disableDefaults) {
             http
                     .addFilter(new WebAsyncManagerIntegrationFilter())
-                    .exceptionHandling().and()
+                    .exceptionHandling().accessDeniedHandler(new RestAccessDeniedHandlerImpl()).and()
                     .headers().and()
                     .securityContext().and()
                     .anonymous().and()

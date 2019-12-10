@@ -12,13 +12,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
-import site.zido.coffee.common.rest.DefaultHttpResponseBodyFactory;
-import site.zido.coffee.common.rest.GlobalExceptionAdvice;
-import site.zido.coffee.common.rest.HttpResponseBodyFactory;
-import site.zido.coffee.common.rest.StringToResultHttpMessageConverter;
+import site.zido.coffee.common.rest.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -30,6 +28,7 @@ import java.util.List;
  */
 @Configuration
 @ConditionalOnBean(ObjectMapper.class)
+@AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class CommonAutoConfiguration {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(CommonAutoConfiguration.class);
@@ -46,7 +45,7 @@ public class CommonAutoConfiguration {
      * @return exception advice
      */
     @Bean
-    @ConditionalOnMissingBean(GlobalExceptionAdvice.class)
+    @ConditionalOnMissingBean(BaseGlobalExceptionHandler.class)
     public GlobalExceptionAdvice advice() {
         return new GlobalExceptionAdvice(bodyFactory());
     }
@@ -80,9 +79,6 @@ public class CommonAutoConfiguration {
         };
         filter.setIncludeClientInfo(true);
         filter.setIncludeQueryString(true);
-        filter.setIncludePayload(true);
-        filter.setIncludeHeaders(true);
-        filter.setMaxPayloadLength(2048);
         return filter;
     }
 

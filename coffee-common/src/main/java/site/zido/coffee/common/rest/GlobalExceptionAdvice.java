@@ -1,7 +1,6 @@
 package site.zido.coffee.common.rest;
 
 
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -21,7 +20,6 @@ import javax.validation.ConstraintViolationException;
  * @author zido
  */
 @RestControllerAdvice
-@Order
 public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
     public GlobalExceptionAdvice(HttpResponseBodyFactory factory) {
         super(factory);
@@ -73,17 +71,10 @@ public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
         return super.handleConstraintViolationException(e, request);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @Override
-    protected Object handleRuntimeException(RuntimeException e, HttpServletRequest request) {
-        return super.handleRuntimeException(e, request);
-    }
-
     @ExceptionHandler(CommonBusinessException.class)
     @Override
     protected Object handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request, HttpServletResponse response) {
-            return super.handleCommonBusinessException(e, request, response);
+        return super.handleCommonBusinessException(e, request, response);
     }
 
 }

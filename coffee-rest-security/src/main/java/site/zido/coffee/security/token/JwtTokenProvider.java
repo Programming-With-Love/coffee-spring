@@ -5,6 +5,7 @@ import io.jsonwebtoken.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.StringUtils;
+import site.zido.coffee.common.exceptions.CommonBusinessException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Base64;
@@ -77,7 +79,7 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
     }
 
     @Override
-    public SecurityContext parse(String token, HttpServletResponse response) {
+    public SecurityContext parse(String token, HttpServletResponse response) throws TokenInvalidException {
         if (StringUtils.isEmpty(token)) {
             return null;
         }
@@ -87,20 +89,17 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
                     .setSigningKey(jwtSecret)
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (ExpiredJwtException e) {
-            return null;
-        } catch (UnsupportedJwtException e) {
-            LOGGER.warn("不支持的jwt token:{}", token);
-            return null;
+        } catch (ExpiredJwtException | UnsupportedJwtException e) {
+            throw new TokenInvalidException("token失效",e);
         } catch (MalformedJwtException e) {
             LOGGER.warn("jwt token被修改过:{}", token);
-            return null;
+            throw new TokenInvalidException("token失效",e);
         } catch (SignatureException e) {
             LOGGER.warn("签名异常:{}", token);
-            return null;
+            throw new TokenInvalidException("token失效",e);
         } catch (IllegalArgumentException e) {
             LOGGER.warn("token串非法:{}", token);
-            return null;
+            throw new TokenInvalidException("token失效",e);
         }
         String username = claims.getSubject();
         if (username == null) {

@@ -51,11 +51,13 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             if (this.tokenProvider == null) {
                 this.tokenProvider = restHttp.getSharedObject(TokenProvider.class);
                 if (this.tokenProvider == null) {
-                    JwtTokenProvider provider = new JwtTokenProvider("coffee-jwt", 1000);
+                    JwtTokenProvider provider = new JwtTokenProvider("coffee-jwt", 1000 * 60 * 60);
                     UserDetailsService userDetailsService = restHttp.getSharedObject(UserDetailsService.class);
                     provider.setUserService(userDetailsService);
                     postProcess(provider);
                     this.tokenProvider = provider;
+                } else {
+                    this.tokenProvider = postProcess(this.tokenProvider);
                 }
             }
             RestSecurityContextRepository repo = new RestSecurityContextRepository(this.tokenProvider);
@@ -105,14 +107,17 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
 
         public JwtTokenProviderConfig enable() {
             if (this.tokenProvider == null) {
-                this.tokenProvider = new JwtTokenProvider();
-                getBuilder().setSharedObject(JwtTokenProvider.class, tokenProvider);
+                UserDetailsService userDetailsService = getBuilder().getSharedObject(UserDetailsService.class);
+                this.tokenProvider =
+                        new JwtTokenProvider("coffee-jwt", 60 * 60 * 1000);
+                this.tokenProvider.setUserService(userDetailsService);
+                getBuilder().setSharedObject(TokenProvider.class, tokenProvider);
             }
             return this;
         }
 
         public RestSecurityContextConfigurer<H> disable() {
-            getBuilder().setSharedObject(JwtTokenProvider.class, null);
+            getBuilder().setSharedObject(TokenProvider.class, null);
             this.tokenProvider = null;
             return RestSecurityContextConfigurer.this;
         }

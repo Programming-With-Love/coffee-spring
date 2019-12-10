@@ -10,11 +10,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import site.zido.coffee.common.rest.GlobalResultHandler;
+import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 import site.zido.coffee.security.RestSecurityConfigurationAdapter;
 import site.zido.coffee.security.authentication.phone.PhoneCodeCache;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zido
@@ -22,6 +25,11 @@ import java.util.Map;
 @EnableRestSecurity(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class AuthConfig extends RestSecurityConfigurationAdapter {
+
+    @Bean
+    public GlobalResultHandler handler(HttpResponseBodyFactory factory) {
+        return new GlobalResultHandler(factory);
+    }
 
     @Override
     protected void configure(RestHttpSecurity http) throws Exception {
@@ -31,19 +39,17 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
                 .and()
                 .formLogin().and()
                 .phoneCodeLogin().phoneCodeCache(new PhoneCodeCache() {
-            private Map<String, String> map = new HashMap<>();
 
             @Override
             public void put(String phone, String code) {
-                map.put(phone, code);
             }
 
             @Override
             public String getCode(String phone) {
-                return map.get(phone);
+                return "1234";
             }
         }).and()
-                .securityContext().jwt().and()
+                .securityContext().jwt().jwtExpiration(1, TimeUnit.HOURS).and()
                 .httpBasic();
     }
 
@@ -60,7 +66,12 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
                 .roles("user")
                 .passwordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder()::encode)
                 .build();
-        return new InMemoryUserDetailsManager(user, user2);
+        UserDetails user3 = User.builder().username("13512341235")
+                .password("xxx")
+                .roles("admin")
+                .passwordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder()::encode)
+                .build();
+        return new InMemoryUserDetailsManager(user, user2, user3);
     }
 
 }
