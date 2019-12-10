@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Path;
@@ -71,8 +72,9 @@ public abstract class BaseGlobalExceptionHandler {
         return factory.error(CommonErrorCode.UNKNOWN, e.getMessage(), null);
     }
 
-    protected Object handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request) {
+    protected Object handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request, HttpServletResponse response) {
         LOGGER.warn("business error:" + e.getMessage());
+        response.setStatus(e.getHttpStatus());
         return factory.error(e.getCode(), e.getMsg(), null);
     }
 
