@@ -31,13 +31,14 @@ public class RestSecurityContextRepository implements SecurityContextRepository 
     @Override
     public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
         HttpServletRequest request = requestResponseHolder.getRequest();
+        HttpServletResponse response = requestResponseHolder.getResponse();
         String token = request.getHeader(authHeaderName);
         SecurityContext authentication;
         if (token == null) {
             LOGGER.debug("No token currently exists");
             authentication = generateNewContext();
         } else {
-            authentication = tokenProvider.parse(token);
+            authentication = tokenProvider.parse(token, response);
             if (authentication == null) {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("jwt did not contain a SecurityContext but contained: '"

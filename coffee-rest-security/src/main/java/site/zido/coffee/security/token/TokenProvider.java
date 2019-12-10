@@ -2,6 +2,8 @@ package site.zido.coffee.security.token;
 
 import org.springframework.security.core.context.SecurityContext;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * token 提供者
  *
@@ -19,8 +21,9 @@ public interface TokenProvider {
     /**
      * 解析token
      *
-     * @param token token
+     * @param token    token
+     * @param response response,例如jwt等会需要response对象进行续期操作
      * @return json字符串
      */
-    SecurityContext parse(String token);
+    SecurityContext parse(String token, HttpServletResponse response);
 }
