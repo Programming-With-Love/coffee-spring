@@ -196,7 +196,6 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
      * {@link #userDetailsService()} instead
      *
      * @return the {@link UserDetailsService}
-     * @throws Exception
      * @see #userDetailsService()
      */
     public UserDetailsService userDetailsServiceBean() throws Exception {

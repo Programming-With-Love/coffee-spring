@@ -20,10 +20,24 @@ public class CommonBusinessException extends RuntimeException {
 
     public CommonBusinessException(int httpStatus, int code, String msg) {
         super(buildMsg(httpStatus, code, msg));
+        this.httpStatus = httpStatus;
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public CommonBusinessException(int httpStatus, int code, Throwable t) {
+        super(buildMsg(httpStatus, code, t.getMessage()), t);
+        this.httpStatus = httpStatus;
+        this.code = code;
+        if (t instanceof CommonBusinessException) {
+            this.msg = ((CommonBusinessException) t).getMsg();
+        } else {
+            this.msg = "未知异常";
+        }
     }
 
     protected CommonBusinessException(Throwable t) {
-        super(buildMsg(400, 1, "未知异常"), t);
+        this(400, 1, t);
     }
 
     public CommonBusinessException(int httpStatus, String msg) {
