@@ -120,7 +120,6 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
                     .exceptionHandling().accessDeniedHandler(new RestAccessDeniedHandlerImpl()).and()
                     .headers().and()
                     .securityContext().and()
-                    .anonymous().and()
                     .servletApi().and()
                     .logout();
             ClassLoader classLoader = this.context.getClassLoader();

@@ -8,8 +8,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
-import site.zido.coffee.security.token.RestSecurityContextRepository;
-import site.zido.coffee.security.token.JwtTokenProvider;
+import site.zido.coffee.security.token.JwtSecurityContextRepository;
 import site.zido.coffee.security.token.TokenProvider;
 
 import java.util.concurrent.TimeUnit;
@@ -19,7 +18,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> extends
         AbstractHttpConfigurer<RestSecurityContextConfigurer<H>, H> {
-    private TokenProvider tokenProvider;
     private String authHeaderName;
 
     /**
@@ -44,39 +42,25 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
     }
 
     @Override
-    public void init(H restHttp) throws Exception {
-        SecurityContextRepository securityContextRepository = restHttp
-                .getSharedObject(SecurityContextRepository.class);
-        if (securityContextRepository == null) {
-            if (this.tokenProvider == null) {
-                this.tokenProvider = restHttp.getSharedObject(TokenProvider.class);
-                if (this.tokenProvider == null) {
-                    JwtTokenProvider provider = new JwtTokenProvider("coffee-jwt", 1000 * 60 * 60);
-                    UserDetailsService userDetailsService = restHttp.getSharedObject(UserDetailsService.class);
-                    provider.setUserService(userDetailsService);
-                    postProcess(provider);
-                    this.tokenProvider = provider;
-                } else {
-                    this.tokenProvider = postProcess(this.tokenProvider);
-                }
-            }
-            RestSecurityContextRepository repo = new RestSecurityContextRepository(this.tokenProvider);
-            AuthenticationTrustResolver trustResolver = restHttp
-                    .getSharedObject(AuthenticationTrustResolver.class);
-            if (trustResolver != null) {
-                repo.setTrustResolver(trustResolver);
-            }
-            if (this.authHeaderName != null) {
-                repo.setAuthHeaderName(authHeaderName);
-            }
-            restHttp.setSharedObject(SecurityContextRepository.class, repo);
-        }
-    }
-
-    @Override
     public void configure(H restHttp) {
         SecurityContextRepository securityContextRepository = restHttp
                 .getSharedObject(SecurityContextRepository.class);
+        if (securityContextRepository == null) {
+            JwtSecurityContextRepository repository = new JwtSecurityContextRepository("coffee-jwt", 1000 * 60 * 60);
+            UserDetailsService userDetailsService = restHttp.getSharedObject(UserDetailsService.class);
+            repository.setUserService(userDetailsService);
+            AuthenticationTrustResolver trustResolver = restHttp
+                    .getSharedObject(AuthenticationTrustResolver.class);
+            if (trustResolver != null) {
+                repository.setTrustResolver(trustResolver);
+            }
+            if (this.authHeaderName != null) {
+                repository.setAuthHeaderName(authHeaderName);
+            }
+            postProcess(repository);
+            restHttp.setSharedObject(SecurityContextRepository.class, repository);
+            securityContextRepository = repository;
+        }
         SecurityContextPersistenceFilter securityContextFilter = new SecurityContextPersistenceFilter(
                 securityContextRepository);
         securityContextFilter.setForceEagerSessionCreation(false);
@@ -85,7 +69,6 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
     }
 
     public RestSecurityContextConfigurer<H> tokenProvider(TokenProvider providedTokenProvider) {
-        this.tokenProvider = providedTokenProvider;
         return this;
     }
 
@@ -94,56 +77,56 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
         return this;
     }
 
-    public JwtTokenProviderConfig jwt() {
-        return new JwtTokenProviderConfig();
+    public JwtSecurityConfigurer jwt() {
+        return new JwtSecurityConfigurer();
     }
 
-    public class JwtTokenProviderConfig {
-        private JwtTokenProvider tokenProvider;
+    public class JwtSecurityConfigurer {
 
-        private JwtTokenProviderConfig() {
+        private JwtSecurityContextRepository repository;
+
+        private JwtSecurityConfigurer() {
             enable();
         }
 
-        public JwtTokenProviderConfig enable() {
-            if (this.tokenProvider == null) {
+        public JwtSecurityConfigurer enable() {
+            if (this.repository == null) {
                 UserDetailsService userDetailsService = getBuilder().getSharedObject(UserDetailsService.class);
-                this.tokenProvider =
-                        new JwtTokenProvider("coffee-jwt", 60 * 60 * 1000);
-                this.tokenProvider.setUserService(userDetailsService);
-                getBuilder().setSharedObject(TokenProvider.class, tokenProvider);
+                this.repository =
+                        new JwtSecurityContextRepository("coffee-jwt", 60 * 60 * 1000);
+                this.repository.setUserService(userDetailsService);
+                getBuilder().setSharedObject(JwtSecurityContextRepository.class, repository);
             }
             return this;
         }
 
         public RestSecurityContextConfigurer<H> disable() {
-            getBuilder().setSharedObject(TokenProvider.class, null);
-            this.tokenProvider = null;
+            getBuilder().setSharedObject(JwtSecurityContextRepository.class, null);
             return RestSecurityContextConfigurer.this;
         }
 
-        public JwtTokenProviderConfig userDetailsService(UserDetailsService userDetailsService) {
-            tokenProvider.setUserService(userDetailsService);
+        public JwtSecurityConfigurer userDetailsService(UserDetailsService userDetailsService) {
+            repository.setUserService(userDetailsService);
             return this;
         }
 
-        public JwtTokenProviderConfig jwtSecret(String jwtSecret) {
-            tokenProvider.setJwtSecret(jwtSecret);
+        public JwtSecurityConfigurer jwtSecret(String jwtSecret) {
+            repository.setJwtSecret(jwtSecret);
             return this;
         }
 
-        public JwtTokenProviderConfig jwtExpirationInMs(int jwtExpirationInMs) {
-            tokenProvider.setJwtExpirationInMs(jwtExpirationInMs);
+        public JwtSecurityConfigurer jwtExpirationInMs(int jwtExpirationInMs) {
+            repository.setJwtExpirationInMs(jwtExpirationInMs);
             return this;
         }
 
-        public JwtTokenProviderConfig jwtExpiration(long time, TimeUnit unit) {
-            tokenProvider.setJwtExpirationInMs(unit.toMillis(time));
+        public JwtSecurityConfigurer jwtExpiration(long time, TimeUnit unit) {
+            repository.setJwtExpirationInMs(unit.toMillis(time));
             return this;
         }
 
-        public JwtTokenProviderConfig authoritiesMapper(GrantedAuthoritiesMapper mapper) {
-            tokenProvider.setAuthoritiesMapper(mapper);
+        public JwtSecurityConfigurer authoritiesMapper(GrantedAuthoritiesMapper mapper) {
+            repository.setAuthoritiesMapper(mapper);
             return this;
         }
 

@@ -4,32 +4,34 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.context.HttpRequestResponseHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.StringUtils;
-import site.zido.coffee.common.exceptions.CommonBusinessException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 
 /**
- * 使用jwt 实现的token提供者
- *
  * @author zido
  */
-public class JwtTokenProvider implements TokenProvider, InitializingBean {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenProvider.class);
-
+public class JwtSecurityContextRepository implements SecurityContextRepository {
+    public static final String DEFAULT_AUTH_HEADER_NAME = "Authorization";
+    private static Logger LOGGER = LoggerFactory.getLogger(JwtSecurityContextRepository.class);
+    private String authHeaderName = DEFAULT_AUTH_HEADER_NAME;
+    private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
     private String jwtSecret;
 
     private long jwtExpirationInMs;
@@ -40,12 +42,67 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
-    public JwtTokenProvider() {
+    public JwtSecurityContextRepository() {
     }
 
-    public JwtTokenProvider(String jwtSecret, long jwtExpirationInMs) {
+    public JwtSecurityContextRepository(String jwtSecret, long jwtExpirationInMs) {
         this.jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes());
         this.jwtExpirationInMs = jwtExpirationInMs;
+    }
+
+    @Override
+    public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
+        HttpServletRequest request = requestResponseHolder.getRequest();
+        HttpServletResponse response = requestResponseHolder.getResponse();
+        String token = request.getHeader(authHeaderName);
+        SecurityContext context;
+        if (token == null) {
+            LOGGER.debug("No token currently exists");
+            context = generateNewContext();
+        } else {
+            try {
+                context = parseFromToken(token, response);
+                if (context == null) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
+                                + context
+                                + "'; are you improperly modifying the HttpSession directly "
+                                + "(you should always use SecurityContextHolder) or using the Authentication attribute "
+                                + "reserved for this class?");
+                    }
+                    context = generateNewContext();
+                }
+            } catch (TokenInvalidException e) {
+                context = generateNewContext();
+            }
+        }
+
+        LOGGER.debug("Obtained a valid SecurityContext from " + authHeaderName
+                + " in request header"
+                + ": '" + context + "'");
+        return context;
+    }
+
+    protected SecurityContext generateNewContext() {
+        return SecurityContextHolder.createEmptyContext();
+    }
+
+    @Override
+    public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    @Override
+    public boolean containsContext(HttpServletRequest request) {
+        return StringUtils.hasLength(request.getHeader(authHeaderName));
+    }
+
+    public void setAuthHeaderName(String authHeaderName) {
+        this.authHeaderName = authHeaderName;
+    }
+
+    public void setTrustResolver(AuthenticationTrustResolver trustResolver) {
+        this.trustResolver = trustResolver;
     }
 
     public void setUserService(UserDetailsService userService) {
@@ -64,8 +121,7 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
         this.authoritiesMapper = authoritiesMapper;
     }
 
-    @Override
-    public String generate(SecurityContext subject) {
+    private String generateNewToken(SecurityContext subject) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + (long) (jwtExpirationInMs * 1.5));
 
@@ -78,8 +134,7 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
                 .compact();
     }
 
-    @Override
-    public SecurityContext parse(String token, HttpServletResponse response) throws TokenInvalidException {
+    public SecurityContext parseFromToken(String token, HttpServletResponse response) throws TokenInvalidException {
         if (StringUtils.isEmpty(token)) {
             return null;
         }
@@ -90,16 +145,16 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException | UnsupportedJwtException e) {
-            throw new TokenInvalidException("token失效",e);
+            throw new TokenInvalidException("token失效", e);
         } catch (MalformedJwtException e) {
             LOGGER.warn("jwt token被修改过:{}", token);
-            throw new TokenInvalidException("token失效",e);
+            throw new TokenInvalidException("token失效", e);
         } catch (SignatureException e) {
             LOGGER.warn("签名异常:{}", token);
-            throw new TokenInvalidException("token失效",e);
+            throw new TokenInvalidException("token失效", e);
         } catch (IllegalArgumentException e) {
             LOGGER.warn("token串非法:{}", token);
-            throw new TokenInvalidException("token失效",e);
+            throw new TokenInvalidException("token失效", e);
         }
         String username = claims.getSubject();
         if (username == null) {
@@ -111,20 +166,16 @@ public class JwtTokenProvider implements TokenProvider, InitializingBean {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null,
                 authoritiesMapper.mapAuthorities(user.getAuthorities()));
         context.setAuthentication(authenticationToken);
+
         Date issued = claims.getIssuedAt();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(issued);
         calendar.add(Calendar.MILLISECOND, (int) (this.jwtExpirationInMs * 0.5));
         if (calendar.getTime().before(new Date())) {
-            String newToken = generate(context);
+            String newToken = generateNewToken(context);
             response.setHeader("Authorization", newToken);
         }
         return context;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(userService, "User Service Cannot be null");
     }
 
     public String getIssue() {
