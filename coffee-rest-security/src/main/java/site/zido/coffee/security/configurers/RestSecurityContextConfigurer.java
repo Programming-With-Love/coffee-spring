@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
 import site.zido.coffee.security.token.JwtSecurityContextRepository;
-import site.zido.coffee.security.token.TokenProvider;
 
 import java.util.concurrent.TimeUnit;
 
@@ -66,10 +65,6 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
         securityContextFilter.setForceEagerSessionCreation(false);
         securityContextFilter = postProcess(securityContextFilter);
         restHttp.addFilter(securityContextFilter);
-    }
-
-    public RestSecurityContextConfigurer<H> tokenProvider(TokenProvider providedTokenProvider) {
-        return this;
     }
 
     public RestSecurityContextConfigurer<H> authHeaderName(String authHeaderName) {

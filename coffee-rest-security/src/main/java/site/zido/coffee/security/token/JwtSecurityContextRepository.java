@@ -64,8 +64,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
                 context = parseFromToken(token, response);
                 if (context == null) {
                     if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("jwt did not contain a SecurityContext but contained: '"
-                                + context
+                        LOGGER.warn("jwt did not contain a SecurityContext but contained: 'null"
                                 + "'; are you improperly modifying the HttpSession directly "
                                 + "(you should always use SecurityContextHolder) or using the Authentication attribute "
                                 + "reserved for this class?");
@@ -89,7 +88,10 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 
     @Override
     public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
-
+        if (!response.isCommitted()) {
+            String token = generateNewToken(context);
+            addTokenToResponse(response, token);
+        }
     }
 
     @Override
@@ -119,6 +121,10 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 
     public void setAuthoritiesMapper(GrantedAuthoritiesMapper authoritiesMapper) {
         this.authoritiesMapper = authoritiesMapper;
+    }
+
+    private void addTokenToResponse(HttpServletResponse response, String token) {
+        response.setHeader("Authorization", token);
     }
 
     private String generateNewToken(SecurityContext subject) {
@@ -173,7 +179,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         calendar.add(Calendar.MILLISECOND, (int) (this.jwtExpirationInMs * 0.5));
         if (calendar.getTime().before(new Date())) {
             String newToken = generateNewToken(context);
-            response.setHeader("Authorization", newToken);
+            addTokenToResponse(response, newToken);
         }
         return context;
     }

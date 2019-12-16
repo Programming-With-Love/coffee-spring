@@ -3,14 +3,11 @@ package site.zido.coffee.security.configurers;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.access.RequestMatcherDelegatingAccessDeniedHandler;
 import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
@@ -32,118 +29,37 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
 
     private LinkedHashMap<RequestMatcher, AccessDeniedHandler> defaultDeniedHandlerMappings = new LinkedHashMap<>();
 
-    /**
-     * Creates a new instance
-     *
-     * @see HttpSecurity#exceptionHandling()
-     */
     public RestExceptionHandlingConfigurer() {
     }
 
-    /**
-     * Shortcut to specify the {@link AccessDeniedHandler} to be used is a specific error
-     * page
-     *
-     * @param accessDeniedUrl the URL to the access denied page (i.e. /errors/401)
-     * @return the {@link ExceptionHandlingConfigurer} for further customization
-     * @see AccessDeniedHandlerImpl
-     * @see #accessDeniedHandler(org.springframework.security.web.access.AccessDeniedHandler)
-     */
-    public RestExceptionHandlingConfigurer<H> accessDeniedPage(String accessDeniedUrl) {
-        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
-        accessDeniedHandler.setErrorPage(accessDeniedUrl);
-        return accessDeniedHandler(accessDeniedHandler);
-    }
-
-    /**
-     * Specifies the {@link AccessDeniedHandler} to be used
-     *
-     * @param accessDeniedHandler the {@link AccessDeniedHandler} to be used
-     * @return the {@link ExceptionHandlingConfigurer} for further customization
-     */
     public RestExceptionHandlingConfigurer<H> accessDeniedHandler(
             AccessDeniedHandler accessDeniedHandler) {
         this.accessDeniedHandler = accessDeniedHandler;
         return this;
     }
 
-    /**
-     * Sets a default {@link AccessDeniedHandler} to be used which prefers being
-     * invoked for the provided {@link RequestMatcher}. If only a single default
-     * {@link AccessDeniedHandler} is specified, it will be what is used for the
-     * default {@link AccessDeniedHandler}. If multiple default
-     * {@link AccessDeniedHandler} instances are configured, then a
-     * {@link RequestMatcherDelegatingAccessDeniedHandler} will be used.
-     *
-     * @param deniedHandler    the {@link AccessDeniedHandler} to use
-     * @param preferredMatcher the {@link RequestMatcher} for this default
-     *                         {@link AccessDeniedHandler}
-     * @return the {@link ExceptionHandlingConfigurer} for further customizations
-     * @since 5.1
-     */
     public RestExceptionHandlingConfigurer<H> defaultAccessDeniedHandlerFor(
             AccessDeniedHandler deniedHandler, RequestMatcher preferredMatcher) {
         this.defaultDeniedHandlerMappings.put(preferredMatcher, deniedHandler);
         return this;
     }
 
-    /**
-     * Sets the {@link AuthenticationEntryPoint} to be used.
-     *
-     * <p>
-     * If no {@link #authenticationEntryPoint(AuthenticationEntryPoint)} is specified,
-     * then
-     * {@link #defaultAuthenticationEntryPointFor(AuthenticationEntryPoint, RequestMatcher)}
-     * will be used. The first {@link AuthenticationEntryPoint} will be used as the
-     * default if no matches were found.
-     * </p>
-     *
-     * <p>
-     * If that is not provided defaults to {@link Http403ForbiddenEntryPoint}.
-     * </p>
-     *
-     * @param authenticationEntryPoint the {@link AuthenticationEntryPoint} to use
-     * @return the {@link ExceptionHandlingConfigurer} for further customizations
-     */
     public RestExceptionHandlingConfigurer<H> authenticationEntryPoint(
             AuthenticationEntryPoint authenticationEntryPoint) {
         this.authenticationEntryPoint = authenticationEntryPoint;
         return this;
     }
 
-    /**
-     * Sets a default {@link AuthenticationEntryPoint} to be used which prefers being
-     * invoked for the provided {@link RequestMatcher}. If only a single default
-     * {@link AuthenticationEntryPoint} is specified, it will be what is used for the
-     * default {@link AuthenticationEntryPoint}. If multiple default
-     * {@link AuthenticationEntryPoint} instances are configured, then a
-     * {@link DelegatingAuthenticationEntryPoint} will be used.
-     *
-     * @param entryPoint       the {@link AuthenticationEntryPoint} to use
-     * @param preferredMatcher the {@link RequestMatcher} for this default
-     *                         {@link AuthenticationEntryPoint}
-     * @return the {@link ExceptionHandlingConfigurer} for further customizations
-     */
     public RestExceptionHandlingConfigurer<H> defaultAuthenticationEntryPointFor(
             AuthenticationEntryPoint entryPoint, RequestMatcher preferredMatcher) {
         this.defaultEntryPointMappings.put(preferredMatcher, entryPoint);
         return this;
     }
 
-    /**
-     * Gets any explicitly configured {@link AuthenticationEntryPoint}
-     *
-     * @return
-     */
     AuthenticationEntryPoint getAuthenticationEntryPoint() {
         return this.authenticationEntryPoint;
     }
 
-    /**
-     * Gets the {@link AccessDeniedHandler} that is configured.
-     *
-     * @return the {@link AccessDeniedHandler}
-     */
     AccessDeniedHandler getAccessDeniedHandler() {
         return this.accessDeniedHandler;
     }
@@ -159,14 +75,6 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
         http.addFilter(exceptionTranslationFilter);
     }
 
-    /**
-     * Gets the {@link AccessDeniedHandler} according to the rules specified by
-     * {@link #accessDeniedHandler(AccessDeniedHandler)}
-     *
-     * @param http the {@link HttpSecurity} used to look up shared
-     *             {@link AccessDeniedHandler}
-     * @return the {@link AccessDeniedHandler} to use
-     */
     AccessDeniedHandler getAccessDeniedHandler(H http) {
         AccessDeniedHandler deniedHandler = this.accessDeniedHandler;
         if (deniedHandler == null) {
@@ -175,14 +83,6 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
         return deniedHandler;
     }
 
-    /**
-     * Gets the {@link AuthenticationEntryPoint} according to the rules specified by
-     * {@link #authenticationEntryPoint(AuthenticationEntryPoint)}
-     *
-     * @param http the {@link HttpSecurity} used to look up shared
-     *             {@link AuthenticationEntryPoint}
-     * @return the {@link AuthenticationEntryPoint} to use
-     */
     AuthenticationEntryPoint getAuthenticationEntryPoint(H http) {
         AuthenticationEntryPoint entryPoint = this.authenticationEntryPoint;
         if (entryPoint == null) {
@@ -193,14 +93,14 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
 
     private AccessDeniedHandler createDefaultDeniedHandler(H http) {
         if (this.defaultDeniedHandlerMappings.isEmpty()) {
-            return new AccessDeniedHandlerImpl();
+            return new RestAccessDeniedHandlerImpl();
         }
         if (this.defaultDeniedHandlerMappings.size() == 1) {
             return this.defaultDeniedHandlerMappings.values().iterator().next();
         }
         return new RequestMatcherDelegatingAccessDeniedHandler(
                 this.defaultDeniedHandlerMappings,
-                new AccessDeniedHandlerImpl());
+                new RestAccessDeniedHandlerImpl());
     }
 
     private AuthenticationEntryPoint createDefaultEntryPoint(H http) {
