@@ -13,26 +13,25 @@ import site.zido.coffee.security.token.JwtSecurityContextRepository;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 使用token提供用户信息存储
+ * <p>
+ * 目前支持：
+ *
+ * <ul>
+ *     <li>
+ *         jwt token:通过{@link #jwt()}启用，默认有效期为一小时，每10分钟尝试一次续期
+ *     </li>
+ * </ul>
+ *
  * @author zido
  */
 public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> extends
         AbstractHttpConfigurer<RestSecurityContextConfigurer<H>, H> {
     private String authHeaderName;
 
-    /**
-     * Creates a new instance
-     *
-     * @see HttpSecurity#securityContext()
-     */
     public RestSecurityContextConfigurer() {
     }
 
-    /**
-     * Specifies the shared {@link SecurityContextRepository} that is to be used
-     *
-     * @param securityContextRepository the {@link SecurityContextRepository} to use
-     * @return the {@link HttpSecurity} for further customizations
-     */
     public RestSecurityContextConfigurer<H> securityContextRepository(
             SecurityContextRepository securityContextRepository) {
         getBuilder().setSharedObject(SecurityContextRepository.class,
@@ -45,7 +44,7 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
         SecurityContextRepository securityContextRepository = restHttp
                 .getSharedObject(SecurityContextRepository.class);
         if (securityContextRepository == null) {
-            JwtSecurityContextRepository repository = new JwtSecurityContextRepository("coffee-jwt", 1000 * 60 * 60);
+            JwtSecurityContextRepository repository = new JwtSecurityContextRepository("coffee-jwt", 1000 * 60 * 60, 1000 * 60 * 10);
             UserDetailsService userDetailsService = restHttp.getSharedObject(UserDetailsService.class);
             repository.setUserService(userDetailsService);
             AuthenticationTrustResolver trustResolver = restHttp
@@ -88,7 +87,7 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             if (this.repository == null) {
                 UserDetailsService userDetailsService = getBuilder().getSharedObject(UserDetailsService.class);
                 this.repository =
-                        new JwtSecurityContextRepository("coffee-jwt", 60 * 60 * 1000);
+                        new JwtSecurityContextRepository("coffee-jwt", 60 * 60 * 1000, 60 * 10 * 1000);
                 this.repository.setUserService(userDetailsService);
                 getBuilder().setSharedObject(JwtSecurityContextRepository.class, repository);
             }
@@ -110,13 +109,23 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             return this;
         }
 
-        public JwtSecurityConfigurer jwtExpirationInMs(int jwtExpirationInMs) {
+        public JwtSecurityConfigurer jwtExpirationInMs(long jwtExpirationInMs) {
             repository.setJwtExpirationInMs(jwtExpirationInMs);
             return this;
         }
 
         public JwtSecurityConfigurer jwtExpiration(long time, TimeUnit unit) {
             repository.setJwtExpirationInMs(unit.toMillis(time));
+            return this;
+        }
+
+        public JwtSecurityConfigurer jwtRenewInMs(long jwtExpirationInMs) {
+            repository.setJwtRenewInMs(jwtExpirationInMs);
+            return this;
+        }
+
+        public JwtSecurityConfigurer jwtRenew(long time, TimeUnit unit) {
+            repository.setJwtRenewInMs(unit.toMillis(time));
             return this;
         }
 

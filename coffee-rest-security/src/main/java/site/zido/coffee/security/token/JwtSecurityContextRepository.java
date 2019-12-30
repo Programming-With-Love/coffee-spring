@@ -36,6 +36,8 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 
     private long jwtExpirationInMs;
 
+    private long jwtRenewInMs;
+
     private String issue = "coffee-security";
 
     private UserDetailsService userService;
@@ -45,11 +47,20 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     public JwtSecurityContextRepository() {
     }
 
-    public JwtSecurityContextRepository(String jwtSecret, long jwtExpirationInMs) {
+    public JwtSecurityContextRepository(String jwtSecret, long jwtExpirationInMs, long jwtRenewInMs) {
         this.jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes());
         this.jwtExpirationInMs = jwtExpirationInMs;
+        this.jwtRenewInMs = jwtRenewInMs;
     }
 
+    /**
+     * 如果需要续期，则将response封装为{@link OnCommittedResponseWrapper}
+     * <p>
+     * 因为spring 会在 filter执行完之后提交输出，直接使用response.setHeader将不起作用
+     *
+     * @param requestResponseHolder response holder
+     * @return context
+     */
     @Override
     public SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
         HttpServletRequest request = requestResponseHolder.getRequest();
@@ -59,7 +70,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         if (token == null) {
             LOGGER.debug("No token currently exists");
             context = generateNewContext();
-            requestResponseHolder.setResponse(new JwtWriterResponse(response, null));
+            requestResponseHolder.setResponse(new JwtWriterResponse(response));
         } else {
             try {
                 if (StringUtils.isEmpty(token)) {
@@ -93,8 +104,18 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null,
                         authoritiesMapper.mapAuthorities(user.getAuthorities()));
                 context.setAuthentication(authenticationToken);
-
-                requestResponseHolder.setResponse(new JwtWriterResponse(response, claims));
+                //计算是否需要续期
+                if (jwtRenewInMs >= 0) {
+                    Date issued = claims.getIssuedAt();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(issued);
+                    calendar.add(Calendar.MILLISECOND, (int) (jwtRenewInMs));
+                    if (calendar.getTime().before(new Date())) {
+                        requestResponseHolder.setResponse(new JwtWriterResponse(response));
+                    }
+                } else {
+                    requestResponseHolder.setResponse(new JwtWriterResponse(response));
+                }
             } catch (TokenInvalidException e) {
                 context = generateNewContext();
             }
@@ -112,7 +133,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     @Override
     public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
         if (response instanceof JwtWriterResponse) {
-            ((JwtWriterResponse) response).writeHeaders(context);
+            ((JwtWriterResponse) response).writeToken(context);
         }
     }
 
@@ -122,12 +143,12 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     }
 
     private void addTokenToResponse(HttpServletResponse response, String token) {
-        response.setHeader("Authorization", token);
+        response.setHeader(authHeaderName, token);
     }
 
     private String generateNewToken(SecurityContext subject) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + (long) (jwtExpirationInMs * 1.5));
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
                 .setSubject(subject.getAuthentication().getName())
@@ -138,38 +159,32 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
                 .compact();
     }
 
-    class JwtWriterResponse extends OnCommittedResponseWrapper {
-        private final Claims claims;
+    public long getJwtRenewInMs() {
+        return jwtRenewInMs;
+    }
 
-        JwtWriterResponse(HttpServletResponse response,
-                          Claims claims) {
+    public void setJwtRenewInMs(long jwtRenewInMs) {
+        this.jwtRenewInMs = jwtRenewInMs;
+    }
+
+    class JwtWriterResponse extends OnCommittedResponseWrapper {
+
+        JwtWriterResponse(HttpServletResponse response) {
             super(response);
-            this.claims = claims;
         }
 
         @Override
         protected void onResponseCommitted() {
-            writeHeaders(SecurityContextHolder.getContext());
+            writeToken(SecurityContextHolder.getContext());
             this.disableOnResponseCommitted();
         }
 
-        protected void writeHeaders(SecurityContext context) {
+        protected void writeToken(SecurityContext context) {
             if (isDisableOnResponseCommitted()) {
                 return;
             }
-            if (claims == null) {
-                String newToken = generateNewToken(context);
-                addTokenToResponse(getHttpResponse(), newToken);
-            } else {
-                Date issued = claims.getIssuedAt();
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(issued);
-                calendar.add(Calendar.MILLISECOND, (int) (jwtExpirationInMs * 0.5));
-                if (calendar.getTime().before(new Date())) {
-                    String newToken = generateNewToken(context);
-                    addTokenToResponse(getHttpResponse(), newToken);
-                }
-            }
+            String newToken = generateNewToken(context);
+            addTokenToResponse(getHttpResponse(), newToken);
         }
 
         private HttpServletResponse getHttpResponse() {
