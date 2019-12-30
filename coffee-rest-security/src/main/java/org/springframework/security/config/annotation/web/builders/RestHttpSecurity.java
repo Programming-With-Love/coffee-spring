@@ -41,6 +41,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * SecurityFilterChain 构建者
+ *
+ * @author zido
+ */
 public final class RestHttpSecurity extends
         AbstractConfiguredSecurityBuilder<DefaultSecurityFilterChain, RestHttpSecurity>
         implements SecurityBuilder<DefaultSecurityFilterChain>,
@@ -50,15 +55,6 @@ public final class RestHttpSecurity extends
     private RequestMatcher requestMatcher = AnyRequestMatcher.INSTANCE;
     private FilterComparator comparator = new FilterComparator();
 
-    /**
-     * Creates a new instance
-     *
-     * @param objectPostProcessor   the {@link ObjectPostProcessor} that should be used
-     * @param authenticationBuilder the {@link AuthenticationManagerBuilder} to use for
-     *                              additional updates
-     * @param sharedObjects         the shared Objects to initialize the {@link RestHttpSecurity} with
-     * @see WebSecurityConfiguration
-     */
     @SuppressWarnings("unchecked")
     public RestHttpSecurity(ObjectPostProcessor<Object> objectPostProcessor,
                             AuthenticationManagerBuilder authenticationBuilder,
@@ -78,210 +74,6 @@ public final class RestHttpSecurity extends
 
     private ApplicationContext getContext() {
         return getSharedObject(ApplicationContext.class);
-    }
-
-    /**
-     * Allows configuring OpenID based authentication.
-     *
-     * <h2>Example Configurations</h2>
-     * <p>
-     * A basic example accepting the defaults and not using attribute exchange:
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class OpenIDLoginConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) {
-     * 		http.authorizeRequests().antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;).and().openidLogin()
-     * 				.permitAll();
-     *    }
-     *
-     * 	&#064;Override
-     * 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-     * 		auth.inMemoryAuthentication()
-     * 				// the username must match the OpenID of the user you are
-     * 				// logging in with
-     * 				.withUser(
-     * 						&quot;https://www.google.com/accounts/o8/id?id=lmkCn9xzPdsxVwG7pjYMuDgNNdASFmobNkcRPaWU&quot;)
-     * 				.password(&quot;password&quot;).roles(&quot;USER&quot;);
-     *    }
-     * }
-     * </pre>
-     * <p>
-     * A more advanced example demonstrating using attribute exchange and providing a
-     * custom AuthenticationUserDetailsService that will make any user that authenticates
-     * a valid user.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class OpenIDLoginConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) {
-     * 		http.authorizeRequests()
-     * 				.antMatchers(&quot;/**&quot;)
-     * 				.hasRole(&quot;USER&quot;)
-     * 				.and()
-     * 				.openidLogin()
-     * 				.loginPage(&quot;/login&quot;)
-     * 				.permitAll()
-     * 				.authenticationUserDetailsService(
-     * 						new AutoProvisioningUserDetailsService())
-     * 				.attributeExchange(&quot;https://www.google.com/.*&quot;).attribute(&quot;email&quot;)
-     * 				.type(&quot;https://axschema.org/contact/email&quot;).required(true).and()
-     * 				.attribute(&quot;firstname&quot;).type(&quot;https://axschema.org/namePerson/first&quot;)
-     * 				.required(true).and().attribute(&quot;lastname&quot;)
-     * 				.type(&quot;https://axschema.org/namePerson/last&quot;).required(true).and().and()
-     * 				.attributeExchange(&quot;.*yahoo.com.*&quot;).attribute(&quot;email&quot;)
-     * 				.type(&quot;https://schema.openid.net/contact/email&quot;).required(true).and()
-     * 				.attribute(&quot;fullname&quot;).type(&quot;https://axschema.org/namePerson&quot;)
-     * 				.required(true).and().and().attributeExchange(&quot;.*myopenid.com.*&quot;)
-     * 				.attribute(&quot;email&quot;).type(&quot;https://schema.openid.net/contact/email&quot;)
-     * 				.required(true).and().attribute(&quot;fullname&quot;)
-     * 				.type(&quot;https://schema.openid.net/namePerson&quot;).required(true);
-     *    }
-     * }
-     *
-     * public class AutoProvisioningUserDetailsService implements
-     * 		AuthenticationUserDetailsService&lt;OpenIDAuthenticationToken&gt; {
-     * 	public UserDetails loadUserDetails(OpenIDAuthenticationToken jwt)
-     * 			throws UsernameNotFoundException {
-     * 		return new User(jwt.getName(), &quot;NOTUSED&quot;,
-     * 				AuthorityUtils.createAuthorityList(&quot;ROLE_USER&quot;));
-     *    }
-     * }
-     * </pre>
-     *
-     * @return the {@link OpenIDLoginConfigurer} for further customizations.
-     * @throws Exception
-     * @see OpenIDLoginConfigurer
-     */
-    public OpenIDLoginConfigurer<RestHttpSecurity> openidLogin() throws Exception {
-        return getOrApply(new OpenIDLoginConfigurer<>());
-    }
-
-    /**
-     * Allows configuring OpenID based authentication.
-     *
-     * <h2>Example Configurations</h2>
-     * <p>
-     * A basic example accepting the defaults and not using attribute exchange:
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class OpenIDLoginConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) {
-     * 		http
-     * 			.authorizeRequests(authorizeRequests ->
-     * 				authorizeRequests
-     * 					.antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;)
-     * 			)
-     * 			.openidLogin(openidLogin ->
-     * 				openidLogin
-     * 					.permitAll()
-     * 			);
-     *    }
-     *
-     * 	&#064;Override
-     * 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-     * 		auth.inMemoryAuthentication()
-     * 				// the username must match the OpenID of the user you are
-     * 				// logging in with
-     * 				.withUser(
-     * 						&quot;https://www.google.com/accounts/o8/id?id=lmkCn9xzPdsxVwG7pjYMuDgNNdASFmobNkcRPaWU&quot;)
-     * 				.password(&quot;password&quot;).roles(&quot;USER&quot;);
-     *    }
-     * }
-     * </pre>
-     * <p>
-     * A more advanced example demonstrating using attribute exchange and providing a
-     * custom AuthenticationUserDetailsService that will make any user that authenticates
-     * a valid user.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class OpenIDLoginConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http.authorizeRequests(authorizeRequests ->
-     * 				authorizeRequests
-     * 					.antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;)
-     * 			)
-     * 			.openidLogin(openidLogin ->
-     * 				openidLogin
-     * 					.loginPage(&quot;/login&quot;)
-     * 					.permitAll()
-     * 					.authenticationUserDetailsService(
-     * 						new AutoProvisioningUserDetailsService())
-     * 					.attributeExchange(googleExchange ->
-     * 						googleExchange
-     * 							.identifierPattern(&quot;https://www.google.com/.*&quot;)
-     * 							.attribute(emailAttribute ->
-     * 								emailAttribute
-     * 									.name(&quot;email&quot;)
-     * 									.type(&quot;https://axschema.org/contact/email&quot;)
-     * 									.required(true)
-     * 							)
-     * 							.attribute(firstnameAttribute ->
-     * 								firstnameAttribute
-     * 									.name(&quot;firstname&quot;)
-     * 									.type(&quot;https://axschema.org/namePerson/first&quot;)
-     * 									.required(true)
-     * 							)
-     * 							.attribute(lastnameAttribute ->
-     * 								lastnameAttribute
-     * 									.name(&quot;lastname&quot;)
-     * 									.type(&quot;https://axschema.org/namePerson/last&quot;)
-     * 									.required(true)
-     * 							)
-     * 					)
-     * 					.attributeExchange(yahooExchange ->
-     * 						yahooExchange
-     * 							.identifierPattern(&quot;.*yahoo.com.*&quot;)
-     * 							.attribute(emailAttribute ->
-     * 								emailAttribute
-     * 									.name(&quot;email&quot;)
-     * 									.type(&quot;https://schema.openid.net/contact/email&quot;)
-     * 									.required(true)
-     * 							)
-     * 							.attribute(fullnameAttribute ->
-     * 								fullnameAttribute
-     * 									.name(&quot;fullname&quot;)
-     * 									.type(&quot;https://axschema.org/namePerson&quot;)
-     * 									.required(true)
-     * 							)
-     * 					)
-     * 			);
-     *    }
-     * }
-     *
-     * public class AutoProvisioningUserDetailsService implements
-     * 		AuthenticationUserDetailsService&lt;OpenIDAuthenticationToken&gt; {
-     * 	public UserDetails loadUserDetails(OpenIDAuthenticationToken jwt)
-     * 			throws UsernameNotFoundException {
-     * 		return new User(jwt.getName(), &quot;NOTUSED&quot;,
-     * 				AuthorityUtils.createAuthorityList(&quot;ROLE_USER&quot;));
-     *    }
-     * }
-     * </pre>
-     *
-     * @param openidLoginCustomizer the {@link Customizer} to provide more options for
-     *                              the {@link OpenIDLoginConfigurer}
-     * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
-     * @see OpenIDLoginConfigurer
-     */
-    public RestHttpSecurity openidLogin(Customizer<OpenIDLoginConfigurer<RestHttpSecurity>> openidLoginCustomizer) throws Exception {
-        openidLoginCustomizer.customize(getOrApply(new OpenIDLoginConfigurer<>()));
-        return RestHttpSecurity.this;
     }
 
     /**

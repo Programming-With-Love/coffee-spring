@@ -22,6 +22,7 @@ public class RestFormLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
      */
     public RestFormLoginConfigurer() {
         super(new UsernamePasswordAuthenticationFilter(), null);
+        getAuthenticationFilter().setRequiresAuthenticationRequestMatcher(createLoginProcessingUrlMatcher("/users/sessions"));
         usernameParameter("username");
         passwordParameter("password");
     }
@@ -55,7 +56,6 @@ public class RestFormLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
     @Override
     public void init(H http) throws Exception {
         super.init(http);
-        initDefaultLoginFilter(http);
     }
 
     @Override
@@ -79,22 +79,5 @@ public class RestFormLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
      */
     private String getPasswordParameter() {
         return getAuthenticationFilter().getPasswordParameter();
-    }
-
-    /**
-     * If available, initializes the {@link DefaultLoginPageGeneratingFilter} shared
-     * object.
-     *
-     * @param http the {@link HttpSecurityBuilder} to use
-     */
-    private void initDefaultLoginFilter(H http) {
-        DefaultLoginPageGeneratingFilter loginPageGeneratingFilter = http
-                .getSharedObject(DefaultLoginPageGeneratingFilter.class);
-        if (loginPageGeneratingFilter != null) {
-            loginPageGeneratingFilter.setFormLoginEnabled(true);
-            loginPageGeneratingFilter.setUsernameParameter(getUsernameParameter());
-            loginPageGeneratingFilter.setPasswordParameter(getPasswordParameter());
-            loginPageGeneratingFilter.setAuthenticationUrl(getLoginProcessingUrl());
-        }
     }
 }
