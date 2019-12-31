@@ -7,7 +7,37 @@
     <groupId>site.zido</groupId>
     <artifactId>coffee-common-builder</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.1-release</version>
+    <version>0.2.0-release</version>
+    <description>A Restful Style Launcher For Spring Boot</description>
+    <url>https://github.com/zidoshare/coffee-spring-boot-builder</url>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/zidoshare/coffee-spring-boot-builder/issues</url>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/zidoshare/coffee-spring-boot-builder</url>
+        <connection>scm:git:git://github.com/zidoshare/coffee-spring-boot-builder.git</connection>
+        <developerConnection>scm:git:git@github.com:zidoshare/coffee-spring-boot-builder.git</developerConnection>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>zidoshare</id>
+            <name>zido</name>
+            <email>wuhongxu1208@gmail.com</email>
+            <url>http://zido.site</url>
+        </developer>
+    </developers>
     <modules>
         <module>coffee-common</module>
         <module>coffee-extra</module>
@@ -16,29 +46,10 @@
         <module>coffee-dependencies</module>
     </modules>
     <properties>
-        <revision>0.1.1-release</revision>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <scm>
-        <connection>scm:git@github.com:zidoshare/coffee-spring-boot-builder.git</connection>
-        <developerConnection>scm:git@github.com:zidoshare/coffee-spring-boot-builder.git</developerConnection>
-        <url>git@github.com:zidoshare/coffee-spring-boot-builder.git</url>
-        <tag>coffee-common-builder-1.0.0</tag>
-    </scm>
-    <developers>
-        <developer>
-            <id>zido</id>
-            <name>zido</name>
-            <email>wuhongxu1208@gmail.com</email>
-            <url>http://zido.site</url>
-        </developer>
-    </developers>
-    <issueManagement>
-        <system>GitHub Issues</system>
-        <url>https://github.com/zidoshare/coffee-spring-boot-builder/issues</url>
-    </issueManagement>
     <repositories>
         <repository>
             <id>central</id>
@@ -78,22 +89,22 @@
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-common</artifactId>
-                <version>0.1.1-release</version>
+                <version>0.2.0-release</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-extra</artifactId>
-                <version>0.1.1-release</version>
+                <version>0.2.0-release</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-rest-security</artifactId>
-                <version>0.1.1-release</version>
+                <version>0.2.0-release</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-spring-boot-starter</artifactId>
-                <version>0.1.1-release</version>
+                <version>0.2.0-release</version>
             </dependency>
             <!-- others -->
             <dependency>
@@ -108,6 +119,16 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>oss</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>oss</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
     <build>
         <plugins>
             <plugin>
@@ -163,49 +184,20 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <!-- GPG -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>release</id>
-            <distributionManagement>
-                <repository>
-                    <id>releases</id>
-                    <name>releases</name>
-                    <url>http://maven.scustartup.com/nexus/content/repositories/releases</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>release-central</id>
-            <build>
-                <plugins>
-                    <!-- GPG -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>oss</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-                </snapshotRepository>
-                <repository>
-                    <id>oss</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-    </profiles>
 </project>

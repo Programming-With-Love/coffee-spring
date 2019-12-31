@@ -5,12 +5,12 @@
     <parent>
         <artifactId>coffee-common-builder</artifactId>
         <groupId>site.zido</groupId>
-        <version>0.1.1-release</version>
+        <version>0.2.0-release</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>coffee-spring-boot-starter</artifactId>
-    <description>所有启动器整合包</description>
+    <description>A Spring Boot Starter For Coffee</description>
     <packaging>pom</packaging>
     <dependencies>
         <dependency>
