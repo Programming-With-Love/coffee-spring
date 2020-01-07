@@ -30,8 +30,6 @@ import java.util.List;
 @ConditionalOnBean(ObjectMapper.class)
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class CommonAutoConfiguration {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(CommonAutoConfiguration.class);
 
     @Bean
     @ConditionalOnMissingBean(HttpResponseBodyFactory.class)

@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisShardInfo;
 import redis.embedded.RedisServer;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ public class RedisFrequencyLimiterTest {
         template = new RedisTemplate<>();
         JedisPoolConfig config = new JedisPoolConfig();
         JedisConnectionFactory factory = new JedisConnectionFactory(config);
-        factory.setShardInfo(new JedisShardInfo("127.0.0.1", 6380));
+        factory.getStandaloneConfiguration().setPort(6380);
         template.setConnectionFactory(factory);
         template.afterPropertiesSet();
     }

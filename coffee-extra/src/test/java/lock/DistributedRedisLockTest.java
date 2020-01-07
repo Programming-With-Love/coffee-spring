@@ -24,7 +24,7 @@ public class DistributedRedisLockTest {
         redisServer.start();
         JedisPoolConfig config = new JedisPoolConfig();
         factory = new JedisConnectionFactory(config);
-        factory.setPort(6381);
+        factory.getStandaloneConfiguration().setPort(6381);
         factory.afterPropertiesSet();
     }
 

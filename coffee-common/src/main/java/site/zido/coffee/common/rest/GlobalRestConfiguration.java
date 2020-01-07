@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class GlobalRestConfiguration {
      */
     @Bean
     public WebMvcConfigurer adapterForMessageConverter(StringToResultHttpMessageConverter converter) {
-        return new WebMvcConfigurerAdapter() {
+        return new WebMvcConfigurer() {
             @Override
             public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
                 LOGGER.debug("Add json string http message converter");
