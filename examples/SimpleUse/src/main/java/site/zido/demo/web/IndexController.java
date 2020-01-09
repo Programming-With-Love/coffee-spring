@@ -5,6 +5,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.zido.coffee.extra.limiter.Limiter;
 
 /**
  * @author zido
@@ -17,6 +18,11 @@ public class IndexController {
         return "hello world : " + user.getUsername();
     }
 
+    @Limiter(key = "limit-test")
+    @RequestMapping("/limit")
+    public String limit(){
+        return "limit content";
+    }
     @PreAuthorize("hasRole('admin')")
     @RequestMapping("/admin")
     public String admin(@AuthenticationPrincipal UserDetails user) {
