@@ -18,7 +18,6 @@ public class IndexController {
         return "hello world : " + user.getUsername();
     }
 
-    @Limiter(key = "limit-test")
     @RequestMapping("/limit")
     public String limit(){
         return "limit content";

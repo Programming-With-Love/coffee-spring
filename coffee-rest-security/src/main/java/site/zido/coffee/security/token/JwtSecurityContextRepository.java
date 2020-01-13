@@ -183,8 +183,10 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
             if (isDisableOnResponseCommitted()) {
                 return;
             }
-            String newToken = generateNewToken(context);
-            addTokenToResponse(getHttpResponse(), newToken);
+            if (context.getAuthentication() != null && context.getAuthentication().isAuthenticated()) {
+                String newToken = generateNewToken(context);
+                addTokenToResponse(getHttpResponse(), newToken);
+            }
         }
 
         private HttpServletResponse getHttpResponse() {

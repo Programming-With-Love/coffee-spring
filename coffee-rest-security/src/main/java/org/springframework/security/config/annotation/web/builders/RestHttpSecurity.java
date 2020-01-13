@@ -1005,6 +1005,14 @@ public final class RestHttpSecurity extends
         return this;
     }
 
+    public AnonymousConfigurer<RestHttpSecurity> anonymous() throws Exception {
+        return getOrApply(new AnonymousConfigurer<>());
+    }
+
+    public RestHttpSecurity anonymous(Customizer<AnonymousConfigurer<RestHttpSecurity>> anonymousCustomizer) throws Exception {
+        anonymousCustomizer.customize(getOrApply(new AnonymousConfigurer<>()));
+        return this;
+    }
 
     /**
      * Specifies to support form based authentication. If

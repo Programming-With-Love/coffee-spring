@@ -121,6 +121,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
                     .headers().and()
                     .securityContext().and()
                     .servletApi().and()
+                    .anonymous().and()
                     .logout();
             ClassLoader classLoader = this.context.getClassLoader();
             List<AbstractHttpConfigurer> defaultHttpConfigurers =

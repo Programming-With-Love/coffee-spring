@@ -34,8 +34,7 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
     @Override
     protected void configure(RestHttpSecurity http) throws Exception {
         http
-                .authorizeRequests()
-                .anyRequest().authenticated()
+                .authorizeRequests().anyRequest().permitAll()
                 .and()
                 .formLogin().and()
                 .phoneCodeLogin().phoneCodeCache(new PhoneCodeCache() {
