@@ -1,4 +1,4 @@
-package site.zido.coffee.security.authentication.mobile;
+package site.zido.coffee.security.authentication.phone;
 
 import org.junit.Assert;
 import org.junit.Test;

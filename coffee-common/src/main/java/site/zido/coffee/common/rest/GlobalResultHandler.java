@@ -8,6 +8,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.lang.reflect.Method;
+
 /**
  * 统一全局响应封装
  *
@@ -36,7 +38,11 @@ public class GlobalResultHandler implements ResponseBodyAdvice<Object> {
         if (methodAnnotation != null || returnType.getDeclaringClass().getAnnotation(OriginalResponse.class) != null) {
             return body;
         }
-        Class<?> returnClass = returnType.getMethod().getReturnType();
+        Method method = returnType.getMethod();
+        if (method == null) {
+            return null;
+        }
+        Class<?> returnClass = method.getReturnType();
         if (returnClass.equals(String.class) && body == null) {
             return null;
         }

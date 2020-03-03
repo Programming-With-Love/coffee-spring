@@ -1,7 +1,6 @@
 package site.zido.demo.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.RestHttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableRestSecurity;
@@ -14,9 +13,8 @@ import site.zido.coffee.common.rest.GlobalResultHandler;
 import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 import site.zido.coffee.security.RestSecurityConfigurationAdapter;
 import site.zido.coffee.security.authentication.phone.PhoneCodeCache;
+import site.zido.coffee.security.authentication.phone.SpringRedisPhoneCodeCache;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,6 +23,17 @@ import java.util.concurrent.TimeUnit;
 @EnableRestSecurity(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class AuthConfig extends RestSecurityConfigurationAdapter {
+
+    private PhoneCodeCache phoneCodeCache;
+
+    public AuthConfig(PhoneCodeCache phoneCodeCache) {
+        this.phoneCodeCache = phoneCodeCache;
+    }
+
+    @Bean
+    public static PhoneCodeCache publicPhoneCodeCache() {
+        return new SpringRedisPhoneCodeCache();
+    }
 
     @Bean
     public GlobalResultHandler handler(HttpResponseBodyFactory factory) {
@@ -37,17 +46,7 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
                 .authorizeRequests().anyRequest().permitAll()
                 .and()
                 .formLogin().and()
-                .phoneCodeLogin().phoneCodeCache(new PhoneCodeCache() {
-
-            @Override
-            public void put(String phone, String code) {
-            }
-
-            @Override
-            public String getCode(String phone) {
-                return "1234";
-            }
-        }).and()
+                .phoneCodeLogin().phoneCodeCache(phoneCodeCache).and()
                 .securityContext().jwt().jwtExpiration(1, TimeUnit.HOURS).and()
                 .httpBasic();
     }

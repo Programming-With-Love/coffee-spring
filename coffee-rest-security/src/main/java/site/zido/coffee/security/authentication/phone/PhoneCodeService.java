@@ -9,8 +9,8 @@ public interface PhoneCodeService {
     /**
      * 发送验证码
      *
-     * @param mobile 手机号
+     * @param phone 手机号
      * @param code   验证码
      */
-    void sendCode(String mobile, String code);
+    void sendCode(String phone, String code);
 }

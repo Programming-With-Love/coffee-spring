@@ -2,6 +2,7 @@ package site.zido.coffee.security.authentication.phone;
 
 import io.jsonwebtoken.lang.Assert;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,7 @@ public class SpringRedisPhoneCodeCache implements PhoneCodeCache, InitializingBe
         return template.opsForValue().get(getKey(phone));
     }
 
+    @Autowired
     public void setTemplate(StringRedisTemplate template) {
         this.template = template;
     }

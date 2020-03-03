@@ -8,7 +8,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import site.zido.coffee.security.validations.MobileValidator;
+import site.zido.coffee.security.validations.PhoneValidator;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -23,8 +23,8 @@ import java.io.IOException;
  */
 public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private RequestMatcher codeRequestMatcher = new AntPathRequestMatcher("/mobile/code", "POST");
-    private MobileValidator mobileValidator = new MobileValidator();
+    private RequestMatcher codeRequestMatcher = new AntPathRequestMatcher("/phone/code", "POST");
+    private PhoneValidator phoneValidator = new PhoneValidator();
     private PhoneCodeService phoneCodeService;
     private CodeGenerator codeGenerator = new CustomCodeGenerator(CustomCodeGenerator.Mode.NUMBER);
     private PhoneCodeCache cache;
@@ -33,7 +33,7 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
     private String codeParameter = "code";
 
     public PhoneAuthenticationFilter() {
-        super(new AntPathRequestMatcher("/mobile/sessions", "POST"));
+        super(new AntPathRequestMatcher("/phone/sessions", "POST"));
     }
 
     @Override
@@ -42,7 +42,7 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
         HttpServletResponse response = (HttpServletResponse) res;
         String phone = obtainPhone(request);
         if (requireCreateCode(request)) {
-            if (phone == null || !mobileValidator.isValid(phone, null)) {
+            if (phone == null || !phoneValidator.isValid(phone, null)) {
                 throw new BadCredentialsException(messages.getMessage(
                         "AbstractUserDetailsAuthenticationProvider.badCredentials",
                         "Bad phone"));
@@ -73,12 +73,12 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
         return request.getParameter(phoneParameter);
     }
 
-    protected String getCacheKey(String mobile) {
-        return cachePrefix + mobile;
+    protected String getCacheKey(String phone) {
+        return cachePrefix + phone;
     }
 
     public void setPhoneParameter(String phone) {
-        Assert.hasLength(phone, "mobile parameter cannot be null or empty");
+        Assert.hasLength(phone, "phone parameter cannot be null or empty");
         this.phoneParameter = phone;
     }
 

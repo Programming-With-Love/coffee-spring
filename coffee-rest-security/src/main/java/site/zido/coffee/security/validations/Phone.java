@@ -13,8 +13,8 @@ import java.lang.annotation.*;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = MobileValidator.class)
-public @interface Mobile {
+@Constraint(validatedBy = PhoneValidator.class)
+public @interface Phone {
     String message() default "手机号错误";
 
     Class<?>[] groups() default {};

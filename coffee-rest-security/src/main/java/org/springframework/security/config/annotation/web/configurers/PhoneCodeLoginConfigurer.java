@@ -83,8 +83,8 @@ public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
             private Logger logger = LoggerFactory.getLogger(PhoneCodeService.class);
 
             @Override
-            public void sendCode(String mobile, String code) {
-                logger.info("mobile:{},code:{}", mobile, code);
+            public void sendCode(String phone, String code) {
+                logger.info("phone:{},code:{}", phone, code);
             }
         };
     }

@@ -19,6 +19,7 @@ public class IndexController {
     }
 
     @RequestMapping("/limit")
+    @Limiter(key = "content")
     public String limit(){
         return "limit content";
     }

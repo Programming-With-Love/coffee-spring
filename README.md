@@ -26,7 +26,7 @@
 
 * 全局请求日志,帮助快速定位问题所在,日志示例：`Before request [uri=/test3/a?x=1&y=2;client=0:0:0:0:0:0:0:1;headers={host=[localhost:8080], user-agent=[curl/7.64.1], accept=[*/*]}]`
 
-* 定义更多的校验注解，例如：`@Mobile`
+* 定义更多的校验注解，例如：`@Phone`
 
 一些其他常用工具：分布式id生成器，分布式锁等
 

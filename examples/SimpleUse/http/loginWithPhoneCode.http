@@ -1,0 +1,43 @@
+### rest http test file
+
+### visit hello api
+GET http://localhost:8080/hello
+Content-Type: application/json
+
+> {%
+ client.assert(response.status === 401,"Response status is not 401")
+ %}
+
+### login by username
+# the default login user is `/users/sessions`
+POST http://localhost:8080/phone/code
+Content-Type: application/x-www-form-urlencoded
+
+phone=13512341234
+
+
+### 读取验证码，注意，这并不是框架自带的接口，只是便于集成测试而在示例项目中加入的直接通过接口获取验证码的功能
+GET http://localhost:8080/phone/code?phone=13512341234
+Content-Type: application/json
+
+> {% client.global.set("code",response.body.result); %}
+
+### visit hello api
+POST http://localhost:8080/phone/sessions
+Content-Type: application/x-www-form-urlencoded
+
+phone=13512341234&code={{code}}
+> {% client.global.set("auth_token", response.headers.valueOf("Authorization")); %}
+
+### visit hello api
+GET http://localhost:8080/hello
+Content-Type: application/json
+Authorization: {{auth_token}}
+
+> {%
+ client.assert(response.status === 200,"Response status is not 200")
+ client.assert(response.body.code === 0,"Response body code is not 0")
+ client.assert(response.body.result === "hello world : 13512341234","Response body result is not correct")
+ %}
+
+####
