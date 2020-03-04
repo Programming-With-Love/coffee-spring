@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * base repository interface containers some common methods
+ * 提供简单的通用方法的基础Repository
  *
  * @param <DOMAIN> domain type
  * @param <ID>     id type

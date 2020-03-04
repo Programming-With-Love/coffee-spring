@@ -29,11 +29,11 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.*;
 import org.springframework.util.Assert;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import site.zido.coffee.security.authentication.phone.PhoneAuthenticationFilter;
-import site.zido.coffee.security.configurers.*;
+import site.zido.coffee.security.configurers.RestExceptionHandlingConfigurer;
+import site.zido.coffee.security.configurers.RestFormLoginConfigurer;
+import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
 
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +45,7 @@ import java.util.Map;
  * SecurityFilterChain 构建者
  *
  * @author zido
+ * @see org.springframework.security.config.annotation.web.configuration.EnableRestSecurity
  */
 public final class RestHttpSecurity extends
         AbstractConfiguredSecurityBuilder<DefaultSecurityFilterChain, RestHttpSecurity>
@@ -55,6 +56,15 @@ public final class RestHttpSecurity extends
     private RequestMatcher requestMatcher = AnyRequestMatcher.INSTANCE;
     private FilterComparator comparator = new FilterComparator();
 
+    /**
+     * Creates a new instance
+     *
+     * @param objectPostProcessor   the {@link ObjectPostProcessor} that should be used
+     * @param authenticationBuilder the {@link AuthenticationManagerBuilder} to use for
+     *                              additional updates
+     * @param sharedObjects         the shared Objects to initialize the {@link RestHttpSecurity} with
+     * @see WebSecurityConfiguration
+     */
     @SuppressWarnings("unchecked")
     public RestHttpSecurity(ObjectPostProcessor<Object> objectPostProcessor,
                             AuthenticationManagerBuilder authenticationBuilder,
@@ -77,196 +87,41 @@ public final class RestHttpSecurity extends
     }
 
     /**
-     * Adds the Security headers to the response. This is activated by default when using
-     * {@link WebSecurityConfigurerAdapter}'s default constructor. Accepting the
-     * default provided by {@link WebSecurityConfigurerAdapter} or only invoking
-     * {@link #headers()} without invoking additional methods on it, is the equivalent of:
+     * openId 登录支持
      *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
+     * @return the {@link OpenIDLoginConfigurer} for further customizations.
+     * @throws Exception ex
+     */
+    public OpenIDLoginConfigurer<RestHttpSecurity> openidLogin() throws Exception {
+        return getOrApply(new OpenIDLoginConfigurer<>());
+    }
+
+    /**
+     * openId 登录支持
      *
-     * 	&#064;Override
-     *     protected void configure(RestHttpSecurity http) throws Exception {
-     *         http
-     *             .headers()
-     *                 .contentTypeOptions()
-     *                 .and()
-     *                 .xssProtection()
-     *                 .and()
-     *                 .cacheControl()
-     *                 .and()
-     *                 .httpStrictTransportSecurity()
-     *                 .and()
-     *                 .frameOptions()
-     *                 .and()
-     *             ...;
-     *     }
-     * }
-     * </pre>
-     * <p>
-     * You can disable the headers using the following:
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     *     protected void configure(RestHttpSecurity http) throws Exception {
-     *         http
-     *             .headers().disable()
-     *             ...;
-     *     }
-     * }
-     * </pre>
-     * <p>
-     * You can enable only a few of the headers by first invoking
-     * {@link HeadersConfigurer#defaultsDisabled()}
-     * and then invoking the appropriate methods on the {@link #headers()} result.
-     * For example, the following will enable {@link HeadersConfigurer#cacheControl()} and
-     * {@link HeadersConfigurer#frameOptions()} only.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     *     protected void configure(RestHttpSecurity http) throws Exception {
-     *         http
-     *             .headers()
-     *                  .defaultsDisabled()
-     *                  .cacheControl()
-     *                  .and()
-     *                  .frameOptions()
-     *                  .and()
-     *             ...;
-     *     }
-     * }
-     * </pre>
-     * <p>
-     * You can also choose to keep the defaults but explicitly disable a subset of headers.
-     * For example, the following will enable all the default headers except
-     * {@link HeadersConfigurer#frameOptions()}.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     *     protected void configure(RestHttpSecurity http) throws Exception {
-     *         http
-     *             .headers()
-     *                  .frameOptions()
-     *                  	.disable()
-     *                  .and()
-     *             ...;
-     *     }
-     * }
-     * </pre>
+     * @return the {@link RestHttpSecurity} for further customizations
+     * @throws Exception ex
+     */
+    public RestHttpSecurity openidLogin(Customizer<OpenIDLoginConfigurer<RestHttpSecurity>> openidLoginCustomizer) throws Exception {
+        openidLoginCustomizer.customize(getOrApply(new OpenIDLoginConfigurer<>()));
+        return this;
+    }
+
+    /**
+     * 响应头配置
      *
      * @return the {@link HeadersConfigurer} for further customizations
-     * @throws Exception
-     * @see HeadersConfigurer
+     * @throws Exception ex
      */
     public HeadersConfigurer<RestHttpSecurity> headers() throws Exception {
         return getOrApply(new HeadersConfigurer<>());
     }
 
     /**
-     * Adds the Security headers to the response. This is activated by default when using
-     * {@link WebSecurityConfigurerAdapter}'s default constructor.
+     * 响应头配置
      *
-     * <h2>Example Configurations</h2>
-     * <p>
-     * Accepting the default provided by {@link WebSecurityConfigurerAdapter} or only invoking
-     * {@link #headers()} without invoking additional methods on it, is the equivalent of:
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http
-     * 			.headers(headers ->
-     * 				headers
-     * 					.contentTypeOptions(withDefaults())
-     * 					.xssProtection(withDefaults())
-     * 					.cacheControl(withDefaults())
-     * 					.httpStrictTransportSecurity(withDefaults())
-     * 					.frameOptions(withDefaults()
-     * 			);
-     *    }
-     * }
-     * </pre>
-     * <p>
-     * You can disable the headers using the following:
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http
-     * 			.headers(headers -> headers.disable());
-     *    }
-     * }
-     * </pre>
-     * <p>
-     * You can enable only a few of the headers by first invoking
-     * {@link HeadersConfigurer#defaultsDisabled()}
-     * and then invoking the appropriate methods on the {@link #headers()} result.
-     * For example, the following will enable {@link HeadersConfigurer#cacheControl()} and
-     * {@link HeadersConfigurer#frameOptions()} only.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http
-     * 			.headers(headers ->
-     * 				headers
-     * 			 		.defaultsDisabled()
-     * 			 		.cacheControl(withDefaults())
-     * 			 		.frameOptions(withDefaults())
-     * 			);
-     *    }
-     * }
-     * </pre>
-     * <p>
-     * You can also choose to keep the defaults but explicitly disable a subset of headers.
-     * For example, the following will enable all the default headers except
-     * {@link HeadersConfigurer#frameOptions()}.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     *  protected void configure(RestHttpSecurity http) throws Exception {
-     *  	http
-     *  		.headers(headers ->
-     *  			headers
-     *  				.frameOptions(frameOptions -> frameOptions.disable())
-     *  		);
-     * }
-     * </pre>
-     *
-     * @param headersCustomizer the {@link Customizer} to provide more options for
-     *                          the {@link HeadersConfigurer}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestHttpSecurity headers(Customizer<HeadersConfigurer<RestHttpSecurity>> headersCustomizer) throws Exception {
         headersCustomizer.customize(getOrApply(new HeadersConfigurer<>()));
@@ -274,46 +129,34 @@ public final class RestHttpSecurity extends
     }
 
     /**
-     * Adds a {@link CorsFilter} to be used. If a bean by the name of corsFilter is
-     * provided, that {@link CorsFilter} is used. Else if corsConfigurationSource is
-     * defined, then that {@link CorsConfiguration} is used. Otherwise, if Spring MVC is
-     * on the classpath a {@link HandlerMappingIntrospector} is used.
+     * 跨域配置
      *
-     * @return the {@link CorsConfigurer} for customizations
-     * @throws Exception
+     * @return the {@link HeadersConfigurer} for further customizations.
+     * @throws Exception ex
      */
     public CorsConfigurer<RestHttpSecurity> cors() throws Exception {
         return getOrApply(new CorsConfigurer<>());
     }
 
     /**
-     * Adds a {@link CorsFilter} to be used. If a bean by the name of corsFilter is
-     * provided, that {@link CorsFilter} is used. Else if corsConfigurationSource is
-     * defined, then that {@link CorsConfiguration} is used. Otherwise, if Spring MVC is
-     * on the classpath a {@link HandlerMappingIntrospector} is used.
-     * You can enable CORS using:
+     * 跨域配置
      *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class CorsSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     *     protected void configure(RestHttpSecurity http) throws Exception {
-     *         http
-     *             .cors(withDefaults());
-     *     }
-     * }
-     * </pre>
-     *
-     * @param corsCustomizer the {@link Customizer} to provide more options for
-     *                       the {@link CorsConfigurer}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestHttpSecurity cors(Customizer<CorsConfigurer<RestHttpSecurity>> corsCustomizer) throws Exception {
         corsCustomizer.customize(getOrApply(new CorsConfigurer<>()));
         return RestHttpSecurity.this;
+    }
+
+    /**
+     * session安全管理配置
+     *
+     * @return the {@link RestHttpSecurity} for further customizations
+     * @throws Exception ex
+     */
+    public SessionManagementConfigurer<RestHttpSecurity> sessionManagement() throws Exception {
+        return getOrApply(new SessionManagementConfigurer<>());
     }
 
     /**

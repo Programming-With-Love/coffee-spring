@@ -4,6 +4,11 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * 基础实体类，带有创建时间，更新时间，删除标志，并且已对数据库钩子进行处理
+ *
+ * @author zido
+ */
 @MappedSuperclass
 public class BaseEntity {
     /**

@@ -4,9 +4,9 @@ import org.springframework.lang.NonNull;
 import site.zido.coffee.common.utils.BeanUtils;
 
 /**
- * Converter interface for output DTO.
- *
- * <b>The implementation type must be equal to DTO type</b>
+ * 输出转换器接口，提供一个convertFrom方法，将pojo转换到其他对象
+ * <p>
+ * 一般用于在逻辑处理完后返回DTO对象
  *
  * @param <DTO>    the implementation class type
  * @param <DOMAIN> domain type

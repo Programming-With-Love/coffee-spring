@@ -1,7 +1,6 @@
 package site.zido.coffee.security.authentication.phone;
 
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
@@ -39,7 +38,6 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) res;
         String phone = obtainPhone(request);
         if (requireCreateCode(request)) {
             if (phone == null || !phoneValidator.isValid(phone, null)) {
@@ -103,7 +101,7 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
     }
 
     protected void setDetails(HttpServletRequest request,
-                              UsernamePasswordAuthenticationToken authRequest) {
+                              PhoneCodeAuthenticationToken authRequest) {
         authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
     }
 
