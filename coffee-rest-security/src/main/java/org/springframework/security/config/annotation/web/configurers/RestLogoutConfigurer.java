@@ -35,6 +35,7 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
 
     /**
      * Creates a new instance
+     *
      * @see HttpSecurity#logout()
      */
     public RestLogoutConfigurer() {
@@ -56,6 +57,7 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
 
     /**
      * Specifies if {@link SecurityContextLogoutHandler} should clear the {@link Authentication} at the time of logout.
+     *
      * @param clearAuthentication true {@link SecurityContextLogoutHandler} should clear the {@link Authentication} (default), or false otherwise.
      * @return the {@link LogoutConfigurer} for further customization
      */
@@ -79,11 +81,10 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
      * <code>logoutRequestMatcher(new AntPathRequestMatcher(logoutUrl, "GET"));</code>
      * </p>
      *
-     * @see #logoutRequestMatcher(RequestMatcher)
-     * @see HttpSecurity#csrf()
-     *
      * @param logoutUrl the URL that will invoke logout.
      * @return the {@link LogoutConfigurer} for further customization
+     * @see #logoutRequestMatcher(RequestMatcher)
+     * @see HttpSecurity#csrf()
      */
     public RestLogoutConfigurer<H> logoutUrl(String logoutUrl) {
         this.logoutRequestMatcher = null;
@@ -95,11 +96,10 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
      * The RequestMatcher that triggers log out to occur. In most circumstances users will
      * use {@link #logoutUrl(String)} which helps enforce good practices.
      *
-     * @see #logoutUrl(String)
-     *
      * @param logoutRequestMatcher the RequestMatcher used to determine if logout should
-     * occur.
+     *                             occur.
      * @return the {@link LogoutConfigurer} for further customization
+     * @see #logoutUrl(String)
      */
     public RestLogoutConfigurer<H> logoutRequestMatcher(RequestMatcher logoutRequestMatcher) {
         this.logoutRequestMatcher = logoutRequestMatcher;
@@ -108,6 +108,7 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
 
     /**
      * A shortcut for {@link #permitAll(boolean)} with <code>true</code> as an argument.
+     *
      * @return the {@link LogoutConfigurer} for further customizations
      */
     public RestLogoutConfigurer<H> permitAll() {
@@ -115,11 +116,10 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
     }
 
     /**
-     * Sets the {@link LogoutSuccessHandler} to use. If this is specified,
-     * {@link #logoutSuccessUrl(String)} is ignored.
+     * Sets the {@link LogoutSuccessHandler} to use.
      *
      * @param logoutSuccessHandler the {@link LogoutSuccessHandler} to use after a user
-     * has been logged out.
+     *                             has been logged out.
      * @return the {@link LogoutConfigurer} for further customizations
      */
     public RestLogoutConfigurer<H> logoutSuccessHandler(
@@ -138,9 +138,9 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
      * {@link DelegatingLogoutSuccessHandler} will be used that defaults to a
      * {@link SimpleUrlLogoutSuccessHandler}.
      *
-     * @param handler the {@link LogoutSuccessHandler} to use
+     * @param handler          the {@link LogoutSuccessHandler} to use
      * @param preferredMatcher the {@link RequestMatcher} for this default
-     * {@link LogoutSuccessHandler}
+     *                         {@link LogoutSuccessHandler}
      * @return the {@link LogoutConfigurer} for further customizations
      */
     public RestLogoutConfigurer<H> defaultLogoutSuccessHandlerFor(
@@ -152,7 +152,7 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
     }
 
     /**
-     * Grants access to the {@link #logoutSuccessUrl(String)} and the
+     * Grants access to the
      * {@link #logoutUrl(String)} for every user.
      *
      * @param permitAll if true grants access, else nothing is done
@@ -165,7 +165,7 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
 
     /**
      * Gets the {@link LogoutSuccessHandler} if not null, otherwise creates a new
-     * {@link SimpleUrlLogoutSuccessHandler} using the {@link #logoutSuccessUrl(String)}.
+     * {@link RestLogoutSuccessHandler}
      *
      * @return the {@link LogoutSuccessHandler} to use
      */
@@ -203,7 +203,7 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
 
     /**
      * Returns true if the logout success has been customized via
-     * {@link #logoutSuccessUrl(String)} or
+     *  or
      * {@link #logoutSuccessHandler(LogoutSuccessHandler)}.
      *
      * @return true if logout success handling has been customized, else false
@@ -224,6 +224,7 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
 
     /**
      * Gets the {@link LogoutHandler} instances that will be used.
+     *
      * @return the {@link LogoutHandler} instances. Cannot be null.
      */
     List<LogoutHandler> getLogoutHandlers() {
@@ -256,8 +257,7 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
         }
         if (http.getConfigurer(CsrfConfigurer.class) != null) {
             this.logoutRequestMatcher = new AntPathRequestMatcher(this.logoutUrl, "POST");
-        }
-        else {
+        } else {
             this.logoutRequestMatcher = new OrRequestMatcher(
                     new AntPathRequestMatcher(this.logoutUrl, "GET"),
                     new AntPathRequestMatcher(this.logoutUrl, "POST"),

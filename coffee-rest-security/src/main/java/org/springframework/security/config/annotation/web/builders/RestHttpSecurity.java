@@ -160,89 +160,20 @@ public final class RestHttpSecurity extends
     }
 
     /**
-     * Allows configuring a {@link PortMapper} that is available from
-     * {@link RestHttpSecurity#getSharedObject(Class)}. Other provided
-     * {@link SecurityConfigurer} objects use this configured {@link PortMapper} as a
-     * default {@link PortMapper} when redirecting from HTTP to HTTPS or from HTTPS to
-     * HTTP (for example when used in combination with {@link #requiresChannel()}. By
-     * default Spring Security uses a {@link PortMapperImpl} which maps the HTTP port 8080
-     * to the HTTPS port 8443 and the HTTP port of 80 to the HTTPS port of 443.
-     *
-     * <h2>Example Configuration</h2>
-     * <p>
-     * The following configuration will ensure that redirects within Spring Security from
-     * HTTP of a port of 9090 will redirect to HTTPS port of 9443 and the HTTP port of 80
-     * to the HTTPS port of 443.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class PortMapperSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http.authorizeRequests().antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;).and().formLogin()
-     * 				.permitAll().and()
-     * 				// Example portMapper() configuration
-     * 				.portMapper().http(9090).mapsTo(9443).http(80).mapsTo(443);
-     *    }
-     *
-     * 	&#064;Override
-     * 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-     * 		auth.inMemoryAuthentication().withUser(&quot;user&quot;).password(&quot;password&quot;).roles(&quot;USER&quot;);
-     *    }
-     * }
-     * </pre>
+     * 配置portMapper
      *
      * @return the {@link PortMapperConfigurer} for further customizations
-     * @throws Exception
-     * @see #requiresChannel()
+     * @throws Exception ex
      */
     public PortMapperConfigurer<RestHttpSecurity> portMapper() throws Exception {
         return getOrApply(new PortMapperConfigurer<>());
     }
 
     /**
-     * Allows configuring a {@link PortMapper} that is available from
-     * {@link RestHttpSecurity#getSharedObject(Class)}. Other provided
-     * {@link SecurityConfigurer} objects use this configured {@link PortMapper} as a
-     * default {@link PortMapper} when redirecting from HTTP to HTTPS or from HTTPS to
-     * HTTP (for example when used in combination with {@link #requiresChannel()}. By
-     * default Spring Security uses a {@link PortMapperImpl} which maps the HTTP port 8080
-     * to the HTTPS port 8443 and the HTTP port of 80 to the HTTPS port of 443.
+     * 配置portMapper
      *
-     * <h2>Example Configuration</h2>
-     * <p>
-     * The following configuration will ensure that redirects within Spring Security from
-     * HTTP of a port of 9090 will redirect to HTTPS port of 9443 and the HTTP port of 80
-     * to the HTTPS port of 443.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class PortMapperSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http
-     * 			.requiresChannel(requiresChannel ->
-     * 				requiresChannel
-     * 					.anyRequest().requiresSecure()
-     * 			)
-     * 			.portMapper(portMapper ->
-     * 				portMapper
-     * 					.http(9090).mapsTo(9443)
-     * 					.http(80).mapsTo(443)
-     * 			);
-     *    }
-     * }
-     * </pre>
-     *
-     * @param portMapperCustomizer the {@link Customizer} to provide more options for
-     *                             the {@link PortMapperConfigurer}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
-     * @see #requiresChannel()
+     * @throws Exception ex
      */
     public RestHttpSecurity portMapper(Customizer<PortMapperConfigurer<RestHttpSecurity>> portMapperCustomizer) throws Exception {
         portMapperCustomizer.customize(getOrApply(new PortMapperConfigurer<>()));
@@ -250,222 +181,73 @@ public final class RestHttpSecurity extends
     }
 
     /**
-     * Configures container based pre authentication. In this case, authentication
-     * is managed by the Servlet Container.
-     *
-     * <h2>Example Configuration</h2>
-     * <p>
-     * The following configuration will use the principal found on the
-     * {@link HttpServletRequest} and if the user is in the role "ROLE_USER" or
-     * "ROLE_ADMIN" will add that to the resulting {@link Authentication}.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class JeeSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http.authorizeRequests().antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;).and()
-     * 		// Example jee() configuration
-     * 				.jee().mappableRoles(&quot;USER&quot;, &quot;ADMIN&quot;);
-     *    }
-     * }
-     * </pre>
-     * <p>
-     * Developers wishing to use pre authentication with the container will need to ensure
-     * their web.xml configures the security constraints. For example, the web.xml (there
-     * is no equivalent Java based configuration supported by the Servlet specification)
-     * might look like:
-     *
-     * <pre>
-     * &lt;login-config&gt;
-     *     &lt;auth-method&gt;FORM&lt;/auth-method&gt;
-     *     &lt;form-login-config&gt;
-     *         &lt;form-login-page&gt;/login&lt;/form-login-page&gt;
-     *         &lt;form-error-page&gt;/login?error&lt;/form-error-page&gt;
-     *     &lt;/form-login-config&gt;
-     * &lt;/login-config&gt;
-     *
-     * &lt;security-role&gt;
-     *     &lt;role-name&gt;ROLE_USER&lt;/role-name&gt;
-     * &lt;/security-role&gt;
-     * &lt;security-constraint&gt;
-     *     &lt;web-resource-collection&gt;
-     *     &lt;web-resource-name&gt;Public&lt;/web-resource-name&gt;
-     *         &lt;description&gt;Matches unconstrained pages&lt;/description&gt;
-     *         &lt;url-pattern&gt;/login&lt;/url-pattern&gt;
-     *         &lt;url-pattern&gt;/logout&lt;/url-pattern&gt;
-     *         &lt;url-pattern&gt;/resources/*&lt;/url-pattern&gt;
-     *     &lt;/web-resource-collection&gt;
-     * &lt;/security-constraint&gt;
-     * &lt;security-constraint&gt;
-     *     &lt;web-resource-collection&gt;
-     *         &lt;web-resource-name&gt;Secured Areas&lt;/web-resource-name&gt;
-     *         &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-     *     &lt;/web-resource-collection&gt;
-     *     &lt;auth-constraint&gt;
-     *         &lt;role-name&gt;ROLE_USER&lt;/role-name&gt;
-     *     &lt;/auth-constraint&gt;
-     * &lt;/security-constraint&gt;
-     * </pre>
-     * <p>
-     * Last you will need to configure your container to contain the user with the correct
-     * roles. This configuration is specific to the Servlet Container, so consult your
-     * Servlet Container's documentation.
+     * 配置基于容器的认证管理
      *
      * @return the {@link JeeConfigurer} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public JeeConfigurer<RestHttpSecurity> jee() throws Exception {
         return getOrApply(new JeeConfigurer<>());
     }
 
     /**
-     * Configures container based pre authentication. In this case, authentication
-     * is managed by the Servlet Container.
-     *
-     * <h2>Example Configuration</h2>
-     * <p>
-     * The following configuration will use the principal found on the
-     * {@link HttpServletRequest} and if the user is in the role "ROLE_USER" or
-     * "ROLE_ADMIN" will add that to the resulting {@link Authentication}.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class JeeSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http
-     * 			.authorizeRequests(authorizeRequests ->
-     * 				authorizeRequests
-     * 					.antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;)
-     * 			)
-     * 			.jee(jee ->
-     * 				jee
-     * 					.mappableRoles(&quot;USER&quot;, &quot;ADMIN&quot;)
-     * 			);
-     *    }
-     * }
-     * </pre>
-     * <p>
-     * Developers wishing to use pre authentication with the container will need to ensure
-     * their web.xml configures the security constraints. For example, the web.xml (there
-     * is no equivalent Java based configuration supported by the Servlet specification)
-     * might look like:
-     *
-     * <pre>
-     * &lt;login-config&gt;
-     *     &lt;auth-method&gt;FORM&lt;/auth-method&gt;
-     *     &lt;form-login-config&gt;
-     *         &lt;form-login-page&gt;/login&lt;/form-login-page&gt;
-     *         &lt;form-error-page&gt;/login?error&lt;/form-error-page&gt;
-     *     &lt;/form-login-config&gt;
-     * &lt;/login-config&gt;
-     *
-     * &lt;security-role&gt;
-     *     &lt;role-name&gt;ROLE_USER&lt;/role-name&gt;
-     * &lt;/security-role&gt;
-     * &lt;security-constraint&gt;
-     *     &lt;web-resource-collection&gt;
-     *     &lt;web-resource-name&gt;Public&lt;/web-resource-name&gt;
-     *         &lt;description&gt;Matches unconstrained pages&lt;/description&gt;
-     *         &lt;url-pattern&gt;/login&lt;/url-pattern&gt;
-     *         &lt;url-pattern&gt;/logout&lt;/url-pattern&gt;
-     *         &lt;url-pattern&gt;/resources/*&lt;/url-pattern&gt;
-     *     &lt;/web-resource-collection&gt;
-     * &lt;/security-constraint&gt;
-     * &lt;security-constraint&gt;
-     *     &lt;web-resource-collection&gt;
-     *         &lt;web-resource-name&gt;Secured Areas&lt;/web-resource-name&gt;
-     *         &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-     *     &lt;/web-resource-collection&gt;
-     *     &lt;auth-constraint&gt;
-     *         &lt;role-name&gt;ROLE_USER&lt;/role-name&gt;
-     *     &lt;/auth-constraint&gt;
-     * &lt;/security-constraint&gt;
-     * </pre>
-     * <p>
-     * Last you will need to configure your container to contain the user with the correct
-     * roles. This configuration is specific to the Servlet Container, so consult your
-     * Servlet Container's documentation.
+     * 配置基于容器的认证管理
      *
      * @param jeeCustomizer the {@link Customizer} to provide more options for
      *                      the {@link JeeConfigurer}
-     * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @return the {@link HttpSecurity} for further customizations
+     * @throws Exception ex
      */
     public RestHttpSecurity jee(Customizer<JeeConfigurer<RestHttpSecurity>> jeeCustomizer) throws Exception {
         jeeCustomizer.customize(getOrApply(new JeeConfigurer<>()));
         return RestHttpSecurity.this;
     }
 
+
     /**
-     * Configures X509 based pre authentication.
-     *
-     * <h2>Example Configuration</h2>
-     * <p>
-     * The following configuration will attempt to extract the username from the X509
-     * certificate. Remember that the Servlet Container will need to be configured to
-     * request client certificates in order for this to work.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class X509SecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http.authorizeRequests().antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;).and()
-     * 		// Example x509() configuration
-     * 				.x509();
-     *    }
-     * }
-     * </pre>
+     * 配置基于x509的认证管理
      *
      * @return the {@link X509Configurer} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public X509Configurer<RestHttpSecurity> x509() throws Exception {
         return getOrApply(new X509Configurer<>());
     }
 
     /**
-     * Configures X509 based pre authentication.
+     * 配置基于x509的认证管理
      *
-     * <h2>Example Configuration</h2>
-     * <p>
-     * The following configuration will attempt to extract the username from the X509
-     * certificate. Remember that the Servlet Container will need to be configured to
-     * request client certificates in order for this to work.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class X509SecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http
-     * 			.authorizeRequests(authorizeRequests ->
-     * 				authorizeRequests
-     * 					.antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;)
-     * 			)
-     * 			.x509(withDefaults());
-     *    }
-     * }
-     * </pre>
-     *
-     * @param x509Customizer the {@link Customizer} to provide more options for
-     *                       the {@link X509Configurer}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestHttpSecurity x509(Customizer<X509Configurer<RestHttpSecurity>> x509Customizer) throws Exception {
         x509Customizer.customize(getOrApply(new X509Configurer<>()));
         return RestHttpSecurity.this;
+    }
+
+    /**
+     * 配置remember me功能
+     * <p>
+     * 在restful情况下不要使用，因为remember me一般基于cookie/session
+     *
+     * @return the {@link RememberMeConfigurer} for further customizations
+     * @throws Exception ex
+     */
+    public RememberMeConfigurer<RestHttpSecurity> rememberMe() throws Exception {
+        return getOrApply(new RememberMeConfigurer<>());
+    }
+
+    /**
+     * 配置remember me功能
+     * <p>
+     * 在restful情况下不要使用，因为remember me一般基于cookie/session
+     *
+     * @return the {@link RememberMeConfigurer} for further customizations
+     * @throws Exception ex
+     */
+    public RestHttpSecurity rememberMe(Customizer<RememberMeConfigurer<RestHttpSecurity>> rememberMeCustomizer) throws Exception {
+        rememberMeCustomizer.customize(getOrApply(new RememberMeConfigurer<>()));
+        return this;
     }
 
     /**
@@ -528,7 +310,7 @@ public final class RestHttpSecurity extends
      * </pre>
      *
      * @return the {@link ExpressionUrlAuthorizationConfigurer} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      * @see #requestMatcher(RequestMatcher)
      */
     public ExpressionUrlAuthorizationConfigurer<RestHttpSecurity>.ExpressionInterceptUrlRegistry authorizeRequests()
@@ -611,7 +393,7 @@ public final class RestHttpSecurity extends
      * @param authorizeRequestsCustomizer the {@link Customizer} to provide more options for
      *                                    the {@link ExpressionUrlAuthorizationConfigurer.ExpressionInterceptUrlRegistry}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      * @see #requestMatcher(RequestMatcher)
      */
     public RestHttpSecurity authorizeRequests(Customizer<ExpressionUrlAuthorizationConfigurer<RestHttpSecurity>.ExpressionInterceptUrlRegistry> authorizeRequestsCustomizer)
@@ -623,11 +405,70 @@ public final class RestHttpSecurity extends
     }
 
     /**
+     * Allows configuring the Request Cache. For example, a protected page (/protected)
+     * may be requested prior to authentication. The application will redirect the user to
+     * a login page. After authentication, Spring Security will redirect the user to the
+     * originally requested protected page (/protected). This is automatically applied
+     * when using {@link WebSecurityConfigurerAdapter}.
+     * <p>
+     * restful情况下不要使用
+     *
+     * @return the {@link RequestCacheConfigurer} for further customizations
+     * @throws Exception ex
+     */
+    public RequestCacheConfigurer<RestHttpSecurity> requestCache() throws Exception {
+        return getOrApply(new RequestCacheConfigurer<>());
+    }
+
+    /**
+     * Allows configuring the Request Cache. For example, a protected page (/protected)
+     * may be requested prior to authentication. The application will redirect the user to
+     * a login page. After authentication, Spring Security will redirect the user to the
+     * originally requested protected page (/protected). This is automatically applied
+     * when using {@link WebSecurityConfigurerAdapter}.
+     *
+     * <h2>Example Custom Configuration</h2>
+     * <p>
+     * The following example demonstrates how to disable request caching.
+     *
+     * <pre>
+     * &#064;Configuration
+     * &#064;EnableWebSecurity
+     * public class RequestCacheDisabledSecurityConfig extends WebSecurityConfigurerAdapter {
+     *
+     * 	&#064;Override
+     * 	protected void configure(HttpSecurity http) throws Exception {
+     * 		http
+     * 			.authorizeRequests(authorizeRequests ->
+     * 				authorizeRequests
+     * 					.antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;)
+     * 			)
+     * 			.requestCache(requestCache ->
+     * 				requestCache.disable()
+     * 			);
+     *    }
+     * }
+     * </pre>
+     * <p>
+     * restful情况下不要使用
+     *
+     * @param requestCacheCustomizer the {@link Customizer} to provide more options for
+     *                               the {@link RequestCacheConfigurer}
+     * @return the {@link HttpSecurity} for further customizations
+     * @throws Exception ex
+     */
+    public RestHttpSecurity requestCache(Customizer<RequestCacheConfigurer<RestHttpSecurity>> requestCacheCustomizer)
+            throws Exception {
+        requestCacheCustomizer.customize(getOrApply(new RequestCacheConfigurer<>()));
+        return this;
+    }
+
+    /**
      * Allows configuring exception handling. This is automatically applied when using
      * {@link WebSecurityConfigurerAdapter}.
      *
      * @return the {@link ExceptionHandlingConfigurer} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestExceptionHandlingConfigurer<RestHttpSecurity> exceptionHandling() throws Exception {
         return getOrApply(new RestExceptionHandlingConfigurer<>());
@@ -666,7 +507,7 @@ public final class RestHttpSecurity extends
      * @param exceptionHandlingCustomizer the {@link Customizer} to provide more options for
      *                                    the {@link ExceptionHandlingConfigurer}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestHttpSecurity exceptionHandling(Customizer<RestExceptionHandlingConfigurer<RestHttpSecurity>> exceptionHandlingCustomizer) throws Exception {
         exceptionHandlingCustomizer.customize(getOrApply(new RestExceptionHandlingConfigurer<>()));
@@ -679,7 +520,7 @@ public final class RestHttpSecurity extends
      * automatically applied when using {@link WebSecurityConfigurerAdapter}.
      *
      * @return the {@link SecurityContextConfigurer} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestSecurityContextConfigurer<RestHttpSecurity> securityContext() throws Exception {
         return getOrApply(new RestSecurityContextConfigurer<>());
@@ -711,7 +552,7 @@ public final class RestHttpSecurity extends
      * @param securityContextCustomizer the {@link Customizer} to provide more options for
      *                                  the {@link SecurityContextConfigurer}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestHttpSecurity securityContext(Customizer<RestSecurityContextConfigurer<RestHttpSecurity>> securityContextCustomizer) throws Exception {
         securityContextCustomizer.customize(getOrApply(new RestSecurityContextConfigurer<>()));
@@ -724,7 +565,7 @@ public final class RestHttpSecurity extends
      * {@link WebSecurityConfigurerAdapter}.
      *
      * @return the {@link ServletApiConfigurer} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public ServletApiConfigurer<RestHttpSecurity> servletApi() throws Exception {
         return getOrApply(new ServletApiConfigurer<>());
@@ -753,11 +594,71 @@ public final class RestHttpSecurity extends
      * @param servletApiCustomizer the {@link Customizer} to provide more options for
      *                             the {@link ServletApiConfigurer}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestHttpSecurity servletApi(Customizer<ServletApiConfigurer<RestHttpSecurity>> servletApiCustomizer) throws Exception {
         servletApiCustomizer.customize(getOrApply(new ServletApiConfigurer<>()));
         return RestHttpSecurity.this;
+    }
+
+    /**
+     * Adds CSRF support. This is activated by default when using
+     * {@link WebSecurityConfigurerAdapter}'s default constructor. You can disable it
+     * using:
+     *
+     * <pre>
+     * &#064;Configuration
+     * &#064;EnableWebSecurity
+     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
+     *
+     * 	&#064;Override
+     *     protected void configure(HttpSecurity http) throws Exception {
+     *         http
+     *             .csrf().disable()
+     *             ...;
+     *     }
+     * }
+     * </pre>
+     * <p>
+     * restful情况下不要使用
+     *
+     * @return the {@link ServletApiConfigurer} for further customizations
+     * @throws Exception ex
+     */
+    public CsrfConfigurer<RestHttpSecurity> csrf() throws Exception {
+        ApplicationContext context = getContext();
+        return getOrApply(new CsrfConfigurer<>(context));
+    }
+
+    /**
+     * Adds CSRF support. This is activated by default when using
+     * {@link WebSecurityConfigurerAdapter}'s default constructor. You can disable it
+     * using:
+     *
+     * <pre>
+     * &#064;Configuration
+     * &#064;EnableWebSecurity
+     * public class CsrfSecurityConfig extends WebSecurityConfigurerAdapter {
+     *
+     * 	&#064;Override
+     *     protected void configure(HttpSecurity http) throws Exception {
+     *         http
+     *             .csrf(csrf -> csrf.disable());
+     *     }
+     * }
+     * </pre>
+     * <p>
+     * restful情况下不要使用
+     *
+     * @param csrfCustomizer the {@link Customizer} to provide more options for
+     *                       the {@link CsrfConfigurer}
+     * @return the {@link HttpSecurity} for further customizations
+     * @throws Exception ex
+     */
+    public RestHttpSecurity csrf(Customizer<CsrfConfigurer<RestHttpSecurity>> csrfCustomizer) throws Exception {
+        ApplicationContext context = getContext();
+        csrfCustomizer.customize(getOrApply(new CsrfConfigurer<>(context)));
+        return this;
     }
 
     /**
@@ -795,7 +696,7 @@ public final class RestHttpSecurity extends
      * </pre>
      *
      * @return the {@link LogoutConfigurer} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestLogoutConfigurer<RestHttpSecurity> logout() throws Exception {
         return getOrApply(new RestLogoutConfigurer<>());
@@ -841,7 +742,7 @@ public final class RestHttpSecurity extends
      * @param logoutCustomizer the {@link Customizer} to provide more options for
      *                         the {@link LogoutConfigurer}
      * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
+     * @throws Exception ex
      */
     public RestHttpSecurity logout(Customizer<RestLogoutConfigurer<RestHttpSecurity>> logoutCustomizer) throws Exception {
         logoutCustomizer.customize(getOrApply(new RestLogoutConfigurer<>()));
@@ -920,15 +821,6 @@ public final class RestHttpSecurity extends
         return getOrApply(new RestFormLoginConfigurer<>());
     }
 
-    public PhoneCodeLoginConfigurer<RestHttpSecurity> phoneCodeLogin() throws Exception {
-        return getOrApply(new PhoneCodeLoginConfigurer<>());
-    }
-
-    public RestHttpSecurity phoneCodeLogin(Customizer<PhoneCodeLoginConfigurer<RestHttpSecurity>> phoneCodeLoginCustomizer) throws Exception {
-        phoneCodeLoginCustomizer.customize(getOrApply(new PhoneCodeLoginConfigurer<>()));
-        return RestHttpSecurity.this;
-    }
-
     /**
      * Specifies to support form based authentication. If
      * {@link FormLoginConfigurer#loginPage(String)} is not specified a default login page
@@ -992,6 +884,15 @@ public final class RestHttpSecurity extends
      */
     public RestHttpSecurity formLogin(Customizer<RestFormLoginConfigurer<RestHttpSecurity>> formLoginCustomizer) throws Exception {
         formLoginCustomizer.customize(getOrApply(new RestFormLoginConfigurer<>()));
+        return RestHttpSecurity.this;
+    }
+
+    public PhoneCodeLoginConfigurer<RestHttpSecurity> phoneCodeLogin() throws Exception {
+        return getOrApply(new PhoneCodeLoginConfigurer<>());
+    }
+
+    public RestHttpSecurity phoneCodeLogin(Customizer<PhoneCodeLoginConfigurer<RestHttpSecurity>> phoneCodeLoginCustomizer) throws Exception {
+        phoneCodeLoginCustomizer.customize(getOrApply(new PhoneCodeLoginConfigurer<>()));
         return RestHttpSecurity.this;
     }
 
@@ -2087,7 +1988,7 @@ public final class RestHttpSecurity extends
         protected List<RequestMatcher> matchers = new ArrayList<>();
 
         /**
-         * @param context
+         * @param context application context
          */
         private RequestMatcherConfigurer(ApplicationContext context) {
             setApplicationContext(context);
@@ -2136,7 +2037,7 @@ public final class RestHttpSecurity extends
      * @param configurer the {@link SecurityConfigurer} to apply if one is not found for
      *                   this {@link SecurityConfigurer} class.
      * @return the current {@link SecurityConfigurer} for the configurer passed in
-     * @throws Exception
+     * @throws Exception ex
      */
     @SuppressWarnings("unchecked")
     private <C extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, RestHttpSecurity>> C getOrApply(
