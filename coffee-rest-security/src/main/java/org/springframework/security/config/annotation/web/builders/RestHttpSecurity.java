@@ -916,7 +916,8 @@ public final class RestHttpSecurity extends
 
 
     public RestHttpSecurity mvcMatcher(String mvcPattern) {
-        HandlerMappingIntrospector introspector = new HandlerMappingIntrospector(getContext());
+        HandlerMappingIntrospector introspector = new HandlerMappingIntrospector();
+        introspector.setApplicationContext(getContext());
         return requestMatcher(new MvcRequestMatcher(introspector, mvcPattern));
     }
 
