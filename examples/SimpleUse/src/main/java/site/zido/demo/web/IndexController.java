@@ -8,11 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 import site.zido.coffee.extra.limiter.Limiter;
 
 /**
+ * 一些简单接口使用
+ *
  * @author zido
  */
 @RestController
 public class IndexController {
-    @PreAuthorize("hasRole('user')")
+
+    @PreAuthorize("hasAuthority('ROLE_user')")
     @RequestMapping("/hello")
     public String index(@AuthenticationPrincipal UserDetails user) {
         return "hello world : " + user.getUsername();
@@ -20,10 +23,11 @@ public class IndexController {
 
     @RequestMapping("/limit")
     @Limiter(key = "content")
-    public String limit(){
+    public String limit() {
         return "limit content";
     }
-    @PreAuthorize("hasRole('admin')")
+
+    @PreAuthorize("hasAuthority('ROLE_admin')")
     @RequestMapping("/admin")
     public String admin(@AuthenticationPrincipal UserDetails user) {
         return "hello world : " + user.getUsername();

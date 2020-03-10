@@ -7,7 +7,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import site.zido.coffee.security.validations.PhoneValidator;
+import site.zido.coffee.common.validations.PhoneValidator;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

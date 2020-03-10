@@ -18,39 +18,32 @@ import site.zido.coffee.security.authentication.phone.SpringRedisPhoneCodeCache;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 认证配置类，restful风格，使用jwt方案
+ *
  * @author zido
  */
 @EnableRestSecurity(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class AuthConfig extends RestSecurityConfigurationAdapter {
-
-    private PhoneCodeCache phoneCodeCache;
-
-    public AuthConfig(PhoneCodeCache phoneCodeCache) {
-        this.phoneCodeCache = phoneCodeCache;
-    }
-
-    @Bean
-    public static PhoneCodeCache publicPhoneCodeCache() {
-        return new SpringRedisPhoneCodeCache();
-    }
-
-    @Bean
-    public GlobalResultHandler handler(HttpResponseBodyFactory factory) {
-        return new GlobalResultHandler(factory);
-    }
-
     @Override
     protected void configure(RestHttpSecurity http) throws Exception {
         http
+                //权限管理将管理所有的请求
                 .authorizeRequests().anyRequest().permitAll()
                 .and()
+                //帐号密码登录
                 .formLogin().and()
-                .phoneCodeLogin().phoneCodeCache(phoneCodeCache).and()
-                .securityContext().jwt().jwtExpiration(1, TimeUnit.HOURS).and()
-                .httpBasic();
+                //手机号验证码登录
+                .phoneCodeLogin().and()
+                //自定义jwt的超时时间
+                .securityContext().jwt().jwtExpiration(1, TimeUnit.HOURS);
     }
 
+    /**
+     * 创建几个内存用户，正常使用时，需要自定义userDetailsService
+     *
+     * @return userDetailsService
+     */
     @Override
     @Bean
     protected UserDetailsService userDetailsService() {

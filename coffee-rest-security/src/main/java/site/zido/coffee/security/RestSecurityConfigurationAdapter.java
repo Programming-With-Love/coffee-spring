@@ -22,11 +22,9 @@ import org.springframework.security.config.annotation.authentication.configurers
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.JdbcUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.authentication.configurers.userdetails.DaoAuthenticationConfigurer;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.RestHttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.DefaultLoginPageConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,7 +38,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
-import site.zido.coffee.security.authentication.phone.PhoneAuthUserAuthenticationProvider;
 import site.zido.coffee.security.authentication.phone.PhoneCodeService;
 import site.zido.coffee.security.configurers.RestAccessDeniedHandlerImpl;
 
@@ -48,6 +45,8 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
+ * rest 风格安全配置适配器
+ *
  * @author zido
  */
 public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<WebSecurity> {
@@ -74,21 +73,10 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
     private RestHttpSecurity http;
     private boolean disableDefaults;
 
-    /**
-     * Creates an instance with the default configuration enabled.
-     */
     protected RestSecurityConfigurationAdapter() {
         this(false);
     }
 
-    /**
-     * Creates an instance which allows specifying if the default configuration should be
-     * enabled. Disabling the default configuration should be considered more advanced
-     * usage as it requires more understanding of how the framework is implemented.
-     *
-     * @param disableDefaults true if the default configuration should be disabled, else
-     *                        false
-     */
     protected RestSecurityConfigurationAdapter(boolean disableDefaults) {
         this.disableDefaults = disableDefaults;
     }
@@ -135,35 +123,10 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         return http;
     }
 
-    /**
-     * Override this method to expose the {@link AuthenticationManager} from
-     * {@link #configure(AuthenticationManagerBuilder)} to be exposed as a Bean. For
-     * example:
-     *
-     * <pre>
-     * &#064;Bean(name name="myAuthenticationManager")
-     * &#064;Override
-     * public AuthenticationManager authenticationManagerBean() throws Exception {
-     *     return super.authenticationManagerBean();
-     * }
-     * </pre>
-     *
-     * @return the {@link AuthenticationManager}
-     * @throws Exception
-     */
     public AuthenticationManager authenticationManagerBean() throws Exception {
-        return new RestSecurityConfigurationAdapter.AuthenticationManagerDelegator(authenticationBuilder, context);
+        return new AuthenticationManagerDelegator(authenticationBuilder, context);
     }
 
-    /**
-     * Gets the {@link AuthenticationManager} to use. The default strategy is if
-     * {@link #configure(AuthenticationManagerBuilder)} method is overridden to use the
-     * {@link AuthenticationManagerBuilder} that was passed in. Otherwise, autowire the
-     * {@link AuthenticationManager} by type.
-     *
-     * @return the {@link AuthenticationManager} to use
-     * @throws Exception
-     */
     protected AuthenticationManager authenticationManager() throws Exception {
         if (!authenticationManagerInitialized) {
             configure(localConfigureAuthenticationBldr);
@@ -178,45 +141,17 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         return authenticationManager;
     }
 
-    /**
-     * Override this method to expose a {@link UserDetailsService} created from
-     * {@link #configure(AuthenticationManagerBuilder)} as a bean. In general only the
-     * following override should be done of this method:
-     *
-     * <pre>
-     * &#064;Bean(name = &quot;myUserDetailsService&quot;)
-     * // any or no name specified is allowed
-     * &#064;Override
-     * public UserDetailsService userDetailsServiceBean() throws Exception {
-     * 	return super.userDetailsServiceBean();
-     * }
-     * </pre>
-     * <p>
-     * To change the instance returned, developers should change
-     * {@link #userDetailsService()} instead
-     *
-     * @return the {@link UserDetailsService}
-     * @see #userDetailsService()
-     */
     public UserDetailsService userDetailsServiceBean() throws Exception {
         AuthenticationManagerBuilder globalAuthBuilder = context
                 .getBean(AuthenticationManagerBuilder.class);
-        return new RestSecurityConfigurationAdapter.UserDetailsServiceDelegator(Arrays.asList(
+        return new UserDetailsServiceDelegator(Arrays.asList(
                 localConfigureAuthenticationBldr, globalAuthBuilder));
     }
 
-    /**
-     * Allows modifying and accessing the {@link UserDetailsService} from
-     * {@link #userDetailsServiceBean()} without interacting with the
-     * {@link ApplicationContext}. Developers should override this method when changing
-     * the instance of {@link #userDetailsServiceBean()}.
-     *
-     * @return the {@link UserDetailsService} to use
-     */
     protected UserDetailsService userDetailsService() {
         AuthenticationManagerBuilder globalAuthBuilder = context
                 .getBean(AuthenticationManagerBuilder.class);
-        return new RestSecurityConfigurationAdapter.UserDetailsServiceDelegator(Arrays.asList(
+        return new UserDetailsServiceDelegator(Arrays.asList(
                 localConfigureAuthenticationBldr, globalAuthBuilder));
     }
 
@@ -234,27 +169,10 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         });
     }
 
-    /**
-     * Override this method to configure {@link WebSecurity}. For example, if you wish to
-     * ignore certain requests.
-     */
     @Override
     public void configure(WebSecurity web) throws Exception {
     }
 
-    /**
-     * Override this method to configure the {@link HttpSecurity}. Typically subclasses
-     * should not invoke this method by calling super as it may override their
-     * configuration. The default configuration is:
-     *
-     * <pre>
-     * http.authorizeRequests().anyRequest().authenticated().and().formLogin().and().httpBasic();
-     * </pre>
-     *
-     * @param http the {@link RestHttpSecurity} to modify
-     * @throws Exception if an error occurs
-     */
-    // @formatter:off
     protected void configure(RestHttpSecurity http) throws Exception {
         logger.debug("Using default configure(HttpSecurity). If subclassed this will potentially override subclass configure(HttpSecurity).");
 
@@ -265,13 +183,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
                 .formLogin().and()
                 .httpBasic();
     }
-    // @formatter:on
 
-    /**
-     * Gets the ApplicationContext
-     *
-     * @return the context
-     */
     protected final ApplicationContext getApplicationContext() {
         return this.context;
     }
@@ -316,11 +228,6 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         this.authenticationConfiguration = authenticationConfiguration;
     }
 
-    /**
-     * Creates the shared objects
-     *
-     * @return the shared Objects
-     */
     private Map<Class<?>, Object> createSharedObjects() {
         Map<Class<?>, Object> sharedObjects = new HashMap<>();
         sharedObjects.putAll(localConfigureAuthenticationBldr.getSharedObjects());
@@ -332,13 +239,6 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         return sharedObjects;
     }
 
-    /**
-     * Delays the use of the {@link UserDetailsService} from the
-     * {@link AuthenticationManagerBuilder} to ensure that it has been fully configured.
-     *
-     * @author Rob Winch
-     * @since 3.2
-     */
     static final class UserDetailsServiceDelegator implements UserDetailsService {
         private List<AuthenticationManagerBuilder> delegateBuilders;
         private UserDetailsService delegate;
@@ -380,13 +280,6 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         }
     }
 
-    /**
-     * Delays the use of the {@link AuthenticationManager} build from the
-     * {@link AuthenticationManagerBuilder} to ensure that it has been fully configured.
-     *
-     * @author Rob Winch
-     * @since 3.2
-     */
     static final class AuthenticationManagerDelegator implements AuthenticationManager {
         private AuthenticationManagerBuilder delegateBuilder;
         private AuthenticationManager delegate;
@@ -452,11 +345,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
     static class DefaultPasswordEncoderAuthenticationManagerBuilder extends AuthenticationManagerBuilder {
         private PasswordEncoder defaultPasswordEncoder;
 
-        /**
-         * Creates a new instance
-         *
-         * @param objectPostProcessor the {@link ObjectPostProcessor} instance to use.
-         */
+
         DefaultPasswordEncoderAuthenticationManagerBuilder(
                 ObjectPostProcessor<Object> objectPostProcessor, PasswordEncoder defaultPasswordEncoder) {
             super(objectPostProcessor);

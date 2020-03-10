@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.IOException;
 
 /**
+ * 启动器
+ *
  * @author zido
  */
 @SpringBootApplication

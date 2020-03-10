@@ -2,9 +2,12 @@
 
 与spring boot完整集成的common包，约定优于配置，所有的项目的基础脚手架依赖包。
 
-本项目主要是目标是在靠近**spring**技术栈的初衷下，
-尽力以spring的行为方式用更少的依赖集成一些**小**项目的日常使用工具，
-以帮助我们日常的小项目更快的开发。
+本项目的主要目标是：
+
+* 提供*restful web*应用默认规则，主要以json作为序列化/反序列化方式
+* 开箱即用
+* 从框架层培养开发习惯，通过各种注解式工具在spring boot基础上使代码更加高内聚，低耦合
+* 继承spring boot理念：完全没有代码生成，也不需要XML配置。
 
 在使用本项目时，你应该同意以下观点：
 
@@ -19,6 +22,8 @@
 
 * 自动配置的认证框架，包含登录/鉴权功能
 
+* 为model层添加基础类，帮助model层开发
+
 * json配置，自动根据profile配置json序列化方式，具体表现为`prod`环境下，null不参与序列化,属性不匹配会失败，节省带宽，提高返回速度
 ，其他环境下返回全属性以帮助更好的提示前端各种属性
 
@@ -28,18 +33,34 @@
 
 * 定义更多的校验注解，例如：`@Phone`
 
-一些其他常用工具：分布式id生成器，分布式锁等
+* 一些其他常用工具：分布式id生成器，分布式锁等
+
+## 环境要求
+
+* java 8+
+* maven 3.3+
+* gradle 5.x / 6.x
 
 ## 使用
 
 maven 加入依赖
 
 ```xml
-<dependency>
-    <groupId>site.zido</groupId>
-    <artifactId>coffee-spring-boot-starter</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency>
+<project>
+
+    <parent>
+        <groupId>site.zido</groupId>
+        <artifactId>coffee-spring-boot-parent</artifactId>
+        <version>{version}</version>
+    </parent>
+    <dependencies>
+        <dependency>
+            <groupId>site.zido</groupId>
+            <artifactId>coffee-spring-boot-starter</artifactId>
+            <version>{version}</version>
+            </dependency>
+    </dependencies>
+</project>
 
 ```
 
