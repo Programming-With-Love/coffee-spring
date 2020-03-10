@@ -12,15 +12,19 @@ import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.*;
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2ClientConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.annotation.web.configurers.openid.OpenIDLoginConfigurer;
 import org.springframework.security.config.annotation.web.configurers.saml2.Saml2LoginConfigurer;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
@@ -34,6 +38,7 @@ import site.zido.coffee.security.configurers.RestFormLoginConfigurer;
 import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
 
 import javax.servlet.Filter;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -747,76 +752,6 @@ public final class RestHttpSecurity extends
 
     public RestFormLoginConfigurer<RestHttpSecurity> formLogin() throws Exception {
         return getOrApply(new RestFormLoginConfigurer<>());
-    }
-
-    /**
-     * Specifies to support form based authentication. If
-     * {@link FormLoginConfigurer#loginPage(String)} is not specified a default login page
-     * will be generated.
-     *
-     * <h2>Example Configurations</h2>
-     * <p>
-     * The most basic configuration defaults to automatically generating a login page at
-     * the URL "/login", redirecting to "/login?error" for authentication failure. The
-     * details of the login page can be found on
-     * {@link FormLoginConfigurer#loginPage(String)}
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class FormLoginSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http
-     * 			.authorizeRequests(authorizeRequests ->
-     * 				authorizeRequests
-     * 					.antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;)
-     * 			)
-     * 			.formLogin(withDefaults());
-     *    }
-     * }
-     * </pre>
-     * <p>
-     * The configuration below demonstrates customizing the defaults.
-     *
-     * <pre>
-     * &#064;Configuration
-     * &#064;EnableWebSecurity
-     * public class FormLoginSecurityConfig extends WebSecurityConfigurerAdapter {
-     *
-     * 	&#064;Override
-     * 	protected void configure(RestHttpSecurity http) throws Exception {
-     * 		http
-     * 			.authorizeRequests(authorizeRequests ->
-     * 				authorizeRequests
-     * 					.antMatchers(&quot;/**&quot;).hasRole(&quot;USER&quot;)
-     * 			)
-     * 			.formLogin(formLogin ->
-     * 				formLogin
-     * 					.usernameParameter(&quot;username&quot;)
-     * 					.passwordParameter(&quot;password&quot;)
-     * 					.loginPage(&quot;/authentication/login&quot;)
-     * 					.failureUrl(&quot;/authentication/login?failed&quot;)
-     * 					.loginProcessingUrl(&quot;/authentication/login/process&quot;)
-     * 			);
-     *    }
-     * }
-     * </pre>
-     *
-     * @param formLoginCustomizer the {@link Customizer} to provide more options for
-     *                            the {@link FormLoginConfigurer}
-     * @return the {@link RestHttpSecurity} for further customizations
-     * @throws Exception
-     * @see FormLoginConfigurer#loginPage(String)
-     */
-    public PhoneCodeLoginConfigurer<RestHttpSecurity> phoneCodeLogin() throws Exception {
-        return getOrApply(new PhoneCodeLoginConfigurer<>());
-    }
-
-    public RestHttpSecurity phoneCodeLogin(Customizer<PhoneCodeLoginConfigurer<RestHttpSecurity>> phoneCodeLoginCustomizer) throws Exception {
-        phoneCodeLoginCustomizer.customize(getOrApply(new PhoneCodeLoginConfigurer<>()));
-        return RestHttpSecurity.this;
     }
 
     public RestHttpSecurity formLogin(Customizer<RestFormLoginConfigurer<RestHttpSecurity>> formLoginCustomizer) throws Exception {
