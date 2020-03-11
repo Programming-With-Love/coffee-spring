@@ -1,10 +1,10 @@
 package site.zido.demo.pojo;
 
-import site.zido.demo.entity.User;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import site.zido.demo.entity.User;
 
 import java.util.Arrays;
 import java.util.Collection;

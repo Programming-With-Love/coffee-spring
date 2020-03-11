@@ -1,10 +1,10 @@
 package site.zido.demo.api;
 
-import site.zido.demo.entity.Room;
-import site.zido.demo.service.IRoomService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.zido.demo.entity.Room;
+import site.zido.demo.service.IRoomService;
 
 import java.util.List;
 
