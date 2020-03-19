@@ -3,13 +3,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>coffee-common-builder</artifactId>
-        <groupId>site.zido</groupId>
-        <version>0.2.0-release</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.1.RELEASE</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <description>Coffee Spring Boot Parent</description>
+    <groupId>site.zido</groupId>
     <artifactId>coffee-spring-boot-parent</artifactId>
+    <packaging>pom</packaging>
+    <description>Coffee Spring Boot Parent</description>
 
     <dependencyManagement>
         <dependencies>

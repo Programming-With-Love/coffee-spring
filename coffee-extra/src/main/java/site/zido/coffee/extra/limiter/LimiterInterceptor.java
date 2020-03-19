@@ -42,9 +42,6 @@ public class LimiterInterceptor extends AbstractLimiterInvoker implements Method
         Method method = invocation.getMethod();
         Object target = invocation.getThis();
         Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
-        if (targetClass == null) {
-            targetClass = target.getClass();
-        }
         Collection<LimiterOperation> operations = getLimiterOperationSource().getLimiterOperations(method, targetClass);
         if (!CollectionUtils.isEmpty(operations)) {
             for (LimiterOperation operation : operations) {
