@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -51,12 +52,6 @@ public class ProxyLimiterConfiguration {
         return interceptor;
     }
 
-    @Bean
-    @ConditionalOnMissingBean(FrequencyLimiter.class)
-    public FrequencyLimiter limiter(RedisTemplate<String, Long> template) {
-        return new RedisFrequencyLimiter(template);
-    }
-
     @Bean(name = "limiterExceptionHandler")
     @ConditionalOnMissingBean(name = "limiterExceptionHandler")
     public LimiterExceptionAdvice advice() {
@@ -65,6 +60,7 @@ public class ProxyLimiterConfiguration {
 
     @Bean(name = "limiterTemplate")
     @ConditionalOnMissingBean(name = "limiterTemplate")
+    @ConditionalOnBean(RedisConnectionFactory.class)
     public RedisTemplate<String, Long> template(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Long> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
@@ -91,7 +87,8 @@ public class ProxyLimiterConfiguration {
     }
 
     @Bean
-    public RedisFrequencyLimiter limiter(@Autowired LimiterProperties properties, @Autowired @Qualifier(value = "limiterTemplate") RedisTemplate<String, Long> template) {
+    public RedisFrequencyLimiter limiter(@Autowired LimiterProperties properties,
+                                         @Autowired @Qualifier(value = "limiterTemplate") RedisTemplate<String, Long> template) {
         if (StringUtils.hasLength(properties.getPrefix())) {
             return new RedisFrequencyLimiter(properties.getPrefix(), template);
         }

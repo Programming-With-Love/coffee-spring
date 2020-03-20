@@ -14,26 +14,19 @@ public class BaseEntity {
     /**
      * Create time.
      */
-    @Column(name = "create_time", columnDefinition = "timestamp default CURRENT_TIMESTAMP")
+    @Column(name = "create_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createTime;
 
     /**
      * Update time.
      */
-    @Column(name = "update_time", columnDefinition = "timestamp default CURRENT_TIMESTAMP")
+    @Column(name = "update_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    /**
-     * Delete flag.
-     */
-    @Column(name = "deleted", columnDefinition = "TINYINT default 0")
-    private Boolean deleted = false;
-
     @PrePersist
     protected void prePersist() {
-        deleted = false;
         Date now = new Date();
         if (createTime == null) {
             createTime = now;
@@ -59,7 +52,6 @@ public class BaseEntity {
         return "BaseEntity{" +
                 "createTime=" + createTime +
                 ", updateTime=" + updateTime +
-                ", deleted=" + deleted +
                 '}';
     }
 
@@ -79,26 +71,17 @@ public class BaseEntity {
         this.updateTime = updateTime;
     }
 
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BaseEntity that = (BaseEntity) o;
         return Objects.equals(createTime, that.createTime) &&
-                Objects.equals(updateTime, that.updateTime) &&
-                Objects.equals(deleted, that.deleted);
+                Objects.equals(updateTime, that.updateTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(createTime, updateTime, deleted);
+        return Objects.hash(createTime, updateTime);
     }
 }
