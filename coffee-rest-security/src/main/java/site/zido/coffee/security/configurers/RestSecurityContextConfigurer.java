@@ -19,7 +19,11 @@ import java.util.concurrent.TimeUnit;
  *
  * <ul>
  *     <li>
- *         jwt token:通过{@link #jwt()}启用，默认有效期为一小时，每10分钟尝试一次续期
+ *         jwt token:通过{@link #jwt()}启用，默认情况下为有效期为一小时
+ *          <ul>
+ *            <li>每10分钟尝试一次续期(默认)</li>
+ *            <li>客户端续期</li>
+ *          </ul>
  *     </li>
  * </ul>
  *

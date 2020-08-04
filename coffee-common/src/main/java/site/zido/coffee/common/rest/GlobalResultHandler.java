@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * 统一全局响应封装
@@ -17,7 +18,7 @@ import java.lang.reflect.Method;
  */
 @RestControllerAdvice
 public class GlobalResultHandler implements ResponseBodyAdvice<Object> {
-    private HttpResponseBodyFactory factory;
+    private final HttpResponseBodyFactory factory;
 
     public GlobalResultHandler(HttpResponseBodyFactory factory) {
         this.factory = factory;
@@ -25,7 +26,8 @@ public class GlobalResultHandler implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return !factory.isExceptedClass(returnType.getMethod().getReturnType());
+        //支持Optional包装
+        return !factory.isExceptedClass(returnType.nestedIfOptional().getParameterType());
     }
 
     @Override
