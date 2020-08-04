@@ -6,3 +6,5 @@ rootProject.name = 'coffee-common-builder'
 include(':coffee-common')
 include(':coffee-extra')
 include(':coffee-rest-security')
+include(':examples:Production')
+//include(':examples:SimpleUse')
