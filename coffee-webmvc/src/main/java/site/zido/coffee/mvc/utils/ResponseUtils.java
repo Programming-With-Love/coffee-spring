@@ -1,4 +1,4 @@
-package site.zido.coffee.common.utils;
+package site.zido.coffee.mvc.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
@@ -12,7 +12,7 @@ import java.io.IOException;
  * @author zido
  */
 public class ResponseUtils {
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public static void json(HttpServletResponse response, Object body) throws IOException {
         response.setCharacterEncoding("UTF-8");

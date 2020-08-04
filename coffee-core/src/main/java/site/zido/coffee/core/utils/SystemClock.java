@@ -1,4 +1,4 @@
-package site.zido.coffee.common.utils;
+package site.zido.coffee.core.utils;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;

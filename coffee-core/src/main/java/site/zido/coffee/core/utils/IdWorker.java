@@ -1,4 +1,4 @@
-package site.zido.coffee.common.utils;
+package site.zido.coffee.core.utils;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;

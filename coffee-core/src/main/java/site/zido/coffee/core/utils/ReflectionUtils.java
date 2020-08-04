@@ -1,4 +1,4 @@
-package site.zido.coffee.common.utils;
+package site.zido.coffee.core.utils;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
