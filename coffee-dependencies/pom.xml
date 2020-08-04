@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>coffee-common-builder</artifactId>
+        <groupId>site.zido</groupId>
+        <version>0.2.0-release</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>coffee-dependencies</artifactId>
+    <packaging>pom</packaging>
+    <description>Dependencies Management For Coffee Spring Boot Starter</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>2.2.1.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-common</artifactId>
+                <version>0.2.0-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-extra</artifactId>
+                <version>0.2.0-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-rest-security</artifactId>
+                <version>0.2.0-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-spring-boot-starter</artifactId>
+                <version>0.2.0-release</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

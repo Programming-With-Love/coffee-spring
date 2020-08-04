@@ -1,51 +1,22 @@
-# Compiled source #
-###################
-*.class
-
-# Packages #
-############
-*.jar
-
-# Logs and databases #
-######################
-*.log
-
-# OS generated files #
-######################
-.DS_Store*
-ehthumbs.db
-Icon?
-Thumbs.db
-
-# Editor Files #
-################
-*~
-*.swp
-
-# Gradle Files #
-################
-.gradle
-.m2
-
-# Build output directies
-/target
-*/target
-/build
-*/build
-
-# IntelliJ specific files/directories
-out
-.idea
-*.ipr
-*.iws
+# Created by .ignore support plugin (hsz.mobi)
+### Maven template
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.idea/
 *.iml
-atlassian-ide-plugin.xml
-
-# Eclipse specific files/directories
-.classpath
+.vscode/
+.settings/
 .project
-.settings
-.metadata
+.classpath
+.factorypath
 
-# NetBeans specific files/directories
-.nbattrs
+# Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
+!/.mvn/wrapper/maven-wrapper.jar
+
