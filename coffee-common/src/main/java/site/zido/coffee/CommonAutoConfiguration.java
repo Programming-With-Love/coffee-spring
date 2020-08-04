@@ -16,7 +16,7 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguratio
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
-import site.zido.coffee.common.rest.*;
+import site.zido.coffee.core.common.rest.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

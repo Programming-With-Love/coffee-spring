@@ -52,6 +52,7 @@
         <module>coffee-spring-boot-parent</module>
         <module>coffee-webmvc</module>
         <module>coffee-core</module>
+        <module>coffee-logger</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
