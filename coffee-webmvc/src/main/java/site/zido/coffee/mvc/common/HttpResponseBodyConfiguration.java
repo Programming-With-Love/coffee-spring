@@ -7,14 +7,9 @@ import site.zido.coffee.mvc.rest.GlobalExceptionAdvice;
 import site.zido.coffee.mvc.rest.HttpResponseBodyFactory;
 
 @Configuration
-public class MvcCommonConfiguration {
+public class HttpResponseBodyConfiguration {
     @Bean
     public HttpResponseBodyFactory bodyFactory() {
         return new DefaultHttpResponseBodyFactory();
-    }
-
-    @Bean
-    public GlobalExceptionAdvice advice() {
-        return new GlobalExceptionAdvice(bodyFactory());
     }
 }

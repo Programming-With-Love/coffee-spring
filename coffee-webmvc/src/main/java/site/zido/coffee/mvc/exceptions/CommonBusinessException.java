@@ -12,7 +12,7 @@ public class CommonBusinessException extends RuntimeException {
      */
     private int httpStatus = 400;
     /**
-     * 补充错误码，请注意，当允许全局返回{@link site.zido.coffee.common.rest.Result}时，
+     * 补充错误码，请注意，当允许全局返回{@link site.zido.coffee.mvc.rest.Result}时，
      * code默认为0，所以不建议占用code为0，请设置其他的code
      */
     private int code = 1;

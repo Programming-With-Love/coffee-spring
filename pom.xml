@@ -53,6 +53,7 @@
         <module>coffee-webmvc</module>
         <module>coffee-core</module>
         <module>coffee-logger</module>
+        <module>coffee-data-jpa</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
