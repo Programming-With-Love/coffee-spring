@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>site.zido</groupId>
-            <artifactId>coffee-common</artifactId>
+            <artifactId>coffee-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.kstyrc</groupId>
@@ -41,15 +41,6 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
     </dependencies>
 </project>

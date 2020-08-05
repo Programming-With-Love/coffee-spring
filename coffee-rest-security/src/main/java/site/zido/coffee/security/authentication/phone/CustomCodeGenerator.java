@@ -16,15 +16,15 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author zido
  */
 public class CustomCodeGenerator implements CodeGenerator, InitializingBean {
-    private static char[] ARR_NUMBER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    private static char[] ARR_LOWER_CHAR = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+    private static final char[] ARR_NUMBER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    private static final char[] ARR_LOWER_CHAR = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
             'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-    private static char[] ARR_UPPER_CHAR = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    private static final char[] ARR_UPPER_CHAR = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
             'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
     private int minLength = 6;
     private int maxLength = 6;
-    private List<Character> arr = new ArrayList<>();
-    private Random random = new Random();
+    private final List<Character> arr = new ArrayList<>();
+    private final Random random = new Random();
 
     public CustomCodeGenerator(Mode... modes) {
         if (modes == null || modes.length == 0) {

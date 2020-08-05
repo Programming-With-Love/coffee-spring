@@ -1,4 +1,4 @@
-package site.zido.coffee;
+package site.zido.coffee.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -16,7 +16,7 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguratio
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
-import site.zido.coffee.core.common.rest.*;
+import site.zido.coffee.mvc.rest.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

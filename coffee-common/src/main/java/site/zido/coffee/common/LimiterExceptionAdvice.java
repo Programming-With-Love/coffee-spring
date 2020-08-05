@@ -1,10 +1,11 @@
-package site.zido.coffee.extra.limiter;
+package site.zido.coffee.common;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import site.zido.coffee.core.common.CommonErrorCode;
-import site.zido.coffee.core.common.rest.Result;
+import site.zido.coffee.extra.limiter.LimiterException;
+import site.zido.coffee.mvc.CommonErrorCode;
+import site.zido.coffee.mvc.rest.Result;
 
 @RestControllerAdvice
 @Order(0)

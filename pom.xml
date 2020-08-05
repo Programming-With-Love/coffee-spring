@@ -87,23 +87,43 @@
             <!-- modules -->
             <dependency>
                 <groupId>site.zido</groupId>
-                <artifactId>coffee-common</artifactId>
+                <artifactId>coffee-webmvc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-logger</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-core</artifactId>
                 <version>0.2.0-release</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-data-jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-common</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-extra</artifactId>
-                <version>0.2.0-release</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-rest-security</artifactId>
-                <version>0.2.0-release</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-spring-boot-starter</artifactId>
-                <version>0.2.0-release</version>
+                <version>${project.version}</version>
             </dependency>
             <!-- others -->
             <dependency>

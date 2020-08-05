@@ -18,7 +18,8 @@ public class BeanFactoryLimiterOperationSourceAdvisor extends AbstractBeanFactor
     private final StaticMethodMatcherPointcut pointcut = new StaticMethodMatcherPointcut() {
         @Override
         public boolean matches(Method method, Class<?> targetClass) {
-            return (getLimiterOperationSource() != null && !CollectionUtils.isEmpty(getLimiterOperationSource().getLimiterOperations(method, targetClass)));
+            return (getLimiterOperationSource() != null
+                    && !CollectionUtils.isEmpty(getLimiterOperationSource().getLimiterOperations(method, targetClass)));
         }
     };
 

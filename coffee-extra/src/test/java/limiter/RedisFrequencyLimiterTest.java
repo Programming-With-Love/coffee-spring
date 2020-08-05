@@ -41,8 +41,8 @@ public class RedisFrequencyLimiterTest {
         int timeout = 1;
         long millis = TimeUnit.SECONDS.toMillis(timeout);
         for (int i = 0; i < 3; i++) {
-            Assert.assertTrue(limiter.tryGet(key, timeout, TimeUnit.SECONDS));
-            Assert.assertFalse(limiter.tryGet(key, timeout, TimeUnit.SECONDS));
+            Assert.assertEquals(0, limiter.tryGet(key, timeout));
+            Assert.assertEquals(0, limiter.tryGet(key, timeout));
             Thread.sleep(millis);
         }
     }

@@ -60,7 +60,7 @@ public class SpringLimiterAnnotationParser implements LimiterAnnotationParser {
 
     @Override
     public boolean equals(Object other) {
-        return (this == other || other instanceof SpringLimiterAnnotationParser);
+        return other instanceof SpringLimiterAnnotationParser;
     }
 
     @Override

@@ -48,12 +48,11 @@ public class LimiterInterceptor extends AbstractLimiterInvoker implements Method
                 String key = operation.getKey();
                 key = generateKey(key, new AnnotatedElementKey(method, targetClass));
                 long timeout = operation.getTimeout();
-                TimeUnit unit = operation.getUnit();
                 try {
-                    FrequencyLimiter.LastItem lastItem = limiter.tryGetForItem(key, timeout, unit);
-                    if (lastItem != null) {
-                        LOGGER.debug("limit a action for {}#{} , remain: {} {}", targetClass.getName(), method.getName(), lastItem.getTime(), lastItem.getUnit());
-                        getErrorHandler().handleOnLimited(new LimiterException(key, lastItem.getTime(), lastItem.getUnit(), timeout, unit));
+                    long lastTimeout = limiter.tryGet(key, timeout);
+                    if (lastTimeout > 0) {
+                        LOGGER.debug("限制行为{}#{} , remain: {}", targetClass.getName(), method.getName(), lastTimeout);
+                        getErrorHandler().handleOnLimited(new LimiterException(key, lastTimeout, timeout));
                         return null;
                     }
                 } catch (RuntimeException e) {

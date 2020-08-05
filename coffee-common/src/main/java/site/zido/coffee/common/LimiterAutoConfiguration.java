@@ -1,57 +1,27 @@
-package site.zido.coffee.extra;
+package site.zido.coffee.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Role;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.StringUtils;
-import site.zido.coffee.extra.limiter.*;
+import site.zido.coffee.extra.limiter.RedisFrequencyLimiter;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-/**
- * @author zido
- */
-@ConditionalOnProperty(prefix = "site.zido.limiter", value = "enable", matchIfMissing = true)
 @Configuration
-public class ProxyLimiterConfiguration {
-    @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public BeanFactoryLimiterOperationSourceAdvisor limiterAdvisor(LimiterInterceptor interceptor) {
-        BeanFactoryLimiterOperationSourceAdvisor advisor = new BeanFactoryLimiterOperationSourceAdvisor();
-        advisor.setAdvice(interceptor);
-        advisor.setLimiterOperationSource(limiterOperationSource());
-        return advisor;
-    }
-
-    @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public LimiterOperationSource limiterOperationSource() {
-        return new AnnotationLimiterOperationSource();
-    }
-
-    @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public LimiterInterceptor interceptor(FrequencyLimiter limiter) {
-        LimiterInterceptor interceptor = new LimiterInterceptor();
-        interceptor.setLimiterOperationSource(limiterOperationSource());
-        interceptor.setLimiter(limiter);
-        return interceptor;
-    }
-
+@ConditionalOnProperty(prefix = "site.zido.limiter", value = "enable", matchIfMissing = true)
+public class LimiterAutoConfiguration {
     @Bean(name = "limiterExceptionHandler")
     @ConditionalOnMissingBean(name = "limiterExceptionHandler")
     public LimiterExceptionAdvice advice() {
@@ -66,21 +36,18 @@ public class ProxyLimiterConfiguration {
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer(StandardCharsets.UTF_8));
         template.setValueSerializer(new RedisSerializer<Long>() {
-            private Logger logger = LoggerFactory.getLogger("limiterValueSerializer");
 
             @Override
             public byte[] serialize(Long value) throws SerializationException {
-                return (value + "").getBytes(StandardCharsets.UTF_8);
+                return ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(value).array();
             }
 
             @Override
             public Long deserialize(byte[] bytes) throws SerializationException {
-                try {
-                    return Long.parseLong(new String(bytes, StandardCharsets.UTF_8));
-                } catch (Throwable t) {
-                    logger.error("deserialize error", t);
-                    return null;
-                }
+                ByteBuffer buffer = ByteBuffer.allocate(8);
+                buffer.put(bytes, 0, bytes.length);
+                buffer.flip();
+                return buffer.getLong();
             }
         });
         return template;

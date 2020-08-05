@@ -1,7 +1,8 @@
 package site.zido.coffee.extra.limiter;
 
 import org.springframework.data.redis.core.RedisTemplate;
-import site.zido.coffee.common.utils.SystemClock;
+import org.springframework.util.Assert;
+import site.zido.coffee.core.utils.SystemClock;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 public class RedisFrequencyLimiter implements FrequencyLimiter {
 
     private static final String PRE = "coffee:limiter:";
-    private String prefix;
-    private RedisTemplate<String, Long> template;
+    private final String prefix;
+    private final RedisTemplate<String, Long> template;
 
     public RedisFrequencyLimiter(String prefix, RedisTemplate<String, Long> template) {
         this.prefix = prefix;
@@ -28,14 +29,9 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
     }
 
     @Override
-    public LastItem tryGetForItem(String key, long timeout, TimeUnit unit) {
-        long l = unit.toSeconds(timeout);
-        if (l < 1) {
-            throw new IllegalArgumentException("超时时间需要大于1S");
-        }
-        if (l >= Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("超时间需要小于" + Integer.MAX_VALUE);
-        }
+    public long tryGet(String key, long timeout) {
+        Assert.isTrue(timeout > 1, "超时时间设定以秒为单位，并且需要大于一秒");
+        Assert.isTrue(timeout <= Integer.MAX_VALUE, "超时时间需要小于等于" + Integer.MAX_VALUE);
         long now = SystemClock.now();
         now = now / 1000;
         String prefixedKey = prefix + key;
@@ -47,14 +43,14 @@ public class RedisFrequencyLimiter implements FrequencyLimiter {
                 throw new IllegalStateException(String.format("键[%s]永久有效，需要排查", prefixedKey));
             }
             if (expire > 0) {
-                return new LastItem(expire, TimeUnit.MILLISECONDS);
+                return expire;
             }
         }
-        createTag(key, now, timeout, unit);
-        return null;
+        createTag(key, now, timeout);
+        return 0;
     }
 
-    private void createTag(String key, long date, long timeout, TimeUnit unit) {
-        template.opsForValue().set(prefix + key, date, timeout, unit);
+    private void createTag(String key, long date, long timeout) {
+        template.opsForValue().set(prefix + key, date, timeout);
     }
 }

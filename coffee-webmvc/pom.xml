@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>coffee-webmvc</artifactId>
+    <description>Spring Web Mvc 增强</description>
 
     <dependencies>
         <dependency>
