@@ -12,7 +12,7 @@
     <groupId>site.zido</groupId>
     <artifactId>coffee-common-builder</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.0-release</version>
+    <version>0.3.0-SNAPSHOT</version>
     <description>A Restful Style Launcher For Spring Boot</description>
     <url>https://github.com/zidoshare/coffee-spring-boot-builder</url>
 
@@ -98,7 +98,7 @@
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-core</artifactId>
-                <version>0.2.0-release</version>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
