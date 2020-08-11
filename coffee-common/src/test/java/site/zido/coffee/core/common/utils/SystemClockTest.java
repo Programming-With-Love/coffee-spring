@@ -2,6 +2,7 @@ package site.zido.coffee.core.common.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import site.zido.coffee.core.utils.SystemClock;
 
 public class SystemClockTest {
     @Test

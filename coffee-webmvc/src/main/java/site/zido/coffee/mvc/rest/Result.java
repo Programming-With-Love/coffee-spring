@@ -1,7 +1,6 @@
 package site.zido.coffee.mvc.rest;
 
-
-import site.zido.coffee.common.CommonErrorCode;
+import site.zido.coffee.mvc.CommonErrorCode;
 
 import java.io.Serializable;
 

@@ -2,7 +2,7 @@ package site.zido.coffee.security.configurers;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import site.zido.coffee.common.utils.ResponseUtils;
+import site.zido.coffee.mvc.utils.ResponseUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

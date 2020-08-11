@@ -6,7 +6,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.util.Assert;
-import site.zido.coffee.common.utils.IdWorker;
+import site.zido.coffee.core.utils.IdWorker;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
