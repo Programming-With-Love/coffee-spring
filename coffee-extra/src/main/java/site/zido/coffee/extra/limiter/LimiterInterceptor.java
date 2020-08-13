@@ -11,6 +11,9 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.BeanFactoryResolver;
+import org.springframework.context.expression.MethodBasedEvaluationContext;
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -18,12 +21,15 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * @author zido
@@ -31,11 +37,12 @@ import java.util.concurrent.TimeUnit;
 public class LimiterInterceptor extends AbstractLimiterInvoker implements MethodInterceptor, BeanFactoryAware, InitializingBean {
 
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-    private final Map<ExpressionKey, Expression> CACHE = new ConcurrentHashMap<>(3);
-    private SpelExpressionParser parser = new SpelExpressionParser();
+    private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+    private final SpelExpressionParser parser = new SpelExpressionParser();
+    private final ConcurrentHashMap<String, Expression> caches = new ConcurrentHashMap<>(3);
     private LimiterOperationSource limiterOperationSource;
     private FrequencyLimiter limiter;
-    private StandardEvaluationContext context;
+    private BeanFactory factory;
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -46,7 +53,13 @@ public class LimiterInterceptor extends AbstractLimiterInvoker implements Method
         if (!CollectionUtils.isEmpty(operations)) {
             for (LimiterOperation operation : operations) {
                 String key = operation.getKey();
-                key = generateKey(key, new AnnotatedElementKey(method, targetClass));
+                Object[] args = invocation.getArguments();
+                if (StringUtils.hasText(key)) {
+                    EvaluationContext context = createEvaluationContext(method, args, target, targetClass);
+                    key = generateKey(key, context);
+                } else {
+                    key = generateKey(target, method, args);
+                }
                 long timeout = operation.getTimeout();
                 try {
                     long lastTimeout = limiter.tryGet(key, timeout);
@@ -64,17 +77,18 @@ public class LimiterInterceptor extends AbstractLimiterInvoker implements Method
         return invocation.proceed();
     }
 
-    private String generateKey(String expression, AnnotatedElementKey elementKey) {
-        ExpressionKey expressionKey = createKey(elementKey, expression);
-        Expression expr = CACHE.get(expressionKey);
-        if (expr == null) {
-            expr = parser.parseExpression(expression);
-            CACHE.put(expressionKey, expr);
-        }
-        return expr.getValue(createEvaluationContext(), String.class);
+    protected String generateKey(Object target, Method method, Object[] args) {
+        return Arrays.toString(args);
     }
 
-    private EvaluationContext createEvaluationContext() {
+    private String generateKey(String expression, EvaluationContext context) {
+        Expression expr = caches.computeIfAbsent(expression, parser::parseExpression);
+        return expr.getValue(context, String.class);
+    }
+
+    private EvaluationContext createEvaluationContext(Method method, Object[] args, Object target, Class<?> targetClass) {
+        MethodBasedEvaluationContext context = new MethodBasedEvaluationContext(new LimiterRootObject(method, args, target, targetClass), method, args, getParameterNameDiscoverer());
+        context.setBeanResolver(new BeanFactoryResolver(factory));
         return context;
     }
 
@@ -92,8 +106,7 @@ public class LimiterInterceptor extends AbstractLimiterInvoker implements Method
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        context = new StandardEvaluationContext();
-        context.setBeanResolver(new BeanFactoryResolver(beanFactory));
+        this.factory = beanFactory;
     }
 
     public FrequencyLimiter getLimiter() {
@@ -110,6 +123,10 @@ public class LimiterInterceptor extends AbstractLimiterInvoker implements Method
                 "If there are no limiter methods, then don't use a limiter aspect.");
         Assert.state(getErrorHandler() != null, "The 'errorHandler' property is required");
         Assert.state(limiter != null, "the 'limiter' property is required");
+    }
+
+    protected ParameterNameDiscoverer getParameterNameDiscoverer() {
+        return parameterNameDiscoverer;
     }
 
     protected static class ExpressionKey implements Comparable<ExpressionKey> {
