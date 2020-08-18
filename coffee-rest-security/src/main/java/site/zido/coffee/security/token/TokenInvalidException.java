@@ -5,8 +5,12 @@ package site.zido.coffee.security.token;
  *
  * @author zido
  */
-public class TokenInvalidException extends Exception {
+public class TokenInvalidException extends RuntimeException {
     public TokenInvalidException(String msg, Throwable t) {
         super(msg, t);
+    }
+
+    public TokenInvalidException(String msg) {
+        super(msg);
     }
 }

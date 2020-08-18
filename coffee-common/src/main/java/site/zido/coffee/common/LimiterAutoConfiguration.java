@@ -66,7 +66,7 @@ public class LimiterAutoConfiguration {
         return new LimiterProperties();
     }
 
-    class LimiterProperties {
+    static class LimiterProperties {
         private String prefix;
 
         public String getPrefix() {

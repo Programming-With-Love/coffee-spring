@@ -30,7 +30,7 @@ public abstract class AbstractRestAuthenticationFilterConfigurer<B extends HttpS
     private RestAuthenticationSuccessHandler defaultSuccessHandler = new RestAuthenticationSuccessHandler();
     private AuthenticationSuccessHandler successHandler = this.defaultSuccessHandler;
 
-    private JwtAuthenticationEntryPoint authenticationEntryPoint = new JwtAuthenticationEntryPoint();
+    private AuthenticationEntryPoint authenticationEntryPoint = new JwtAuthenticationEntryPoint();
 
     private String loginProcessingUrl;
 

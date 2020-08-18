@@ -71,7 +71,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
     private AuthenticationManager authenticationManager;
     private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
     private RestHttpSecurity http;
-    private boolean disableDefaults;
+    private final boolean disableDefaults;
 
     protected RestSecurityConfigurationAdapter() {
         this(false);
@@ -212,7 +212,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
     }
 
     @Autowired(required = false)
-    public void setContentNegotationStrategy(
+    public void setContentNegotiationStrategy(
             ContentNegotiationStrategy contentNegotiationStrategy) {
         this.contentNegotiationStrategy = contentNegotiationStrategy;
     }
@@ -229,8 +229,8 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
     }
 
     private Map<Class<?>, Object> createSharedObjects() {
-        Map<Class<?>, Object> sharedObjects = new HashMap<>();
-        sharedObjects.putAll(localConfigureAuthenticationBldr.getSharedObjects());
+        Map<Class<?>, Object> sharedObjects =
+                new HashMap<>(localConfigureAuthenticationBldr.getSharedObjects());
         sharedObjects.put(UserDetailsService.class, userDetailsService());
         sharedObjects.put(PhoneCodeService.class, phoneCodeService());
         sharedObjects.put(ApplicationContext.class, context);
@@ -291,6 +291,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
             Assert.notNull(delegateBuilder, "delegateBuilder cannot be null");
             Field parentAuthMgrField = ReflectionUtils.findField(
                     AuthenticationManagerBuilder.class, "parentAuthenticationManager");
+            Assert.notNull(parentAuthMgrField,"cannot reachable");
             ReflectionUtils.makeAccessible(parentAuthMgrField);
             beanNames = getAuthenticationManagerBeanNames(context);
             validateBeanCycle(
