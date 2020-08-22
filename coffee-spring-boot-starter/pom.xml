@@ -11,7 +11,7 @@
 
     <artifactId>coffee-spring-boot-starter</artifactId>
     <description>A Spring Boot Starter For Coffee</description>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <dependencies>
         <dependency>
             <groupId>site.zido</groupId>

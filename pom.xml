@@ -45,15 +45,11 @@
     </developers>
     <modules>
         <module>coffee-common</module>
-        <module>coffee-extra</module>
         <module>coffee-spring-boot-starter</module>
-        <module>coffee-rest-security</module>
         <module>coffee-dependencies</module>
         <module>coffee-spring-boot-parent</module>
-        <module>coffee-webmvc</module>
-        <module>coffee-core</module>
         <module>coffee-logger</module>
-        <module>coffee-data-jpa</module>
+        <module>modules</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>

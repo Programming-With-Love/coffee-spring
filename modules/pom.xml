@@ -9,16 +9,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>coffee-data-jpa</artifactId>
+    <artifactId>coffee-modules</artifactId>
+    <packaging>pom</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>coffee-core</module>
+        <module>coffee-webmvc</module>
+        <module>coffee-extra</module>
+        <module>coffee-rest-security</module>
+        <module>coffee-data-jpa</module>
+    </modules>
 </project>
