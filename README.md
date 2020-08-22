@@ -43,11 +43,42 @@
 
 ## 使用
 
-maven 加入依赖
+为使框架尽可能轻量化，项目采用分包开发，尽可能进行单一功能的增强，鉴于开发者可能对某些模块的定制并不满意，你完全可以选择不引入相应功能。
+
+为了保持Spring Boot使用习惯，本项目提供site.zido:coffee-spring-boot-parent包，放置于pom文件中的parent标签下，
+它继承自Spring Boot Starter Parent主要用于维护版本及能够沿用它的相关插件设置，在其基础上增加coffee项目的版本依赖管理。
+```xml
+<parent>
+    <groupId>site.zido</groupId>
+    <artifactId>coffee-spring-boot-parent</artifactId>
+    <version>{version}</version>
+</parent>
+```
+当然，你也可以使用dependencyManager方式引入site.zido:coffee-dependencies包，用于管理依赖版本。
 
 ```xml
-<project>
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <!-- Import dependency management from Spring Boot -->
+            <groupId>site.zido</groupId>
+            <artifactId>coffee-dependencies</artifactId>
+            <version>${version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
 
+当在需要引入项目时，可能会遇到两种情况：
+
+#### 你完全认同本框架对于Spring的相应扩展能力（推荐）
+
+直接引入`coffee-spring-boot-starter`模块。本模块完全采用探测型功能增强，
+也即是说，它会在你引入相应模块时才为之生效，否则不产生任何副作用。示例如下：
+```xml
+<project>
     <parent>
         <groupId>site.zido</groupId>
         <artifactId>coffee-spring-boot-parent</artifactId>
@@ -58,23 +89,59 @@ maven 加入依赖
             <groupId>site.zido</groupId>
             <artifactId>coffee-spring-boot-starter</artifactId>
             <version>{version}</version>
-            </dependency>
+        </dependency>
+        <!--增强Spring Mvc,添加全局统一返回，异常处理等逻辑-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!--增强Spring Security，增加Restful Api支持，增加jwt支持，添加手机号登陆等功能支持-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
     </dependencies>
 </project>
-
 ```
-
+#### 你认同部分扩展能力 （推荐）
 可以分别使用各个模块为你提供相关的功能
 
 | 模块名               | 描述                                                                                                  |
 | -------------------- | ----------------------------------------------------------------------------------------------------- |
-| coffee-common        | 基本通用包，包含异常封装，响应体封装，json自动配置，请求日志自动配置等，其他模块均会自动引入该模块    |
-| coffee-rest-security | rest api认证框架，基于spring security封装，在spring security基础上提供rest api支持，默认使用jwt token |
-| coffee-extra         | 提供诸多常用注解式开发工具，包含注解式分布式锁/限流器/防重放等功能                                    |
+| coffee-starter-web        | 基本通用包，包含异常封装，响应体封装，json自动配置，请求日志自动配置等，其他模块均会自动引入该模块    |
+| coffee-starter-rest-security | rest api认证框架，基于spring security封装，在spring security基础上提供rest api支持，默认使用jwt token |
+| coffee-starter-extra         | 提供诸多常用注解式开发工具，包含注解式分布式锁/限流器/防重放等功能                                    |
 
-...
-
-完毕
+将`spring-boot-starter-xxx`替换为`coffee-starter-xxx`即可，**不需要再添加对应spring boot模块**，这些模块本身附带有对应依赖。
+```xml
+<project>
+    <parent>
+        <groupId>site.zido</groupId>
+        <artifactId>coffee-spring-boot-parent</artifactId>
+        <version>{version}</version>
+    </parent>
+    <dependencies>
+        <!--增强Spring Mvc,添加全局统一返回，异常处理等逻辑-->
+        <dependency>
+            <groupId>site.zido</groupId>
+            <artifactId>coffee-starter-web</artifactId>
+            <version>{version}</version>
+        </dependency>
+        <!--增强Spring Security，增加Restful Api支持，增加jwt支持，添加手机号登陆等功能支持-->
+        <dependency>
+            <groupId>site.zido</groupId>
+            <artifactId>coffee-starter-rest-security</artifactId>
+            <version>{version}</version>
+        </dependency>
+        <!--额外开发利器-->
+        <dependency>
+            <groupId>site.zido</groupId>
+            <artifactId>coffee-starter-extra</artifactId>
+            <version>{version}</version>
+        </dependency>
+    </dependencies>
+</project>
+```
 
 ## 认证模块 (coffee-auth)
 
