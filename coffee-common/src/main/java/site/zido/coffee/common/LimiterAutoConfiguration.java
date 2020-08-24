@@ -2,6 +2,7 @@ package site.zido.coffee.common;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
@@ -15,13 +16,15 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.StringUtils;
+import site.zido.coffee.extra.limiter.FrequencyLimiter;
+import site.zido.coffee.extra.limiter.MemoryFrequencyLimiter;
 import site.zido.coffee.extra.limiter.RedisFrequencyLimiter;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
-@Import(RedisAutoConfiguration.class)
+@AutoConfigureAfter(RedisAutoConfiguration.class)
 public class LimiterAutoConfiguration {
     @Bean(name = "limiterExceptionHandler")
     @ConditionalOnMissingBean(name = "limiterExceptionHandler")
@@ -55,12 +58,23 @@ public class LimiterAutoConfiguration {
     }
 
     @Bean
-    public RedisFrequencyLimiter limiter(@Autowired LimiterProperties properties,
-                                         @Autowired @Qualifier(value = "limiterTemplate") RedisTemplate<String, Long> template) {
+    @ConditionalOnBean(name = "limiterTemplate")
+    @ConditionalOnMissingBean(FrequencyLimiter.class)
+    public FrequencyLimiter limiter(@Autowired LimiterProperties properties,
+                                    @Autowired @Qualifier(value = "limiterTemplate") RedisTemplate<String, Long> template) {
         if (StringUtils.hasLength(properties.getPrefix())) {
             return new RedisFrequencyLimiter(properties.getPrefix(), template);
         }
         return new RedisFrequencyLimiter(template);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "limiterTemplate", value = FrequencyLimiter.class)
+    public FrequencyLimiter limiter(@Autowired LimiterProperties properties) {
+        if (StringUtils.hasLength(properties.getPrefix())) {
+            return new MemoryFrequencyLimiter(properties.getPrefix());
+        }
+        return new MemoryFrequencyLimiter();
     }
 
     @Bean
