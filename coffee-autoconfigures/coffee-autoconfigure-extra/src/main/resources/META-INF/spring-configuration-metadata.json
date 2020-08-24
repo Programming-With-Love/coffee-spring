@@ -1,0 +1,19 @@
+{
+  "groups": [
+    {
+      "name": "coffee.limiter",
+      "type": "site.zido.coffee.common.limiter.LimiterProperties",
+      "sourceType": "site.zido.coffee.common.limiter.LimiterAutoConfiguration",
+      "sourceMethod": "createProperties()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "coffee.limiter.prefix",
+      "type": "java.lang.String",
+      "sourceType": "site.zido.coffee.common.limiter.LimiterProperties",
+      "description": "设置limiter前缀"
+    }
+  ],
+  "hints": []
+}

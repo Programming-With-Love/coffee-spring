@@ -3,28 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>coffee-common-builder</artifactId>
+        <artifactId>coffee-starters</artifactId>
         <groupId>site.zido</groupId>
         <version>0.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>coffee-spring-boot-starter</artifactId>
-    <description>A Spring Boot Starter For Coffee</description>
-    <packaging>jar</packaging>
+    <artifactId>coffee-starter-extra</artifactId>
+
     <dependencies>
-        <dependency>
-            <groupId>site.zido</groupId>
-            <artifactId>coffee-autoconfigure-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>site.zido</groupId>
-            <artifactId>coffee-autoconfigure-extra</artifactId>
-        </dependency>
         <dependency>
             <groupId>site.zido</groupId>
             <artifactId>coffee-autoconfigure-rest-security</artifactId>
         </dependency>
     </dependencies>
-
 </project>

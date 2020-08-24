@@ -9,22 +9,23 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>coffee-spring-boot-starter</artifactId>
-    <description>A Spring Boot Starter For Coffee</description>
-    <packaging>jar</packaging>
+    <artifactId>coffee-autoconfigures</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>coffee-autoconfigure-web</module>
+        <module>coffee-autoconfigure-rest-security</module>
+        <module>coffee-autoconfigure-extra</module>
+    </modules>
     <dependencies>
         <dependency>
-            <groupId>site.zido</groupId>
-            <artifactId>coffee-autoconfigure-web</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>site.zido</groupId>
-            <artifactId>coffee-autoconfigure-extra</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>site.zido</groupId>
-            <artifactId>coffee-autoconfigure-rest-security</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
     </dependencies>
-
 </project>

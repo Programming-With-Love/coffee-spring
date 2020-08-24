@@ -1,0 +1,11 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "coffee.json.auto-switch",
+      "type": "java.lang.Boolean",
+      "description": "设置是否自动根据环境切换json序列化行为"
+    }
+  ],
+  "hints": []
+}

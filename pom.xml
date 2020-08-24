@@ -44,12 +44,13 @@
         </developer>
     </developers>
     <modules>
-        <module>coffee-common</module>
         <module>coffee-spring-boot-starter</module>
         <module>coffee-dependencies</module>
         <module>coffee-spring-boot-parent</module>
         <module>coffee-logger</module>
-        <module>modules</module>
+        <module>coffee-modules</module>
+        <module>coffee-starters</module>
+        <module>coffee-autoconfigures</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
@@ -103,11 +104,6 @@
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
-                <artifactId>coffee-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>site.zido</groupId>
                 <artifactId>coffee-extra</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -119,6 +115,21 @@
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-autoconfigure-extra</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-autoconfigure-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-autoconfigure-rest-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- others -->

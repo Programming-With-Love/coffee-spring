@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  site.zido.coffee.autoconfigure.security.rest.RestSecurityAutoConfiguration,\
+  site.zido.coffee.autoconfigure.security.rest.RestSecurityFilterAutoConfiguration
