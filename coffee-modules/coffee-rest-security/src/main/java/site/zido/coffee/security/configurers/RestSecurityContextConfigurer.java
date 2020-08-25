@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
+import site.zido.coffee.security.token.JwtRefreshFilter;
 import site.zido.coffee.security.token.JwtSecurityContextRepository;
 
 import java.util.concurrent.TimeUnit;
@@ -67,6 +68,14 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
         securityContextFilter.setForceEagerSessionCreation(false);
         securityContextFilter = postProcess(securityContextFilter);
         restHttp.addFilter(securityContextFilter);
+
+        JwtRefreshFilter refreshFilter = restHttp.getSharedObject(JwtRefreshFilter.class);
+        if (refreshFilter != null) {
+            if (this.authHeaderName != null) {
+                refreshFilter.setAuthHeaderName(authHeaderName);
+            }
+            restHttp.addFilterBefore(refreshFilter, SecurityContextPersistenceFilter.class);
+        }
     }
 
     public RestSecurityContextConfigurer<H> authHeaderName(String authHeaderName) {
@@ -81,6 +90,7 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
     public class JwtSecurityConfigurer {
 
         private JwtSecurityContextRepository repository;
+        private JwtRefreshFilter refreshFilter;
 
         private JwtSecurityConfigurer() {
             enable();
@@ -88,10 +98,8 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
 
         public JwtSecurityConfigurer enable() {
             if (this.repository == null) {
-                UserDetailsService userDetailsService = getBuilder().getSharedObject(UserDetailsService.class);
                 this.repository =
                         new JwtSecurityContextRepository("coffee-jwt", 60 * 60 * 1000, 60 * 10 * 1000);
-                this.repository.setUserService(userDetailsService);
                 getBuilder().setSharedObject(JwtSecurityContextRepository.class, repository);
             }
             return this;
@@ -107,28 +115,37 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             return this;
         }
 
-        public JwtSecurityConfigurer jwtSecret(String jwtSecret) {
-            repository.setJwtSecret(jwtSecret);
+        public JwtSecurityConfigurer secret(String jwtSecret) {
+            repository.setSecret(jwtSecret);
             return this;
         }
 
-        public JwtSecurityConfigurer jwtExpirationInMs(long jwtExpirationInMs) {
-            repository.setJwtExpirationInMs(jwtExpirationInMs);
+        /**
+         * 启用自动为即将过期的token发放新token
+         *
+         * @param renewInMs  重新发放的请求时间，毫秒数
+         * @param expiration token过期时间，过期时间不能比renewInMs短
+         * @return this
+         */
+        public JwtSecurityConfigurer autoRefresh(long renewInMs, long expiration) {
+            repository.setJwtExpirationInMs(expiration);
+            repository.setJwtRenewInMs(renewInMs);
             return this;
         }
 
-        public JwtSecurityConfigurer jwtExpiration(long time, TimeUnit unit) {
-            repository.setJwtExpirationInMs(unit.toMillis(time));
-            return this;
-        }
-
-        public JwtSecurityConfigurer jwtRenewInMs(long jwtExpirationInMs) {
-            repository.setJwtRenewInMs(jwtExpirationInMs);
-            return this;
-        }
-
-        public JwtSecurityConfigurer jwtRenew(long time, TimeUnit unit) {
-            repository.setJwtRenewInMs(unit.toMillis(time));
+        /**
+         * 启用手动刷新过期token，将提供手动刷新接口
+         *
+         * @return this
+         */
+        public JwtSecurityConfigurer refresh() {
+            if (refreshFilter == null) {
+                refreshFilter = getBuilder().getSharedObject(JwtRefreshFilter.class);
+                if (refreshFilter == null) {
+                    refreshFilter = new JwtRefreshFilter();
+                    getBuilder().setSharedObject(JwtRefreshFilter.class, refreshFilter);
+                }
+            }
             return this;
         }
 

@@ -32,7 +32,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     private static Logger LOGGER = LoggerFactory.getLogger(JwtSecurityContextRepository.class);
     private String authHeaderName = DEFAULT_AUTH_HEADER_NAME;
     private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
-    private String jwtSecret;
+    private String secret;
 
     private long jwtExpirationInMs;
 
@@ -47,8 +47,8 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     public JwtSecurityContextRepository() {
     }
 
-    public JwtSecurityContextRepository(String jwtSecret, long jwtExpirationInMs, long jwtRenewInMs) {
-        this.jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes());
+    public JwtSecurityContextRepository(String secret, long jwtExpirationInMs, long jwtRenewInMs) {
+        this.secret = Base64.getEncoder().encodeToString(secret.getBytes());
         this.jwtExpirationInMs = jwtExpirationInMs;
         this.jwtRenewInMs = jwtRenewInMs;
     }
@@ -70,7 +70,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         if (token == null) {
             LOGGER.debug("No token currently exists");
             context = generateNewContext();
-            requestResponseHolder.setResponse(new JwtWriterResponse(response));
+            requestResponseHolder.setResponse(new JwtWriterResponse(response, jwtExpirationInMs, getIssue(), secret, authHeaderName));
         } else {
             try {
                 if (StringUtils.isEmpty(token)) {
@@ -79,7 +79,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
                 Claims claims;
                 try {
                     claims = Jwts.parser()
-                            .setSigningKey(jwtSecret)
+                            .setSigningKey(secret)
                             .parseClaimsJws(token)
                             .getBody();
                 } catch (ExpiredJwtException | UnsupportedJwtException e) {
@@ -111,10 +111,10 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
                     calendar.setTime(issued);
                     calendar.add(Calendar.MILLISECOND, (int) (jwtRenewInMs));
                     if (calendar.getTime().before(new Date())) {
-                        requestResponseHolder.setResponse(new JwtWriterResponse(response));
+                        requestResponseHolder.setResponse(new JwtWriterResponse(response, jwtExpirationInMs, issue, secret, authHeaderName));
                     }
                 } else {
-                    requestResponseHolder.setResponse(new JwtWriterResponse(response));
+                    requestResponseHolder.setResponse(new JwtWriterResponse(response, jwtExpirationInMs, issue, secret, authHeaderName));
                 }
             } catch (TokenInvalidException e) {
                 context = generateNewContext();
@@ -142,56 +142,12 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         return StringUtils.hasLength(request.getHeader(authHeaderName));
     }
 
-    private void addTokenToResponse(HttpServletResponse response, String token) {
-        response.setHeader(authHeaderName, token);
-    }
-
-    private String generateNewToken(SecurityContext subject) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-
-        return Jwts.builder()
-                .setSubject(subject.getAuthentication().getName())
-                .setIssuedAt(now)
-                .setIssuer(issue)
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
-                .compact();
-    }
-
     public long getJwtRenewInMs() {
         return jwtRenewInMs;
     }
 
     public void setJwtRenewInMs(long jwtRenewInMs) {
         this.jwtRenewInMs = jwtRenewInMs;
-    }
-
-    class JwtWriterResponse extends OnCommittedResponseWrapper {
-
-        JwtWriterResponse(HttpServletResponse response) {
-            super(response);
-        }
-
-        @Override
-        protected void onResponseCommitted() {
-            writeToken(SecurityContextHolder.getContext());
-            this.disableOnResponseCommitted();
-        }
-
-        protected void writeToken(SecurityContext context) {
-            if (isDisableOnResponseCommitted()) {
-                return;
-            }
-            if (context.getAuthentication() != null && context.getAuthentication().isAuthenticated()) {
-                String newToken = generateNewToken(context);
-                addTokenToResponse(getHttpResponse(), newToken);
-            }
-        }
-
-        private HttpServletResponse getHttpResponse() {
-            return (HttpServletResponse) getResponse();
-        }
     }
 
     public void setAuthHeaderName(String authHeaderName) {
@@ -206,8 +162,8 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
         this.userService = userService;
     }
 
-    public void setJwtSecret(String jwtSecret) {
-        this.jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes());
+    public void setSecret(String secret) {
+        this.secret = Base64.getEncoder().encodeToString(secret.getBytes());
     }
 
     public void setJwtExpirationInMs(long jwtExpirationInMs) {

@@ -12,7 +12,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import site.zido.coffee.security.token.JwtAuthenticationEntryPoint;
+import site.zido.coffee.security.token.RestAuthenticationEntryPoint;
 
 import java.util.LinkedHashMap;
 
@@ -105,7 +105,7 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
 
     private AuthenticationEntryPoint createDefaultEntryPoint(H http) {
         if (this.defaultEntryPointMappings.isEmpty()) {
-            return new JwtAuthenticationEntryPoint();
+            return new RestAuthenticationEntryPoint();
         }
         if (this.defaultEntryPointMappings.size() == 1) {
             return this.defaultEntryPointMappings.values().iterator().next();

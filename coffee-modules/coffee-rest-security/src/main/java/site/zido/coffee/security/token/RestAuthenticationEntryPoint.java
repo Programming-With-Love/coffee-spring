@@ -13,18 +13,18 @@ import java.io.IOException;
 /**
  * @author zido
  */
-public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private MediaType mediaType;
     private String successBody;
 
-    public JwtAuthenticationEntryPoint() {
+    public RestAuthenticationEntryPoint() {
     }
 
-    public JwtAuthenticationEntryPoint(String successBody) {
+    public RestAuthenticationEntryPoint(String successBody) {
         this(MediaType.APPLICATION_JSON, successBody);
     }
 
-    public JwtAuthenticationEntryPoint(MediaType mediaType, String successBody) {
+    public RestAuthenticationEntryPoint(MediaType mediaType, String successBody) {
         this.mediaType = mediaType;
         this.successBody = successBody;
     }

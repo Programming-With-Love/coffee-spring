@@ -12,7 +12,7 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import site.zido.coffee.security.authentication.RestAuthenticationFailureHandler;
 import site.zido.coffee.security.authentication.RestAuthenticationSuccessHandler;
-import site.zido.coffee.security.token.JwtAuthenticationEntryPoint;
+import site.zido.coffee.security.token.RestAuthenticationEntryPoint;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -30,7 +30,7 @@ public abstract class AbstractRestAuthenticationFilterConfigurer<B extends HttpS
     private RestAuthenticationSuccessHandler defaultSuccessHandler = new RestAuthenticationSuccessHandler();
     private AuthenticationSuccessHandler successHandler = this.defaultSuccessHandler;
 
-    private AuthenticationEntryPoint authenticationEntryPoint = new JwtAuthenticationEntryPoint();
+    private AuthenticationEntryPoint authenticationEntryPoint = new RestAuthenticationEntryPoint();
 
     private String loginProcessingUrl;
 
