@@ -1,7 +1,9 @@
 package site.zido.coffee.security.token;
 
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.OnCommittedResponseWrapper;
@@ -33,7 +35,7 @@ public class JwtWriterResponse extends OnCommittedResponseWrapper {
         if (isDisableOnResponseCommitted()) {
             return;
         }
-        if (context.getAuthentication() != null && context.getAuthentication().isAuthenticated()) {
+        if (context.getAuthentication() != null) {
             String newToken = generateNewToken(context);
             addTokenToResponse(getHttpResponse(), newToken);
             doAfterWriteToken(context);
@@ -52,7 +54,13 @@ public class JwtWriterResponse extends OnCommittedResponseWrapper {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
-        return Jwts.builder()
+        JwtBuilder builder = Jwts.builder();
+        //如果开启匿名，则写入匿名token配置
+        if (subject instanceof AnonymousAuthenticationToken) {
+            builder.claim("role", "anonymous");
+        }
+        //如果是匿名用户则subject为空字符串
+        return builder
                 .setSubject(subject.getAuthentication().getName())
                 .setIssuedAt(now)
                 .setIssuer(issue)
