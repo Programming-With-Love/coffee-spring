@@ -1,7 +1,7 @@
 package site.zido.demo.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import site.zido.coffee.common.model.BaseRepository;
+import site.zido.coffee.data.model.BaseRepository;
 import site.zido.demo.entity.User;
 
 import java.util.Optional;

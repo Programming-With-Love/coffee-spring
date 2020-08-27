@@ -3,7 +3,7 @@ package site.zido.demo.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import site.zido.coffee.common.model.BaseEntity;
+import site.zido.coffee.data.model.BaseEntity;
 
 import javax.persistence.*;
 import java.util.Date;

@@ -14,14 +14,10 @@
         <dependency>
             <groupId>site.zido</groupId>
             <artifactId>coffee-webmvc</artifactId>
-            <scope>compile</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>site.zido</groupId>
             <artifactId>coffee-rest-security</artifactId>
-            <scope>compile</scope>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 

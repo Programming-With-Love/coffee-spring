@@ -2,8 +2,8 @@ package site.zido.demo.pojo.params;
 
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import site.zido.coffee.common.model.InputConverter;
-import site.zido.coffee.common.validations.Phone;
+import site.zido.coffee.core.utils.InputConverter;
+import site.zido.coffee.core.validations.Phone;
 import site.zido.demo.entity.User;
 
 @Data

@@ -1,7 +1,7 @@
 package site.zido.demo.pojo.dto;
 
 import lombok.Data;
-import site.zido.coffee.common.model.OutputConverter;
+import site.zido.coffee.core.utils.OutputConverter;
 import site.zido.demo.entity.User;
 
 @Data

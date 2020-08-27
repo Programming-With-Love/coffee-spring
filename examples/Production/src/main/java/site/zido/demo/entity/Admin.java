@@ -7,7 +7,7 @@ import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import site.zido.coffee.common.model.BaseEntity;
+import site.zido.coffee.data.model.BaseEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

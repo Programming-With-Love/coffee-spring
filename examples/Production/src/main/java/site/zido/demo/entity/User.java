@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import site.zido.coffee.common.model.BaseEntity;
+import site.zido.coffee.data.model.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

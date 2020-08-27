@@ -9,11 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import site.zido.coffee.common.rest.GlobalResultHandler;
-import site.zido.coffee.common.rest.HttpResponseBodyFactory;
 import site.zido.coffee.security.RestSecurityConfigurationAdapter;
-import site.zido.coffee.security.authentication.phone.PhoneCodeCache;
-import site.zido.coffee.security.authentication.phone.SpringRedisPhoneCodeCache;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,14 +25,14 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
     protected void configure(RestHttpSecurity http) throws Exception {
         http
                 //权限管理将管理所有的请求
-                .authorizeRequests().anyRequest().permitAll()
+                .authorizeRequests()
                 .and()
                 //帐号密码登录
                 .formLogin().and()
                 //手机号验证码登录
                 .phoneCodeLogin().and()
                 //自定义jwt的超时时间
-                .securityContext().jwt().jwtExpiration(1, TimeUnit.HOURS);
+                .securityContext().jwt().autoRefresh(10 * 60 * 1000,3600 * 1000);
     }
 
     /**
