@@ -99,11 +99,6 @@
             </dependency>
             <dependency>
                 <groupId>site.zido</groupId>
-                <artifactId>coffee-data-jpa</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>site.zido</groupId>
                 <artifactId>coffee-extra</artifactId>
                 <version>${project.version}</version>
             </dependency>

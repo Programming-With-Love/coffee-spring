@@ -11,8 +11,6 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import site.zido.coffee.security.RestSecurityConfigurationAdapter;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * 认证配置类，restful风格，使用jwt方案
  *
@@ -25,14 +23,14 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
     protected void configure(RestHttpSecurity http) throws Exception {
         http
                 //权限管理将管理所有的请求
-                .authorizeRequests()
+                .authorizeRequests().anyRequest().permitAll()
                 .and()
                 //帐号密码登录
                 .formLogin().and()
                 //手机号验证码登录
                 .phoneCodeLogin().and()
                 //自定义jwt的超时时间
-                .securityContext().jwt().autoRefresh(10 * 60 * 1000,3600 * 1000);
+                .securityContext().jwt().autoRefresh(10 * 60 * 1000, 3600 * 1000);
     }
 
     /**

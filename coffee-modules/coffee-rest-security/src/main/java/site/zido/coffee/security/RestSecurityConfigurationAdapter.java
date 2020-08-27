@@ -291,7 +291,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
             Assert.notNull(delegateBuilder, "delegateBuilder cannot be null");
             Field parentAuthMgrField = ReflectionUtils.findField(
                     AuthenticationManagerBuilder.class, "parentAuthenticationManager");
-            Assert.notNull(parentAuthMgrField,"cannot reachable");
+            Assert.notNull(parentAuthMgrField, "cannot reachable");
             ReflectionUtils.makeAccessible(parentAuthMgrField);
             beanNames = getAuthenticationManagerBeanNames(context);
             validateBeanCycle(

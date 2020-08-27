@@ -33,7 +33,7 @@ public abstract class AbstractDistributedLock implements Lock, Serializable, Dis
         Runtime.getRuntime().addShutdownHook(new Thread(AbstractDistributedLock::releaseAll));
     }
 
-    public static void releaseAll(){
+    public static void releaseAll() {
         log.debug("try release distributed locks:number[{}]", CONTAINER.size());
         for (AbstractDistributedLock lock : CONTAINER) {
             lock.destroy();

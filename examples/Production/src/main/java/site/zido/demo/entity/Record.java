@@ -3,7 +3,6 @@ package site.zido.demo.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import site.zido.coffee.data.model.BaseEntity;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -13,9 +12,9 @@ import java.util.Date;
  */
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @ToString(callSuper = true)
-public class Record extends BaseEntity {
+public class Record {
     @Id
     @GeneratedValue
     private Integer id;

@@ -1,12 +1,9 @@
 package site.zido.coffee.autoconfigure.security.rest;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityDataConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SpringBootWebSecurityConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.WebSecurityEnablerConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,8 +30,6 @@ import org.springframework.security.authentication.DefaultAuthenticationEventPub
 @Import({SpringBootRestSecurityConfiguration.class,
         RestSecurityEnableConfiguration.class,
         SecurityDataConfiguration.class})
-@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class,
-        SecurityFilterAutoConfiguration.class})
 public class RestSecurityAutoConfiguration {
 
     @Bean

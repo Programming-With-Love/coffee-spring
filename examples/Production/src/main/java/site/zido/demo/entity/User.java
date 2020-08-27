@@ -2,9 +2,6 @@ package site.zido.demo.entity;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import site.zido.coffee.data.model.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,9 +13,7 @@ import javax.persistence.Id;
  */
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public class User extends BaseEntity {
+public class User {
     @GeneratedValue
     @Id
     private Integer id;

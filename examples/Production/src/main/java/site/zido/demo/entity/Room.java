@@ -3,16 +3,15 @@ package site.zido.demo.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import site.zido.coffee.data.model.BaseEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @ToString(callSuper = true)
-public class Room extends BaseEntity {
+public class Room {
     /**
      * 房间号
      */

@@ -10,7 +10,7 @@ public interface PhoneCodeService {
      * 发送验证码
      *
      * @param phone 手机号
-     * @param code   验证码
+     * @param code  验证码
      */
     void sendCode(String phone, String code);
 }

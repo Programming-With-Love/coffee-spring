@@ -20,7 +20,6 @@ import site.zido.demo.repository.UserRepository;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 认证配置类，restful风格，使用jwt方案
@@ -61,7 +60,7 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
             System.out.printf("phone:%s,code:%s\n", phone, code);
         }).and()
                 //自定义jwt的超时时间
-                .securityContext().jwt().jwtExpiration(1, TimeUnit.HOURS);
+                .securityContext().jwt();
     }
 
     /**

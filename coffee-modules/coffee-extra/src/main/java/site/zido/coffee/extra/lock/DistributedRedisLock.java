@@ -74,7 +74,7 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
                 this.value = (IdWorker.nextId() + "").getBytes(USE_CHARSET);
             }
         } finally {
-            RedisConnectionUtils.releaseConnection(connection, connectionFactory,false);
+            RedisConnectionUtils.releaseConnection(connection, connectionFactory, false);
         }
     }
 
@@ -95,7 +95,7 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
             }
             return false;
         } finally {
-            RedisConnectionUtils.releaseConnection(connection, connectionFactory,false);
+            RedisConnectionUtils.releaseConnection(connection, connectionFactory, false);
         }
     }
 
@@ -110,7 +110,7 @@ public class DistributedRedisLock extends AbstractDistributedLock implements Ser
         try {
             connection.eval(DEL_SCRIPT_BYTES, ReturnType.VALUE, 1, keysAndArgs);
         } finally {
-            RedisConnectionUtils.releaseConnection(connection, connectionFactory,false);
+            RedisConnectionUtils.releaseConnection(connection, connectionFactory, false);
         }
     }
 

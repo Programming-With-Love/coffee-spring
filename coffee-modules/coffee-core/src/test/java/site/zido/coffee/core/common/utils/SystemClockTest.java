@@ -10,6 +10,6 @@ public class SystemClockTest {
         long now = SystemClock.now();
         Thread.sleep(2);
         long last = SystemClock.now();
-        Assert.assertNotEquals(now,last);
+        Assert.assertNotEquals(now, last);
     }
 }

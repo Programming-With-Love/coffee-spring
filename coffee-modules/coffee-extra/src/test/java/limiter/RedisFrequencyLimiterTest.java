@@ -1,6 +1,5 @@
 package limiter;
 
-import site.zido.coffee.extra.limiter.RedisFrequencyLimiter;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,6 +8,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;
+import site.zido.coffee.extra.limiter.RedisFrequencyLimiter;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

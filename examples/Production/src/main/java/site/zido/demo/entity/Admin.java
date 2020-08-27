@@ -2,12 +2,9 @@ package site.zido.demo.entity;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import site.zido.coffee.data.model.BaseEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -15,10 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
 @Entity
-public class Admin extends BaseEntity implements UserDetails {
+public class Admin implements UserDetails {
     @Id
     private String username;
     private String password;

@@ -17,6 +17,5 @@
         <module>coffee-webmvc</module>
         <module>coffee-extra</module>
         <module>coffee-rest-security</module>
-        <module>coffee-data-jpa</module>
     </modules>
 </project>

@@ -10,8 +10,6 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import site.zido.coffee.security.token.JwtRefreshFilter;
 import site.zido.coffee.security.token.JwtSecurityContextRepository;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * 使用token提供用户信息存储
  * <p>

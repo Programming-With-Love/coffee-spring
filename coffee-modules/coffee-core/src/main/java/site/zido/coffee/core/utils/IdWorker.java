@@ -112,6 +112,7 @@ public class IdWorker {
 
     /**
      * 效率稍低
+     *
      * @return id
      */
     public synchronized long nextWithSync() {
