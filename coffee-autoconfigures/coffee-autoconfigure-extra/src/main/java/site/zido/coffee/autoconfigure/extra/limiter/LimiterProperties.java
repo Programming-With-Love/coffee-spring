@@ -1,5 +1,9 @@
 package site.zido.coffee.autoconfigure.extra.limiter;
 
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "coffee.limiter")
 public class LimiterProperties {
     private String prefix;
 

@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=site.zido.coffee.extra.limiter.ProxyLimiterConfiguration

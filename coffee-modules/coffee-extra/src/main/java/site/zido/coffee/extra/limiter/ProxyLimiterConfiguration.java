@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Role;
  * @author zido
  */
 @Configuration
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class ProxyLimiterConfiguration {
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)

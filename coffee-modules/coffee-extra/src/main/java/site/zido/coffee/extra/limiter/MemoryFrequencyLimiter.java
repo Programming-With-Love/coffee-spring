@@ -32,11 +32,11 @@ public class MemoryFrequencyLimiter implements FrequencyLimiter {
     @GuardedBy("cache")
     public long tryGet(String key, long timeout) {
         key = getKey(key);
-        //进一，确保过失时间不会短于约定时间
+        //进一，确保过时时间不会短于约定时间
         long crt = System.currentTimeMillis() / 1000 + 1;
         SortedKey sortedKey = new SortedKey(key, crt + timeout);
         SortedKey target = cache.compute(key, (k, v) -> {
-            //如果原k不存在，一定可以申请。如果不存在，可能是还没来得及回收，需要判断过期时间戳
+            //如果原k不存在，一定可以申请。如果存在，可能是还没来得及回收，需要判断过期时间戳
             if (v == null || v.timeout - crt <= 0) {
                 sortedKeys.add(sortedKey);
                 return sortedKey;

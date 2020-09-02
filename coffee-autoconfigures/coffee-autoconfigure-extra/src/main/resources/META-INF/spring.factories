@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  site.zido.coffee.autoconfigure.extra.limiter.LimiterRedisConfiguration,\
   site.zido.coffee.autoconfigure.extra.limiter.LimiterAutoConfiguration
