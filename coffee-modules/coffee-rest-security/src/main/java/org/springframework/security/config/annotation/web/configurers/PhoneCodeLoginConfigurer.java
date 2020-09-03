@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -66,10 +65,7 @@ public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
             try {
                 cache = context.getBean(PhoneCodeCache.class);
             } catch (BeansException ignore) {
-                SpringRedisPhoneCodeCache cache = new SpringRedisPhoneCodeCache();
-                StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
-                cache.setTemplate(template);
-                this.cache = cache;
+                cache = new MemoryPhoneCodeCache();
             }
         }
         http.setSharedObject(PhoneCodeCache.class, cache);
