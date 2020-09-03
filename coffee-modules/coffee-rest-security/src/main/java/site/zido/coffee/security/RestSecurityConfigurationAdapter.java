@@ -60,7 +60,7 @@ public class RestSecurityConfigurationAdapter implements WebSecurityConfigurer<W
         public <T> T postProcess(T object) {
             throw new IllegalStateException(
                     ObjectPostProcessor.class.getName()
-                            + " is a required bean. Ensure you have used @EnableWebSecurity and @Configuration");
+                            + " is a required bean. Ensure you have used @EnableRestSecurity and @Configuration");
         }
     };
     private AuthenticationConfiguration authenticationConfiguration;
