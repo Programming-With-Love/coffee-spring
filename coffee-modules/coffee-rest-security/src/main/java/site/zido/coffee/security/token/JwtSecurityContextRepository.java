@@ -33,6 +33,7 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
     private String authHeaderName = DEFAULT_AUTH_HEADER_NAME;
     private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
     private String secret;
+    private boolean disableAutoRefresh = false;
 
     private long jwtExpirationInMs;
 
@@ -105,16 +106,18 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
                         authoritiesMapper.mapAuthorities(user.getAuthorities()));
                 context.setAuthentication(authenticationToken);
                 //计算是否需要续期
-                if (jwtRenewInMs >= 0) {
-                    Date issued = claims.getIssuedAt();
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(issued);
-                    calendar.add(Calendar.MILLISECOND, (int) (jwtRenewInMs));
-                    if (calendar.getTime().before(new Date())) {
+                if (!disableAutoRefresh) {
+                    if (jwtRenewInMs >= 0) {
+                        Date issued = claims.getIssuedAt();
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(issued);
+                        calendar.add(Calendar.MILLISECOND, (int) (jwtRenewInMs));
+                        if (calendar.getTime().before(new Date())) {
+                            requestResponseHolder.setResponse(new JwtWriterResponse(response, jwtExpirationInMs, issue, secret, authHeaderName));
+                        }
+                    } else {
                         requestResponseHolder.setResponse(new JwtWriterResponse(response, jwtExpirationInMs, issue, secret, authHeaderName));
                     }
-                } else {
-                    requestResponseHolder.setResponse(new JwtWriterResponse(response, jwtExpirationInMs, issue, secret, authHeaderName));
                 }
             } catch (TokenInvalidException e) {
                 context = generateNewContext();
@@ -180,5 +183,9 @@ public class JwtSecurityContextRepository implements SecurityContextRepository {
 
     public void setIssue(String issue) {
         this.issue = issue;
+    }
+
+    public void enableAutoRefresh(boolean enable) {
+        this.disableAutoRefresh = enable;
     }
 }

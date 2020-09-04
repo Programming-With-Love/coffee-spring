@@ -29,20 +29,29 @@ import site.zido.coffee.security.token.JwtSecurityContextRepository;
  */
 public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> extends
         AbstractHttpConfigurer<RestSecurityContextConfigurer<H>, H> {
-    private String authHeaderName;
+
+    private JwtSecurityConfigurer configurer;
 
     public RestSecurityContextConfigurer() {
     }
 
     public RestSecurityContextConfigurer<H> securityContextRepository(
-            SecurityContextRepository securityContextRepository) {
-        getBuilder().setSharedObject(SecurityContextRepository.class,
+            JwtSecurityContextRepository securityContextRepository) {
+        getBuilder().setSharedObject(JwtSecurityContextRepository.class,
                 securityContextRepository);
         return this;
     }
 
     @Override
+    public void init(H builder) throws Exception {
+        super.init(builder);
+    }
+
+    @Override
     public void configure(H restHttp) {
+        if (configurer != null) {
+            configurer.apply();
+        }
         SecurityContextRepository securityContextRepository = restHttp
                 .getSharedObject(SecurityContextRepository.class);
         if (securityContextRepository == null) {
@@ -54,9 +63,7 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             if (trustResolver != null) {
                 repository.setTrustResolver(trustResolver);
             }
-            if (this.authHeaderName != null) {
-                repository.setAuthHeaderName(authHeaderName);
-            }
+            repository.setAuthHeaderName("Authorization");
             postProcess(repository);
             restHttp.setSharedObject(SecurityContextRepository.class, repository);
             securityContextRepository = repository;
@@ -69,86 +76,250 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
 
         JwtRefreshFilter refreshFilter = restHttp.getSharedObject(JwtRefreshFilter.class);
         if (refreshFilter != null) {
-            if (this.authHeaderName != null) {
-                refreshFilter.setAuthHeaderName(authHeaderName);
-            }
             restHttp.addFilterBefore(refreshFilter, SecurityContextPersistenceFilter.class);
         }
     }
 
-    public RestSecurityContextConfigurer<H> authHeaderName(String authHeaderName) {
-        this.authHeaderName = authHeaderName;
-        return this;
-    }
-
     public JwtSecurityConfigurer jwt() {
-        return new JwtSecurityConfigurer();
+        return (configurer = new JwtSecurityConfigurer());
     }
 
     public class JwtSecurityConfigurer {
+        private boolean enable = false;
+        private boolean refresh = true;
+        private String refreshHeader = "Refresh-Token";
+        private String refreshSecret;
+        private boolean autoRefresh = true;
+        private String secret;
+        private String header = "Authorization";
+        private long renewInMs = 10 * 60 * 1000;
+        private long expiration = 3600 * 1000;
+        private String keyPrefix;
+        private long timeout;
+        private String issue;
+        private String refreshUrl;
+        private long refreshExpiration = 3600 * 1000 * 24;
 
-        private JwtSecurityContextRepository repository;
-        private JwtRefreshFilter refreshFilter;
+        private GrantedAuthoritiesMapper authoritiesMapper;
+        private UserDetailsService userService;
+        private AuthenticationTrustResolver trustResolver;
 
-        private JwtSecurityConfigurer() {
-            enable();
+        public JwtSecurityConfigurer() {
+            this.enable(true);
+            this.autoRefresh(true);
         }
 
-        public JwtSecurityConfigurer enable() {
-            if (this.repository == null) {
-                this.repository =
-                        new JwtSecurityContextRepository("coffee-jwt", 60 * 60 * 1000, 60 * 10 * 1000);
-                getBuilder().setSharedObject(JwtSecurityContextRepository.class, repository);
+        private void apply() {
+            if (!enable) {
+                return;
             }
-            return this;
-        }
+            if (autoRefresh) {
+                JwtSecurityContextRepository repository = getBuilder().getSharedObject(JwtSecurityContextRepository.class);
+                if (repository == null) {
+                    repository = new JwtSecurityContextRepository(secret, expiration, renewInMs);
+                }
+                if (header != null) {
+                    repository.setAuthHeaderName(header);
+                }
+                if (authoritiesMapper != null) {
+                    repository.setAuthoritiesMapper(authoritiesMapper);
+                }
+                if (issue != null) {
+                    repository.setIssue(issue);
+                }
+                if (trustResolver != null) {
+                    repository.setTrustResolver(trustResolver);
+                }
+                if (userService != null) {
+                    repository.setUserService(userService);
+                }
+                getBuilder().setSharedObject(JwtSecurityContextRepository.class, postProcess(repository));
+            }
 
-        public RestSecurityContextConfigurer<H> disable() {
-            getBuilder().setSharedObject(JwtSecurityContextRepository.class, null);
-            return RestSecurityContextConfigurer.this;
-        }
-
-        public JwtSecurityConfigurer userDetailsService(UserDetailsService userDetailsService) {
-            repository.setUserService(userDetailsService);
-            return this;
-        }
-
-        public JwtSecurityConfigurer secret(String jwtSecret) {
-            repository.setSecret(jwtSecret);
-            return this;
-        }
-
-        /**
-         * 启用自动为即将过期的token发放新token
-         *
-         * @param renewInMs  重新发放的请求时间，毫秒数
-         * @param expiration token过期时间，过期时间不能比renewInMs短
-         * @return this
-         */
-        public JwtSecurityConfigurer autoRefresh(long renewInMs, long expiration) {
-            repository.setJwtExpirationInMs(expiration);
-            repository.setJwtRenewInMs(renewInMs);
-            return this;
-        }
-
-        /**
-         * 启用手动刷新过期token，将提供手动刷新接口
-         *
-         * @return this
-         */
-        public JwtSecurityConfigurer refresh() {
-            if (refreshFilter == null) {
-                refreshFilter = getBuilder().getSharedObject(JwtRefreshFilter.class);
+            if (refresh) {
+                JwtRefreshFilter refreshFilter = getBuilder().getSharedObject(JwtRefreshFilter.class);
                 if (refreshFilter == null) {
                     refreshFilter = new JwtRefreshFilter();
                     getBuilder().setSharedObject(JwtRefreshFilter.class, refreshFilter);
                 }
+                if (refreshUrl != null) {
+                    refreshFilter.setProcessUrl(refreshUrl);
+                }
+                if (refreshHeader != null) {
+                    refreshFilter.setRefreshHeader(refreshHeader);
+                }
+                if (userService != null) {
+                    refreshFilter.setUserService(userService);
+                }
+                if (authoritiesMapper != null) {
+                    refreshFilter.setAuthoritiesMapper(authoritiesMapper);
+                }
+                if (issue != null) {
+                    refreshFilter.setIssue(issue);
+                }
+                refreshFilter.setJwtExpirationInMs(expiration);
+                refreshFilter.setJwtSecret(secret);
+                if (refreshSecret != null) {
+                    refreshFilter.setRefreshSecret(refreshSecret);
+                } else if (secret != null) {
+                    refreshFilter.setRefreshSecret(secret);
+                }
+                refreshFilter.setRefreshTokenExpirationInMs(refreshExpiration);
+                getBuilder().setSharedObject(JwtRefreshFilter.class, postProcess(refreshFilter));
             }
+
+        }
+
+        public boolean isEnable() {
+            return enable;
+        }
+
+        public JwtSecurityConfigurer enable(boolean enable) {
+            this.enable = enable;
             return this;
         }
 
-        public JwtSecurityConfigurer authoritiesMapper(GrantedAuthoritiesMapper mapper) {
-            repository.setAuthoritiesMapper(mapper);
+        public boolean isRefresh() {
+            return refresh;
+        }
+
+        public JwtSecurityConfigurer refresh(boolean refresh) {
+            this.refresh = refresh;
+            return this;
+        }
+
+        public String getRefreshHeader() {
+            return refreshHeader;
+        }
+
+        public JwtSecurityConfigurer refreshHeader(String refreshHeader) {
+            this.refreshHeader = refreshHeader;
+            return this;
+        }
+
+        public String getRefreshSecret() {
+            return refreshSecret;
+        }
+
+        public JwtSecurityConfigurer refreshSecret(String refreshSecret) {
+            this.refreshSecret = refreshSecret;
+            return this;
+        }
+
+        public boolean isAutoRefresh() {
+            return autoRefresh;
+        }
+
+        public JwtSecurityConfigurer autoRefresh(boolean autoRefresh) {
+            this.autoRefresh = autoRefresh;
+            return this;
+        }
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public JwtSecurityConfigurer secret(String secret) {
+            this.secret = secret;
+            return this;
+        }
+
+        public String getHeader() {
+            return header;
+        }
+
+        public JwtSecurityConfigurer header(String header) {
+            this.header = header;
+            return this;
+        }
+
+        public long getRenewInMs() {
+            return renewInMs;
+        }
+
+        public JwtSecurityConfigurer renewInMs(long renewInMs) {
+            this.renewInMs = renewInMs;
+            return this;
+        }
+
+        public long getExpiration() {
+            return expiration;
+        }
+
+        public JwtSecurityConfigurer expiration(long expiration) {
+            this.expiration = expiration;
+            return this;
+        }
+
+        public String getKeyPrefix() {
+            return keyPrefix;
+        }
+
+        public JwtSecurityConfigurer keyPrefix(String keyPrefix) {
+            this.keyPrefix = keyPrefix;
+            return this;
+        }
+
+        public long getTimeout() {
+            return timeout;
+        }
+
+        public JwtSecurityConfigurer timeout(long timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
+        public String getIssue() {
+            return issue;
+        }
+
+        public JwtSecurityConfigurer issue(String issue) {
+            this.issue = issue;
+            return this;
+        }
+
+        public String getRefreshUrl() {
+            return refreshUrl;
+        }
+
+        public JwtSecurityConfigurer refreshUrl(String refreshUrl) {
+            this.refreshUrl = refreshUrl;
+            return this;
+        }
+
+        public long getRefreshExpiration() {
+            return refreshExpiration;
+        }
+
+        public JwtSecurityConfigurer refreshExpiration(long refreshExpiration) {
+            this.refreshExpiration = refreshExpiration;
+            return this;
+        }
+
+        public GrantedAuthoritiesMapper getAuthoritiesMapper() {
+            return authoritiesMapper;
+        }
+
+        public JwtSecurityConfigurer authoritiesMapper(GrantedAuthoritiesMapper authoritiesMapper) {
+            this.authoritiesMapper = authoritiesMapper;
+            return this;
+        }
+
+        public UserDetailsService getUserService() {
+            return userService;
+        }
+
+        public JwtSecurityConfigurer userService(UserDetailsService userService) {
+            this.userService = userService;
+            return this;
+        }
+
+        public AuthenticationTrustResolver getTrustResolver() {
+            return trustResolver;
+        }
+
+        public JwtSecurityConfigurer trustResolver(AuthenticationTrustResolver trustResolver) {
+            this.trustResolver = trustResolver;
             return this;
         }
 

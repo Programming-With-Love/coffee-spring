@@ -4,7 +4,8 @@
       "name": "coffee.limiter",
       "type": "site.zido.coffee.common.limiter.LimiterProperties",
       "sourceType": "site.zido.coffee.common.limiter.LimiterAutoConfiguration",
-      "sourceMethod": "createProperties()"
+      "sourceMethod": "createProperties()",
+      "description": "限流器相关属性"
     }
   ],
   "properties": [

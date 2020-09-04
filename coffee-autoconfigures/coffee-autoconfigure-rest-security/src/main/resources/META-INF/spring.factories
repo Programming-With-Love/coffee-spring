@@ -1,5 +1,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   site.zido.coffee.autoconfigure.security.rest.RestSecurityAutoConfiguration,\
-  site.zido.coffee.autoconfigure.security.rest.RestSecurityFilterAutoConfiguration
+  site.zido.coffee.autoconfigure.security.rest.RestSecurityFilterAutoConfiguration,\
+  site.zido.coffee.autoconfigure.security.rest.authorize.PhoneCodeAutoConfiguration,\
+  site.zido.coffee.autoconfigure.security.rest.authorize.RedisPhoneCodeConfiguration
 org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
   site.zido.coffee.autoconfigure.security.rest.WebSecurityAutoFilter
