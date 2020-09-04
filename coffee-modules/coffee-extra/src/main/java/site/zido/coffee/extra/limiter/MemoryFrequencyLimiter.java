@@ -23,8 +23,14 @@ public class MemoryFrequencyLimiter implements FrequencyLimiter {
     @Override
     public long tryGet(String key, long timeout) {
         key = getKey(key);
+
+        long ttl = expireMap.ttl(key);
+        if (ttl > 0) {
+            return ttl;
+        }
         long crt = timeout * 1000;
-        return expireMap.setNx(key, PRESENT, crt);
+        expireMap.set(key, PRESENT, crt);
+        return 0;
     }
 
     protected String getKey(String key) {
