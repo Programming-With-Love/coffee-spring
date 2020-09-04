@@ -1,13 +1,4 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
----
-
----
 name: 缺陷反馈
 about: 报告缺陷以帮助我们改进
 title: ''
