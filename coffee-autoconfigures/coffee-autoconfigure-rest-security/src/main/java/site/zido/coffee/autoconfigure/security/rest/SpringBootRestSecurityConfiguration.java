@@ -1,12 +1,11 @@
 package site.zido.coffee.autoconfigure.security.rest;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -22,8 +21,8 @@ import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
  * @author zido
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(RestSecurityConfigurationAdapter.class)
-@ConditionalOnMissingBean(RestSecurityConfigurationAdapter.class)
+@ConditionalOnMissingBean({RestSecurityConfigurationAdapter.class,
+        WebSecurityConfigurerAdapter.class})
 @ConditionalOnWebApplication(type = Type.SERVLET)
 public class SpringBootRestSecurityConfiguration {
 
@@ -31,11 +30,11 @@ public class SpringBootRestSecurityConfiguration {
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
     @EnableConfigurationProperties(CoffeeSecurityProperties.class)
-    @Conditional(value = AuthorizationStorageJWTCondition.class)
-    static class DefaultConfigurerAdapter extends RestSecurityConfigurationAdapter {
+    @ConditionalOnProperty(value = "secureStoreType", prefix = "spring.security", havingValue = "JWT", matchIfMissing = true)
+    static class DefaultSecurityConfigurerAdapter extends RestSecurityConfigurationAdapter {
         private final CoffeeSecurityProperties properties;
 
-        public DefaultConfigurerAdapter(CoffeeSecurityProperties properties) {
+        public DefaultSecurityConfigurerAdapter(CoffeeSecurityProperties properties) {
             super(false);
             this.properties = properties;
         }
