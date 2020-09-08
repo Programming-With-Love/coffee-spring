@@ -86,7 +86,7 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
 
     public class JwtSecurityConfigurer {
         private boolean enable = false;
-        private boolean refresh = true;
+        private boolean refresh = false;
         private String refreshHeader = "Refresh-Token";
         private String refreshSecret;
         private boolean autoRefresh = true;

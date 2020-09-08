@@ -1,13 +1,15 @@
 package site.zido.coffee.autoconfigure.security.rest;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @ConfigurationProperties(prefix = "spring.security")
 public class CoffeeSecurityProperties {
     private SecureStoreType secureStoreType = SecureStoreType.JWT;
-    private JwtProperties jwt;
+    private JwtProperties jwt = new JwtProperties();
     private Boolean phoneCodeEnable = true;
-    private AuthorizationPhoneCodeProperties phoneCode;
+    private AuthorizationPhoneCodeProperties phoneCode = new AuthorizationPhoneCodeProperties();
 
     public SecureStoreType getSecureStoreType() {
         return secureStoreType;
@@ -42,7 +44,7 @@ public class CoffeeSecurityProperties {
     }
 
     public static class JwtProperties {
-        private Boolean refreshSupport = true;
+        private Boolean refreshSupport = false;
         private String refreshHeader = "Refresh-Token";
         private String refreshSecret;
         private Boolean autoRefresh = true;
@@ -116,7 +118,6 @@ public class CoffeeSecurityProperties {
         }
     }
 
-    @ConfigurationProperties(prefix = "spring.security.phone-code")
     public static class AuthorizationPhoneCodeProperties {
         private String keyPrefix;
         private long timeout;

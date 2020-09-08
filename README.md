@@ -13,40 +13,35 @@
 > spring 5.x / spring boot 2.x的restful启动器，节省一杯咖啡的时间，更多的约定，更快的开发
 
 它承袭Spring/Spring Boot的开发理念，在原Spring Boot基础上做更进一步的约定但又尽可能的不为开发者带来配置负担。
-它是一个不依赖模板代码，不依赖代码生成的脚手架，通过它你可以一分钟创建带有各种基础功能的项目，。
+
+旨在提升小型团队的开发输出能力，**不依赖模板代码**，**不依赖代码生成**的脚手架。
 
 本项目的主要目标是：
 
-* 提供*restful web*应用默认规则，主要以json作为序列化/反序列化方式
+* 提供*restful web*应用默认规则
 * 开箱即用
 * 从框架层培养开发习惯，通过各种注解式工具在spring boot基础上使代码更加高内聚，低耦合
-* 继承spring boot理念：完全没有代码生成，也不需要XML配置。
+* 继承spring boot理念：基于自动配置，完全没有代码生成，也不需要XML配置。
 
 在使用本项目时，你应该同意以下观点：
 
 * **习惯约定+注解**优于提供一堆工具类
 * **可扩展性**优于不必要的效率优化（例如选择jackson而不是fastjson做为序列化工具)
-* **restful** api接口优于后端（java）模板渲染
 * [关于rest api请求响应的相关规则](./docs/rest.md)
 
 ## 优势
 
 提供通用自动配置，完全零配置并提供高度扩展能力
 
-* 自动配置的认证框架，包含登录/鉴权功能
+* 自动配置的认证框架，包含账号密码（手机号验证码）登录/鉴权（全注解鉴权），
 
-* 为model层添加基础类，帮助model层开发
+* 全局异常自动捕捉并返回约定响应结果。
 
-* json配置，自动根据profile配置json序列化方式，具体表现为`prod`环境下，null不参与序列化,属性不匹配会失败，节省带宽，提高返回速度
-，其他环境下返回全属性以帮助更好的提示前端各种属性
-
-* 全局异常自动捕捉并返回Result结果。业务异常务必继承`CommonBussinessException`，给予前端更好的提示处理
-
-* 全局请求日志,帮助快速定位问题所在,日志示例：`Before request [uri=/test3/a?x=1&y=2;client=0:0:0:0:0:0:0:1;headers={host=[localhost:8080], user-agent=[curl/7.64.1], accept=[*/*]}]`
+* 全局请求日志,帮助快速定位问题所在。
 
 * 定义更多的校验注解，例如：`@Phone`
 
-* 一些其他常用工具：分布式id生成器，分布式锁等
+* 其他常用工具集成
 
 ## 环境要求
 
@@ -156,6 +151,19 @@
 </project>
 ```
 
+## WebMvc模块
+
+为spring web mvc 提供了一系列定制，并为其他模块提供自适应的相关配置。
+
+主要包括：
+
+### 全局统一返回对象
+
+全局统一返回对象默认为`site.zido.coffee.mvc.rest.Result`。
+
+开发者可以选择使用`@EnableGlobalResult`注解标记到Configuration中，从而开启全局统一返回处理，
+
+
 ## 认证模块 (coffee-auth)
 
 可实现几乎0配置的自动认证模块，基于spring security的自动化配置，
@@ -178,40 +186,3 @@
 RestSecurityConfigurationAdapter去除了其他rest不需要的配置，新增了适合rest风格的自动配置
 
 除此之外，其他使用与[spring security官方文档](https://spring.io/projects/spring-security)完全相同
-
-## 注解式限流 (coffee-extra)
-
-如需启用需使用 @EnableLimiter 注解
-
-使用场景例如：手机号发送短信验证码一分钟不能超过一次(建议时间设置比实际情况略小
-
-在需要限流的方法上加入注解@Limiter
-
-参数如下：
-
-* key: 限流的key，支持spel表达式
-* timeout: 超时时间，在超时时间内不允许同key第二次调用
-* unit: 超时时间单位
-
-
-## 可配置扩展点
-
-### 禁用自动切换json序列化
-
-```properties
-site.zido.json.auto-switch.enable=false
-```
-
-### 自动配置限流器
-
-使用redis进行限流处理
-
-默认key前缀为`coffee:limiter:`
-
-如需要定制前缀，在`application.properties`配置文件中使用`coffee.limiter.prefix=xxx`
-
-在需要使用限流的方法上使用@Limiter注解。
-...
-
-待完成
-

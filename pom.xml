@@ -47,7 +47,6 @@
         <module>coffee-spring-boot-starter</module>
         <module>coffee-dependencies</module>
         <module>coffee-spring-boot-parent</module>
-        <module>coffee-logger</module>
         <module>coffee-modules</module>
         <module>coffee-starters</module>
         <module>coffee-autoconfigures</module>
@@ -85,11 +84,6 @@
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-webmvc</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>site.zido</groupId>
-                <artifactId>coffee-logger</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

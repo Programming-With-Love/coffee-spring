@@ -10,7 +10,7 @@ import site.zido.coffee.security.authentication.phone.MemoryPhoneCodeCache;
 import site.zido.coffee.security.authentication.phone.PhoneCodeCache;
 
 @Configuration
-@EnableConfigurationProperties({CoffeeSecurityProperties.AuthorizationPhoneCodeProperties.class})
+@EnableConfigurationProperties({CoffeeSecurityProperties.class})
 @AutoConfigureAfter(RedisPhoneCodeConfiguration.class)
 public class PhoneCodeAutoConfiguration {
     @ConditionalOnMissingBean(PhoneCodeCache.class)

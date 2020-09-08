@@ -19,18 +19,17 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @ConditionalOnBean(RedisConnectionFactory.class)
-@EnableConfigurationProperties(CoffeeSecurityProperties.AuthorizationPhoneCodeProperties.class)
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 public class RedisPhoneCodeConfiguration {
     public static final String TEMPLATE_BEAN_NAME = "phoneCodeCacheTemplate";
 
     @Bean
     @ConditionalOnMissingBean(PhoneCodeCache.class)
-    public PhoneCodeCache phoneCodeCache(@Autowired CoffeeSecurityProperties.AuthorizationPhoneCodeProperties properties,
+    public PhoneCodeCache phoneCodeCache(@Autowired CoffeeSecurityProperties properties,
                                          @Autowired @Qualifier(TEMPLATE_BEAN_NAME) StringRedisTemplate template) {
         SpringRedisPhoneCodeCache cache = new SpringRedisPhoneCodeCache();
-        cache.setKeyPrefix(properties.getKeyPrefix());
-        cache.setTimeout(properties.getTimeout(), TimeUnit.SECONDS);
+        cache.setKeyPrefix(properties.getPhoneCode().getKeyPrefix());
+        cache.setTimeout(properties.getPhoneCode().getTimeout(), TimeUnit.SECONDS);
         cache.setTemplate(template);
         return cache;
     }

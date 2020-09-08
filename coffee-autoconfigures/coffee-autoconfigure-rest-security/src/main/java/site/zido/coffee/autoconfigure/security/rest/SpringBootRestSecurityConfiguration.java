@@ -11,6 +11,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.RestHttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.util.StringUtils;
 import site.zido.coffee.core.utils.RandomUtils;
 import site.zido.coffee.security.RestSecurityConfigurationAdapter;
 import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
@@ -59,11 +60,17 @@ public class SpringBootRestSecurityConfiguration {
                     secret = RandomUtils.ascii(12);
                 }
                 jwt.secret(secret);
+                jwt.refreshSecret(secret);
             } else {
                 jwt.autoRefresh(false);
             }
             if (properties.getJwt().getRefreshSupport()) {
                 jwt.refresh(true);
+                if (StringUtils.hasLength(properties.getJwt().getRefreshSecret())) {
+                    jwt.refreshSecret(properties.getJwt().getRefreshSecret());
+                }
+            } else {
+                jwt.refresh(false);
             }
         }
     }

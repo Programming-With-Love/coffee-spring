@@ -1,0 +1,90 @@
+{
+  "groups": [
+    {
+      "name": "spring.security",
+      "type": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties"
+    },
+    {
+      "name": "spring.security.jwt",
+      "type": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties",
+      "sourceMethod": "getJwt()"
+    },
+    {
+      "name": "spring.security.phone-code",
+      "type": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$AuthorizationPhoneCodeProperties",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties",
+      "sourceMethod": "getPhoneCode()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "spring.security.jwt.auto-refresh",
+      "type": "java.lang.Boolean",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.security.jwt.expiration",
+      "type": "java.lang.Long",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties"
+    },
+    {
+      "name": "spring.security.jwt.header",
+      "type": "java.lang.String",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties",
+      "defaultValue": "Authorization"
+    },
+    {
+      "name": "spring.security.jwt.refresh-header",
+      "type": "java.lang.String",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties",
+      "defaultValue": "Refresh-Token"
+    },
+    {
+      "name": "spring.security.jwt.refresh-secret",
+      "type": "java.lang.String",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties"
+    },
+    {
+      "name": "spring.security.jwt.refresh-support",
+      "type": "java.lang.Boolean",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "spring.security.jwt.renew-in-ms",
+      "type": "java.lang.Long",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties"
+    },
+    {
+      "name": "spring.security.jwt.secret",
+      "type": "java.lang.String",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$JwtProperties"
+    },
+    {
+      "name": "spring.security.phone-code-enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.security.phone-code.key-prefix",
+      "type": "java.lang.String",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$AuthorizationPhoneCodeProperties"
+    },
+    {
+      "name": "spring.security.phone-code.timeout",
+      "type": "java.lang.Long",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties$AuthorizationPhoneCodeProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "spring.security.secure-store-type",
+      "type": "site.zido.coffee.autoconfigure.security.rest.SecureStoreType",
+      "sourceType": "site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties"
+    }
+  ],
+  "hints": []
+}
