@@ -123,14 +123,14 @@ public class ExpireMap<K, V> {
      * @return 过期时间
      */
     public long setNx(K key, V val, long timeout) {
-        SortedKey<K> sortedKey = cache.compute(key, (k, sortedKey1) -> {
-            if (sortedKey1 == null) {
+        SortedKey<K> sortedKey = cache.compute(key, (k, v) -> {
+            if (v == null) {
                 long expireTime = timeout + System.currentTimeMillis();
-                sortedKey1 = new SortedKey<>(key, expireTime);
-                sortedKeys.add(sortedKey1);
+                v = new SortedKey<>(key, expireTime);
+                sortedKeys.add(v);
                 valContainer.put(key, val);
             }
-            return sortedKey1;
+            return v;
         });
         return returnExpireTime(sortedKey.expireTime);
     }

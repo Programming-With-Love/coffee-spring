@@ -1,6 +1,19 @@
-# 概述
+# Coffee-Spring-Boot
 
-与spring boot完整集成的common包，约定优于配置，所有的项目的基础脚手架依赖包。
+<p align="center">
+  <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="Travis Build Status" src="https://travis-ci.org/zidoshare/coffee-spring-boot-builder.svg?branch=master"></a>
+  <a href="https://github.com/zidoshare/coffee-spring-boot-builder/blob/master/LICENSE"><img alt="MIT LICENCE" src="https://img.shields.io/cocoapods/l/Kingfisher.svg?style=flat"></a>
+  <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="LANGUAGE JAVA" src="https://img.shields.io/badge/language-java-orange.svg"></a>
+</p>
+<p align="center">
+  <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="JDK 1.8+" src="https://img.shields.io/badge/JDK-1.8+-green.svg"></a>
+  <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="JDK 1.8+" src="https://img.shields.io/badge/Spring%20Boot-2.2.1.RELEASE-blue.svg"></a>
+</p>
+
+> spring 5.x / spring boot 2.x的restful启动器，节省一杯咖啡的时间，更多的约定，更快的开发
+
+它承袭Spring/Spring Boot的开发理念，在原Spring Boot基础上做更进一步的约定但又尽可能的不为开发者带来配置负担。
+它是一个不依赖模板代码，不依赖代码生成的脚手架，通过它你可以一分钟创建带有各种基础功能的项目，。
 
 本项目的主要目标是：
 
