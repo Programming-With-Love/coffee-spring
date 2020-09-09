@@ -159,9 +159,57 @@
 
 ### 全局统一返回对象
 
+不需要为返回结果添加统一工具类，形如`Result.success(data)`形式。
+
+不需要为统一异常封装而发愁，自行封装还可能漏掉某些异常，导致前端一脸懵逼。
+
+使用`@EnableGlobalResult`注解标记到Configuration中，从而开启全局统一返回处理,自动封装你的响应数据，
+从此你的controller方法只需要直接返回业务数据，不需要再进行任何封装，并且可以统一直接修改响应类型。
+
 全局统一返回对象默认为`site.zido.coffee.mvc.rest.Result`。
 
-开发者可以选择使用`@EnableGlobalResult`注解标记到Configuration中，从而开启全局统一返回处理，
+在开启全局统一返回后，框架会做出如下自适应：
+
+* 封装RestController注解和ResponseBody的返回结果，自动包装为统一返回对象
+* 封装异常响应结果，注意对于字段校验异常，只返回遇到的第一个异常封装字段
+* 如果你的返回类型已经是封装对象，不做任何封装
+* 有时可能会需要返回原对象，可以使用@OriginalResponse注解，如果作用于类上，则所有返回加过不封装。
+
+如果需要返回错误，那么你可以根据异常进行分类，框架提供`CommonBusinessException`代表业务异常，继承它，能得到更加完善的结果并自动加入业务日志中。
+
+```java
+public class UnknownException extends CommonBusinessException {
+    public UnknownException() {
+        super(400, "发生意料之外的错误");
+    }
+}
+```
+
+如果你对返回结果有定制需求，可以实现`HttpResponseBodyFactory`,如下：
+
+```java
+public class DefaultHttpResponseBodyFactory implements HttpResponseBodyFactory {
+    @Override
+    public boolean isExceptedClass(Class<?> clazz) {
+        return Result.class.isAssignableFrom(clazz);
+    }
+
+    @Override
+    public Object success(Object data) {
+        return Result.success(data);
+    }
+
+    @Override
+    public Object error(int code, String message, Object data) {
+        return Result.error(code, message, data);
+    }
+}
+```
+
+并作为Bean返回，框架会自动迁移到对应的factory中。
+
+### 全局日志
+
 
 
 ## 认证模块 (coffee-auth)
