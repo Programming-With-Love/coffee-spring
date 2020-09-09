@@ -2,9 +2,14 @@
   "groups": [],
   "properties": [
     {
-      "name": "coffee.json.auto-switch",
+      "name": "spring.coffee.json.auto-switch",
       "type": "java.lang.Boolean",
       "description": "设置是否自动根据环境切换json序列化行为"
+    },
+    {
+      "name": "spring.coffee.web.global-result",
+      "type": "java.lang.Boolean",
+      "description": "设置是否使用全局封装统一返回对象"
     }
   ],
   "hints": []

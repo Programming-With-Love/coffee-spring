@@ -15,8 +15,10 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
 import org.springframework.web.servlet.DispatcherServlet;
+import site.zido.coffee.mvc.rest.HttpResponseBodyConfiguration;
 import site.zido.coffee.mvc.rest.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,64 +29,9 @@ import java.util.List;
  *
  * @author zido
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean({ObjectMapper.class, DispatcherServlet.class})
-@AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class CommonAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(HttpResponseBodyFactory.class)
-    public HttpResponseBodyFactory bodyFactory() {
-        return new DefaultHttpResponseBodyFactory();
-    }
-
-    /**
-     * 全局异常处理
-     *
-     * @return exception advice
-     */
-    @Bean
-    @ConditionalOnMissingBean(BaseGlobalExceptionHandler.class)
-    public GlobalExceptionAdvice advice() {
-        return new GlobalExceptionAdvice(bodyFactory());
-    }
-
-
-    /**
-     * 全局请求日志
-     *
-     * @return filter
-     */
-    @Bean
-    @ConditionalOnMissingBean(AbstractRequestLoggingFilter.class)
-    public AbstractRequestLoggingFilter filter() {
-        AbstractRequestLoggingFilter filter = new AbstractRequestLoggingFilter() {
-            final Logger logger = LoggerFactory.getLogger("RequestLog");
-
-            @Override
-            protected boolean shouldLog(HttpServletRequest request) {
-                return logger.isInfoEnabled();
-            }
-
-            @Override
-            protected void beforeRequest(HttpServletRequest httpServletRequest, String s) {
-                logger.info(s);
-            }
-
-            @Override
-            protected void afterRequest(HttpServletRequest httpServletRequest, String s) {
-                logger.info(s);
-            }
-        };
-        filter.setIncludeClientInfo(true);
-        filter.setIncludeQueryString(true);
-        return filter;
-    }
-
-    @Bean
-    public StringToResultHttpMessageConverter stringToResultHttpMessageConverter() {
-        return new StringToResultHttpMessageConverter();
-    }
 
     /**
      * json序列化配置
@@ -92,7 +39,7 @@ public class CommonAutoConfiguration {
      * @author zido
      */
     @Configuration
-    @ConditionalOnProperty(prefix = "site.zido.json.auto-switch",
+    @ConditionalOnProperty(prefix = "spring.coffee.json.auto-switch",
             value = "enable",
             havingValue = "true",
             matchIfMissing = true)

@@ -2,7 +2,9 @@ package site.zido.demo.web;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.zido.coffee.extra.limiter.Limiter;
@@ -14,6 +16,11 @@ import site.zido.coffee.extra.limiter.Limiter;
  */
 @RestController
 public class IndexController {
+
+    @GetMapping("/global-result")
+    public String testGlobalResult() {
+        return "someString";
+    }
 
     @PreAuthorize("hasAuthority('ROLE_user')")
     @RequestMapping("/hello")

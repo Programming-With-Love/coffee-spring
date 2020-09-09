@@ -1,4 +1,4 @@
-package site.zido.coffee.mvc.common;
+package site.zido.coffee.mvc.rest;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

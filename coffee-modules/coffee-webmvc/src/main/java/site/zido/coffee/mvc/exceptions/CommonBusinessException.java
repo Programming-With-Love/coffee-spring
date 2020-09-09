@@ -10,12 +10,12 @@ public class CommonBusinessException extends RuntimeException {
     /**
      * 一般业务异常不建议使用500及以上http status
      */
-    private int httpStatus = 400;
+    private int httpStatus;
     /**
      * 补充错误码，请注意，当允许全局返回{@link site.zido.coffee.mvc.rest.Result}时，
      * code默认为0，所以不建议占用code为0，请设置其他的code
      */
-    private int code = 1;
+    private int code;
     private String msg;
 
     public CommonBusinessException(int httpStatus, int code, String msg) {
@@ -26,7 +26,13 @@ public class CommonBusinessException extends RuntimeException {
     }
 
     public CommonBusinessException(int httpStatus, int code, Throwable t) {
-        super(buildMsg(httpStatus, code, t.getMessage()), t);
+        super(
+                buildMsg(httpStatus,
+                        code,
+                        t instanceof CommonBusinessException
+                                ? ((CommonBusinessException) t).getMsg()
+                                : t.getMessage()),
+                t);
         this.httpStatus = httpStatus;
         this.code = code;
         if (t instanceof CommonBusinessException) {

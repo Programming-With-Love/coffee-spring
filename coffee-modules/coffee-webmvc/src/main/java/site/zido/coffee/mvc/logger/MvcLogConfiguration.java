@@ -1,4 +1,4 @@
-package site.zido.coffee.mvc.common;
+package site.zido.coffee.mvc.logger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -16,8 +16,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Documented
-@Import(GlobalRestSelector.class)
+@Import({GlobalRestConfiguration.class})
 @Configuration
 public @interface EnableGlobalResult {
-    boolean enable() default true;
 }

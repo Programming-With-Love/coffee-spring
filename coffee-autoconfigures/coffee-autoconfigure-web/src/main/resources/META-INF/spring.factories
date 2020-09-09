@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  site.zido.coffee.autoconfigure.web.CommonAutoConfiguration
+  site.zido.coffee.autoconfigure.web.CommonAutoConfiguration,\
+  site.zido.coffee.autoconfigure.web.GlobalResultEnablerConfiguration

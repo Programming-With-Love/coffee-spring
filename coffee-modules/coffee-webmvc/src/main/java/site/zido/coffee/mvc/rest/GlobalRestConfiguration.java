@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import site.zido.coffee.mvc.common.HttpResponseBodyConfiguration;
 
 import java.util.List;
 
@@ -60,7 +59,7 @@ public class GlobalRestConfiguration {
             @Override
             public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
                 LOGGER.debug("Add json string http message converter");
-                converters.add(0, converter);
+//                converters.add(0, converter);
             }
         };
     }
