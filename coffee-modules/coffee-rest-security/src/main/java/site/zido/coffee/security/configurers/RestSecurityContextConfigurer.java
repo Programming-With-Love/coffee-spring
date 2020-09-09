@@ -132,6 +132,8 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
                 }
                 if (userService != null) {
                     repository.setUserService(userService);
+                } else {
+                    repository.setUserService(getBuilder().getSharedObject(UserDetailsService.class));
                 }
                 getBuilder().setSharedObject(JwtSecurityContextRepository.class, postProcess(repository));
             }
@@ -150,6 +152,8 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
                 }
                 if (userService != null) {
                     refreshFilter.setUserService(userService);
+                } else {
+                    refreshFilter.setUserService(getBuilder().getSharedObject(UserDetailsService.class));
                 }
                 if (authoritiesMapper != null) {
                     refreshFilter.setAuthoritiesMapper(authoritiesMapper);
