@@ -163,7 +163,9 @@
 
 不需要为统一异常封装而发愁，自行封装还可能漏掉某些异常，导致前端一脸懵逼。
 
-使用`@EnableGlobalResult`注解标记到Configuration中，从而开启全局统一返回处理,自动封装你的响应数据，
+如果未使用自动配置，则可以使用`@EnableGlobalResult`注解标记到Configuration中，从而开启全局统一返回处理,自动封装你的响应数据，
+否则在自动配置的规则中，全局统一封装会自动开启，可以通过`spring.coffee.web.global-result=false`来关闭。
+
 从此你的controller方法只需要直接返回业务数据，不需要再进行任何封装，并且可以统一直接修改响应类型。
 
 全局统一返回对象默认为`site.zido.coffee.mvc.rest.Result`。
