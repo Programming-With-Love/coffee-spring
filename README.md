@@ -210,6 +210,12 @@ public class DefaultHttpResponseBodyFactory implements HttpResponseBodyFactory {
 
 并作为Bean返回，框架会自动迁移到对应的factory中。
 
+### 全局统一异常处理
+
+全部统一异常处理会使用`HttpResponseBodyFactory`包装异常返回，它跟随全局统一返回处理一起开启。
+
+对于校验类型的异常，默认只显示第一个
+
 ### 全局日志
 
 
