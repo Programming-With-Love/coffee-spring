@@ -8,4 +8,4 @@ ${AnsiColor.YELLOW} `Y8bood8P'  `Y8bod8P' o888o   o888o   `Y8bod8P' `Y8bod8P' ${
                                                                         888                                  d"     YD
                                                                        o888o                                 "Y88888P'
 
-${AnsiColor.BLUE}:: CoffeeSpring ${AnsiColor.YELLOW}${coffee.version}${AnsiColor.BLUE} :: SpringBoot ${AnsiColor.YELLOW}${spring-boot.version}${AnsiColor.BRIGHT_BLACK}
+${AnsiColor.BLUE}:: CoffeeSpring ${AnsiColor.YELLOW}${coffee.version}${coffee.project.name}${AnsiStyle.NORMAL}${AnsiColor.BLUE} :: SpringBoot ${AnsiColor.YELLOW}${spring-boot.version}${AnsiColor.BRIGHT_BLACK}

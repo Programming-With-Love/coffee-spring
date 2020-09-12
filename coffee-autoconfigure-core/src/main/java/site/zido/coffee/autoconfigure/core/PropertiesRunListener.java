@@ -6,6 +6,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.util.StringUtils;
 import site.zido.coffee.core.Coffee;
 
 import java.util.HashMap;
@@ -20,12 +21,22 @@ public class PropertiesRunListener implements SpringApplicationRunListener, Orde
         MutablePropertySources sources = environment.getPropertySources();
         Map<String, Object> props = new HashMap<>();
         props.put("coffee.version", Coffee.VERSION);
-        sources.addFirst(new MapPropertySource("coffee", props));
+
+        String property = environment.getProperty("spring.application.name");
+        if (StringUtils.hasText(property)) {
+            property = "${AnsiStyle.NORMAL}${AnsiColor.BRIGHT_BLACK} design for ${AnsiStyle.BOLD}${AnsiColor.DEFAULT}"
+                    + property +
+                    "${AnsiStyle.NORMAL}${AnsiColor.BRIGHT_BLACK} power by ";
+        }else{
+            property = "";
+        }
+        props.put("coffee.project.name", property);
+        sources.addLast(new MapPropertySource("coffee", props));
     }
 
     @Override
     public int getOrder() {
-        return 0;
+        return Ordered.LOWEST_PRECEDENCE;
     }
 
 }
