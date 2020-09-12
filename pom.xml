@@ -50,6 +50,7 @@
         <module>coffee-modules</module>
         <module>coffee-starters</module>
         <module>coffee-autoconfigures</module>
+        <module>coffee-autoconfigure-core</module>
     </modules>
     <properties>
         <java.version>1.8</java.version>
@@ -104,6 +105,11 @@
             <dependency>
                 <groupId>site.zido</groupId>
                 <artifactId>coffee-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>site.zido</groupId>
+                <artifactId>coffee-autoconfigure-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

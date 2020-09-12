@@ -1,0 +1,11 @@
+${AnsiColor.YELLOW}  .oooooo.              .o88o.  .o88o.                     ${AnsiColor.BRIGHT_CYAN} .oooooo..o                      o8o
+${AnsiColor.YELLOW} d8P'  `Y8b             888 `"  888 `"                     ${AnsiColor.BRIGHT_CYAN}d8P'    `Y8                      `"'
+${AnsiColor.YELLOW}888           .ooooo.  o888oo  o888oo   .ooooo.   .ooooo.  ${AnsiColor.BRIGHT_CYAN}Y88bo.      oo.ooooo.  oooo d8b oooo  ooo. .oo.    .oooooooo
+${AnsiColor.YELLOW}888          d88' `88b  888     888    d88' `88b d88' `88b ${AnsiColor.BRIGHT_CYAN} `"Y8888o.   888' `88b `888""8P `888  `888P"Y88b  888' `88b
+${AnsiColor.YELLOW}888          888   888  888     888    888ooo888 888ooo888 ${AnsiColor.BRIGHT_CYAN}     `"Y88b  888   888  888      888   888   888  888   888
+${AnsiColor.YELLOW}`88b    ooo  888   888  888     888    888    .o 888    .o ${AnsiColor.BRIGHT_CYAN}oo     .d8P  888   888  888      888   888   888  `88bod8P'
+${AnsiColor.YELLOW} `Y8bood8P'  `Y8bod8P' o888o   o888o   `Y8bod8P' `Y8bod8P' ${AnsiColor.BRIGHT_CYAN}8""88888P'   888bod8P' d888b    o888o o888o o888o `8oooooo.
+                                                                        888                                  d"     YD
+                                                                       o888o                                 "Y88888P'
+
+${AnsiColor.BLUE}:: CoffeeSpring ${AnsiColor.YELLOW}${coffee.version}${AnsiColor.BLUE} :: SpringBoot ${AnsiColor.YELLOW}${spring-boot.version}${AnsiColor.BRIGHT_BLACK}

@@ -9,18 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>coffee-autoconfigures</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>coffee-autoconfigure-core</artifactId>
 
-    <modules>
-        <module>coffee-autoconfigure-web</module>
-        <module>coffee-autoconfigure-rest-security</module>
-        <module>coffee-autoconfigure-extra</module>
-    </modules>
     <dependencies>
         <dependency>
             <groupId>site.zido</groupId>
-            <artifactId>coffee-autoconfigure-core</artifactId>
+            <artifactId>coffee-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -32,4 +26,5 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
     </dependencies>
+
 </project>
