@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zido
@@ -57,9 +58,11 @@ public class LimiterInterceptor extends AbstractLimiterInvoker implements Method
                     key = generateKey(target, method, args);
                 }
                 long timeout = operation.getTimeout();
+                TimeUnit unit = operation.getUnit();
                 try {
-                    long lastTimeout = limiter.tryGet(key, timeout);
+                    long lastTimeout = limiter.tryGet(key, unit.toMillis(timeout));
                     if (lastTimeout > 0) {
+                        lastTimeout = lastTimeout / 1000;
                         LOGGER.debug("限制行为{}#{} , remain: {}", targetClass.getName(), method.getName(), lastTimeout);
                         getErrorHandler().handleOnLimited(new LimiterException(key, lastTimeout, timeout));
                         return null;

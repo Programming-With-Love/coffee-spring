@@ -1,8 +1,6 @@
 package site.zido.coffee.autoconfigure.security.rest;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @ConfigurationProperties(prefix = "spring.security")
 public class CoffeeSecurityProperties {

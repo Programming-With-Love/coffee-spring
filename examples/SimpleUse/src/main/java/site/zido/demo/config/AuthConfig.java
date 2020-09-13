@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import site.zido.coffee.autoconfigure.core.CoffeeApplicationInitializer;
 
 /**
  * 认证配置类，restful风格，使用jwt方案

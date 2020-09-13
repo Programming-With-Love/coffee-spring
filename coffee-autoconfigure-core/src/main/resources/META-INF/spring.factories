@@ -1,4 +1,2 @@
-org.springframework.context.ApplicationContextInitializer=\
-  site.zido.coffee.autoconfigure.core.CoffeeApplicationInitializer
 org.springframework.boot.SpringApplicationRunListener=\
 site.zido.coffee.autoconfigure.core.PropertiesRunListener

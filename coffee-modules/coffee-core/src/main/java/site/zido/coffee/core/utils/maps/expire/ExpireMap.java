@@ -171,7 +171,7 @@ public class ExpireMap<K, V> {
         Iterator<SortedKey<K>> iter = sortedKeys.iterator();
         while (iter.hasNext()) {
             SortedKey<K> item = iter.next();
-            if (item.expireTime > crt) {
+            if (item.expireTime <= crt) {
                 //一定要有限删除cache，因为所有的查询都是从cache开始，当cache的key不存在，也就不会动用其他容器
                 //cache使用transient防止此处被重排序
                 cache.remove(item.key);

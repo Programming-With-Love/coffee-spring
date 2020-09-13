@@ -25,11 +25,13 @@ public class MemoryFrequencyLimiter implements FrequencyLimiter {
         key = getKey(key);
 
         long ttl = expireMap.ttl(key);
+        if (ttl == -1) {
+            throw new IllegalStateException(String.format("key:%s永久存在，无法获取执行", key));
+        }
         if (ttl > 0) {
             return ttl;
         }
-        long crt = timeout * 1000;
-        expireMap.set(key, PRESENT, crt);
+        expireMap.set(key, PRESENT, timeout);
         return 0;
     }
 

@@ -2,7 +2,6 @@ package site.zido.demo.web;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +28,8 @@ public class IndexController {
     }
 
     @RequestMapping("/limit")
-    @Limiter(key = "content")
-    public String limit() {
+    @Limiter(key = "'content' + #name")
+    public String limit(String name) {
         return "limit content";
     }
 
