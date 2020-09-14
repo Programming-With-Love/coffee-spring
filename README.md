@@ -1,4 +1,4 @@
-# Coffee-Spring-Boot
+# Coffee-Spring
 
 <p align="center">
   <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="Travis Build Status" src="https://travis-ci.org/zidoshare/coffee-spring-boot-builder.svg?branch=master"></a>

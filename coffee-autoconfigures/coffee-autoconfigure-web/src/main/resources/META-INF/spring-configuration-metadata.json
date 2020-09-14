@@ -10,6 +10,11 @@
       "name": "spring.coffee.web.global-result",
       "type": "java.lang.Boolean",
       "description": "设置是否使用全局封装统一返回对象"
+    },
+    {
+      "name": "spring.coffee.web.global-exception",
+      "type": "java.lang.Boolean",
+      "description": "设置是否使用全局封装统一异常返回对象"
     }
   ],
   "hints": []

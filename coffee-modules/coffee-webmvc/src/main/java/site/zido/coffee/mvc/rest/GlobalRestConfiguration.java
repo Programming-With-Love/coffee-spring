@@ -1,12 +1,15 @@
 package site.zido.coffee.mvc.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import site.zido.coffee.mvc.exceptions.EnableGlobalException;
 
 import java.util.List;
 
@@ -22,14 +25,10 @@ import java.util.List;
  * @author zido
  */
 @Configuration
-@Import(HttpResponseBodyConfiguration.class)
+@Import({HttpResponseBodyConfiguration.class})
+@EnableGlobalException
 public class GlobalRestConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalRestConfiguration.class);
-
-    @Bean
-    public GlobalExceptionAdvice advice(HttpResponseBodyFactory factory) {
-        return new GlobalExceptionAdvice(factory);
-    }
 
     /**
      * 全局响应体封装类
@@ -38,29 +37,26 @@ public class GlobalRestConfiguration {
      */
     @Bean
     public GlobalResultHandler handler(HttpResponseBodyFactory factory) {
-        LOGGER.debug("Set global result to wrap " + Result.class);
+        LOGGER.debug("The global result is enabled");
         return new GlobalResultHandler(factory);
-    }
-
-    @Bean
-    public StringToResultHttpMessageConverter stringToResultHttpMessageConverter() {
-        return new StringToResultHttpMessageConverter();
     }
 
     /**
      * 配合全局响应封装的消息转换器
-     *
-     * @param converter message converter
-     * @return configure
      */
-    @Bean
-    public WebMvcConfigurer adapterForMessageConverter(StringToResultHttpMessageConverter converter) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-                LOGGER.debug("Add json string http message converter");
-//                converters.add(0, converter);
-            }
-        };
+    @Configuration
+    @EnableWebMvc
+    public static class StringToResultHttpConfiguration implements WebMvcConfigurer {
+        private final ObjectMapper mapper;
+
+        public StringToResultHttpConfiguration(ObjectMapper mapper) {
+            this.mapper = mapper;
+        }
+
+        @Override
+        public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+            LOGGER.debug("Add json string http message converter");
+            converters.add(0, new StringToResultHttpMessageConverter(mapper));
+        }
     }
 }

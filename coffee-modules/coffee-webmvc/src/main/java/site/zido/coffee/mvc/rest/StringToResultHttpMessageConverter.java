@@ -1,7 +1,6 @@
 package site.zido.coffee.mvc.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -26,12 +25,13 @@ public class StringToResultHttpMessageConverter extends AbstractHttpMessageConve
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private ObjectMapper mapper;
 
-    public StringToResultHttpMessageConverter() {
-        this(DEFAULT_CHARSET);
+    public StringToResultHttpMessageConverter(ObjectMapper mapper) {
+        this(mapper, DEFAULT_CHARSET);
     }
 
-    public StringToResultHttpMessageConverter(Charset charset) {
+    public StringToResultHttpMessageConverter(ObjectMapper mapper, Charset charset) {
         super(charset, MediaType.APPLICATION_JSON, MediaType.ALL);
+        this.mapper = mapper;
     }
 
     @Override
@@ -61,11 +61,5 @@ public class StringToResultHttpMessageConverter extends AbstractHttpMessageConve
         } else {
             return getDefaultCharset();
         }
-    }
-
-    @Autowired
-    public StringToResultHttpMessageConverter setMapper(ObjectMapper mapper) {
-        this.mapper = mapper;
-        return this;
     }
 }
