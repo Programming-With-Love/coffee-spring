@@ -38,8 +38,6 @@ public class ExpireMap<K, V> {
     private final SortedSet<SortedKey<K>> sortedKeys = new TreeSet<>();
     /**
      * 存储存储过的需要过期的Key，用于索引SortedSet
-     * <p>
-     * transient：防止在release时因指令重排序带来的意料之外的异常
      */
     private final transient ConcurrentHashMap<K, SortedKey<K>> cache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<K, V> valContainer = new ConcurrentHashMap<>();
@@ -172,7 +170,7 @@ public class ExpireMap<K, V> {
         while (iter.hasNext()) {
             SortedKey<K> item = iter.next();
             if (item.expireTime <= crt) {
-                //一定要有限删除cache，因为所有的查询都是从cache开始，当cache的key不存在，也就不会动用其他容器
+                //一定要优先删除cache，因为所有的查询都是从cache开始，当cache的key不存在，也就不会动用其他容器
                 //cache使用transient防止此处被重排序
                 cache.remove(item.key);
                 iter.remove();

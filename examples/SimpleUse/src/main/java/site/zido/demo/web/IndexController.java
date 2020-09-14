@@ -33,6 +33,11 @@ public class IndexController {
         return "limit content";
     }
 
+    @RequestMapping("/inline-limit")
+    public String inlineLimit() {
+        return limit("inline");
+    }
+
     @PreAuthorize("hasAuthority('ROLE_admin')")
     @RequestMapping("/admin")
     public String admin(@AuthenticationPrincipal UserDetails user) {
