@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   site.zido.coffee.autoconfigure.web.JsonAutoConfiguration,\
   site.zido.coffee.autoconfigure.web.GlobalResultEnablerConfiguration,\
-  site.zido.coffee.autoconfigure.web.GlobalExceptionEnablerConfiguration
+  site.zido.coffee.autoconfigure.web.GlobalExceptionEnablerConfiguration,\
+  site.zido.coffee.autoconfigure.web.RequestLogEnablerConfiguration

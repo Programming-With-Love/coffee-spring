@@ -1,13 +1,13 @@
 # Coffee-Spring
-
 <p align="center">
-  <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="Travis Build Status" src="https://travis-ci.org/zidoshare/coffee-spring-boot-builder.svg?branch=master"></a>
-  <a href="https://github.com/zidoshare/coffee-spring-boot-builder/blob/master/LICENSE"><img alt="MIT LICENCE" src="https://img.shields.io/cocoapods/l/Kingfisher.svg?style=flat"></a>
-  <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="LANGUAGE JAVA" src="https://img.shields.io/badge/language-java-orange.svg"></a>
+  <img alt="Travis Build Status" src="https://travis-ci.org/zidoshare/coffee-spring.svg?branch=master">
+  <img alt="Travis Build Status" src="https://github.com/zidoshare/coffee-spring/workflows/Java%20CI%20with%20Maven/badge.svg">
+  <a href="https://github.com/zidoshare/coffee-spring/blob/master/LICENSE"><img alt="MIT LICENCE" src="https://img.shields.io/cocoapods/l/Kingfisher.svg?style=flat"></a>
 </p>
 <p align="center">
-  <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="JDK 1.8+" src="https://img.shields.io/badge/JDK-1.8+-green.svg"></a>
-  <a href="https://github.com/zidoshare/coffee-spring-boot-builder"><img alt="JDK 1.8+" src="https://img.shields.io/badge/Spring%20Boot-2.2.1.RELEASE-blue.svg"></a>
+  <img alt="LANGUAGE JAVA" src="https://img.shields.io/badge/language-java-orange.svg">
+  <img alt="JDK 1.8+" src="https://img.shields.io/badge/JDK-1.8+-green.svg">
+  <img alt="Spring Boot" src="https://img.shields.io/badge/Spring%20Boot-2.2.1.RELEASE-blue.svg">
 </p>
 
 > spring 5.x / spring boot 2.x的restful启动器，节省一杯咖啡的时间，更多的约定，更快的开发
@@ -156,8 +156,7 @@
 
 不需要为统一异常封装而发愁，自行封装还可能漏掉某些异常，导致前端一脸懵逼。
 
-如果未使用自动配置，则可以使用`@EnableGlobalResult`注解标记到Configuration中，从而开启全局统一返回处理,自动封装你的响应数据，
-否则在自动配置的规则中，全局统一封装会自动开启，可以通过`spring.coffee.web.global-result=false`来关闭。
+全局统一封装会自动开启，可以通过`spring.coffee.web.global-result=false`来关闭。
 
 从此你的controller方法只需要直接返回业务数据，不需要再进行任何封装，并且可以统一直接修改响应类型。
 
@@ -205,13 +204,24 @@ public class DefaultHttpResponseBodyFactory implements HttpResponseBodyFactory {
 
 ### 全局统一异常处理
 
+全局统一异常处理会自动开启，可以通过`spring.coffee.web.global-result=false`来关闭。
+
 全部统一异常处理会使用`HttpResponseBodyFactory`包装异常返回，它跟随全局统一返回处理一起开启。
 
 对于校验类型的异常，默认只显示第一个
 
-### 全局日志
+如果使用spring-security包，则会自适应为每个异常日志附加当前用户名，方便日志区分是哪个用户在何时发生的异常
 
+## 全局日志
 
+会自当开启全局日志，这通过`AbstractRequestLoggingFilter`实现，会自动打印每个请求日志。
+包含客户端地址，用户名等信息，方便开发者跟踪请求信息。
+
+默认关闭，可以使用`spring.coffee.web.request-log=true`来开启。也可以使用注解`@EnableRequestLogger`
+
+### 其他杂项
+
+* 根据环境切换json序列化标准，如果profiles.active包含prod，也就代表生产环境，此时会将null属性得序列化过滤，否则不会过滤null属性，帮助前端了解这个接口到底有多少字段。这可以通过`spring.coffee.json.auto-switch=false`来手动关闭
 
 ## 认证模块 (coffee-auth)
 
@@ -221,17 +231,57 @@ public class DefaultHttpResponseBodyFactory implements HttpResponseBodyFactory {
 
 自带登录模块：
 
-用户名密码登录(spring security自带，并加入rest相关自动配置)
-手机号验证码登录(需自行配置)
+* 用户名密码登录(spring security自带，并加入rest相关自动配置)
+* 手机号验证码登录(需自行配置)
 
 ### 使用
 
-与spring security完全相同的配置，只需要将spring security的@EnableWebSecurity注解换成@EnableRestSecurity
-即可，不改变其他任何使用方式。
+coffee为你提供最简单的开箱即用的体验。当集成coffee-security之后，自动开启注解支持。
+此时你需要做的只是返回一个`UserDetailsService`，这与[spring security官方文档](https://spring.io/projects/spring-security)完全相同
 
-如果需要自定义配置，你需要继承RestSecurityConfigurationAdapter
-而不是Spring security的WebSecurityConfigurerAdapter
+如果你需要集成手机号验证码登录，这是默认开启的，但是项目默认你是在开发环境，这会使得你手机号验证码并不会真正的发送，而是输出到控制台。
+为此，如需上线一个必须的Bean是`PhoneCodeService`。
+像这样
+```java
+@Bean
+public PhoneCodeService phoneCodeService(){
+    return (phone,code) -> {
+        //发送验证码
+    }
+}
+```
+框架已经默认为你处理了手机号校验，验证码生成等逻辑，你无需关心这些细节。
+
+此时验证码会默认被缓存到内存中，并在60秒后失效。如果你集成了spring-redis，框架会进一步将验证码放到redis中，以获得更好的性能体验。
+
+如果你需要自定义存储,可以实现`PhoneCodeCache`接口，并作为bean返回。框架默认会提供内存存储，如下所示：
+
+```java
+public class MemoryPhoneCodeCache implements PhoneCodeCache {
+    private final ExpireMap<String, String> expireMap;
+
+    public MemoryPhoneCodeCache() {
+        this(new ExpireMap<>(1000));
+    }
+
+    public MemoryPhoneCodeCache(ExpireMap<String, String> expireMap) {
+        this.expireMap = expireMap;
+    }
+
+    @Override
+    public void put(String phone, String code) {
+        expireMap.set(phone, code, 60 * 1000);
+    }
+
+    @Override
+    public String getCode(String phone) {
+        return expireMap.get(phone);
+    }
+}
+```
+
+如果安全需要自定义配置，你需要继承RestSecurityConfigurationAdapter
+而不是Spring security的WebSecurityConfigurerAdapter。并且需要将spring security的@EnableWebSecurity注解换成@EnableRestSecurity
 
 RestSecurityConfigurationAdapter去除了其他rest不需要的配置，新增了适合rest风格的自动配置
 
-除此之外，其他使用与[spring security官方文档](https://spring.io/projects/spring-security)完全相同
