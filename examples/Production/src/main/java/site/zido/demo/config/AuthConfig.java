@@ -2,15 +2,17 @@ package site.zido.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.RestHttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableRestSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import site.zido.coffee.security.RestSecurityConfigurationAdapter;
+import site.zido.coffee.security.configurers.DefaultRestSecurityConfigureAdapter;
+import site.zido.coffee.security.configurers.PhoneCodeLoginConfigurer;
+import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
 import site.zido.demo.entity.Admin;
 import site.zido.demo.entity.User;
 import site.zido.demo.pojo.AuthUser;
@@ -26,9 +28,9 @@ import java.util.UUID;
  *
  * @author zido
  */
-@EnableRestSecurity(debug = true)
+@EnableWebSecurity(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class AuthConfig extends RestSecurityConfigurationAdapter {
+public class AuthConfig extends DefaultRestSecurityConfigureAdapter {
     private static final String PHONE_PATTERN = "^1[123456789][\\d]{9}";
     private static final RequestMatcher adminMatcher =
             new RequestHeaderRequestMatcher("role", "admin");
@@ -48,7 +50,7 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
     }
 
     @Override
-    protected void configure(RestHttpSecurity http) throws Exception {
+    protected void configure(HttpSecurity http) throws Exception {
         http
                 //权限管理将管理所有的请求
                 .authorizeRequests().anyRequest().permitAll()
@@ -56,11 +58,11 @@ public class AuthConfig extends RestSecurityConfigurationAdapter {
                 //帐号密码登录
                 .formLogin().and()
                 //手机号验证码登录
-                .phoneCodeLogin().phoneCodeService((phone, code) -> {
+                .apply(new PhoneCodeLoginConfigurer<>()).phoneCodeService((phone, code) -> {
             System.out.printf("phone:%s,code:%s\n", phone, code);
         }).and()
                 //自定义jwt的超时时间
-                .securityContext().jwt();
+                .apply(new RestSecurityContextConfigurer<>()).jwt();
     }
 
     /**

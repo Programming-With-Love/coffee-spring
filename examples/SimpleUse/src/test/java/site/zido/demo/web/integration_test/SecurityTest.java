@@ -8,11 +8,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.config.annotation.web.builders.RestHttpSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.ReflectionUtils;
 import site.zido.coffee.security.authentication.phone.PhoneCodeCache;
+import site.zido.demo.DemoApplication;
 import site.zido.demo.config.AuthConfig;
 
 import java.lang.reflect.Method;
@@ -22,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = DemoApplication.class)
 @AutoConfigureMockMvc
 public class SecurityTest {
     @Autowired
@@ -34,7 +35,7 @@ public class SecurityTest {
         Method getHttp = ReflectionUtils.findMethod(AuthConfig.class, "getHttp");
         Assert.assertNotNull(getHttp);
         ReflectionUtils.makeAccessible(getHttp);
-        RestHttpSecurity http = (RestHttpSecurity) ReflectionUtils.invokeMethod(getHttp, config);
+        HttpSecurity http = (HttpSecurity) ReflectionUtils.invokeMethod(getHttp, config);
         Assert.assertNotNull(http);
         return http.getSharedObject(PhoneCodeCache.class);
     }

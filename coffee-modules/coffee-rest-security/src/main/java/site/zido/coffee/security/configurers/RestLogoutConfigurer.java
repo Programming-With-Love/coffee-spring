@@ -1,12 +1,14 @@
-package org.springframework.security.config.annotation.web.configurers;
+package site.zido.coffee.security.configurers;
 
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.web.authentication.logout.*;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import site.zido.coffee.security.configurers.RestLogoutSuccessHandler;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -98,14 +100,6 @@ public class RestLogoutConfigurer<H extends HttpSecurityBuilder<H>> extends
         DelegatingLogoutSuccessHandler successHandler = new DelegatingLogoutSuccessHandler(defaultLogoutSuccessHandlerMappings);
         successHandler.setDefaultLogoutSuccessHandler(logoutHandler);
         return successHandler;
-    }
-
-    @Override
-    public void init(H http) {
-        if (permitAll) {
-            PermitAllSupport.permitAll(http, this.logoutSuccessUrl);
-            PermitAllSupport.permitAll(http, this.getLogoutRequestMatcher(http));
-        }
     }
 
     @Override

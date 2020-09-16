@@ -1,4 +1,4 @@
-package org.springframework.security.config.annotation.web.configurers;
+package site.zido.coffee.security.configurers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
+import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -16,7 +17,7 @@ import site.zido.coffee.security.authentication.phone.*;
  * @author zido
  */
 public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
-        AbstractRestAuthenticationFilterConfigurer<H, PhoneCodeLoginConfigurer<H>, PhoneAuthenticationFilter> {
+        AbstractAuthenticationFilterConfigurer<H, PhoneCodeLoginConfigurer<H>, PhoneAuthenticationFilter> {
     private static Logger LOGGER = LoggerFactory.getLogger(PhoneCodeLoginConfigurer.class);
     private PhoneCodeService phoneCodeService;
     private PhoneCodeCache cache;
@@ -35,7 +36,6 @@ public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
     @Override
     public void init(H http) throws Exception {
         super.init(http);
-        PermitAllSupport.permitAll(http, getAuthenticationFilter().getCodeRequestMatcher());
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
         if (phoneCodeService == null) {
             phoneCodeService = http.getSharedObject(PhoneCodeService.class);

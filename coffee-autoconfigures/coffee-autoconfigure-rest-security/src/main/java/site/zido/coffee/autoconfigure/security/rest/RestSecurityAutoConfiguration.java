@@ -28,7 +28,7 @@ import org.springframework.security.authentication.DefaultAuthenticationEventPub
 @ConditionalOnClass(DefaultAuthenticationEventPublisher.class)
 @EnableConfigurationProperties(SecurityProperties.class)
 @Import({SpringBootRestSecurityConfiguration.class,
-        RestSecurityEnableConfiguration.class,
+        WebSecurityEnablerConfiguration.class,
         SecurityDataConfiguration.class})
 public class RestSecurityAutoConfiguration {
 
