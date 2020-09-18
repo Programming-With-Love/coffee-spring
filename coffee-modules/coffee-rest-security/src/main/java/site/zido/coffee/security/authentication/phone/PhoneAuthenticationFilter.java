@@ -32,7 +32,7 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
     private String codeParameter = "code";
 
     public PhoneAuthenticationFilter() {
-        super(new AntPathRequestMatcher("/phone/sessions", "POST"));
+        super(new AntPathRequestMatcher("/users/sms/sessions", "POST"));
     }
 
     @Override

@@ -30,6 +30,13 @@ public class PhoneCodeAutoConfiguration {
             private String getKey(String key) {
                 return properties.getPhoneCode().getKeyPrefix() + key;
             }
+
+            @Override
+            public long getTimeout() {
+                return properties.getPhoneCode().getTimeout() == null
+                        ? super.getTimeout()
+                        : properties.getPhoneCode().getTimeout();
+            }
         };
     }
 }

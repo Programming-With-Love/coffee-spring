@@ -22,15 +22,14 @@ import java.nio.charset.StandardCharsets;
  * @author zido
  */
 public class StringToResultHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
+    /**
+     * 不使用utf-8 charset参数的原因参考{@link MediaType#APPLICATION_JSON_UTF8}
+     * @param mapper json mapper，用于序列化对象
+     */
     public StringToResultHttpMessageConverter(ObjectMapper mapper) {
-        this(mapper, DEFAULT_CHARSET);
-    }
-
-    public StringToResultHttpMessageConverter(ObjectMapper mapper, Charset charset) {
-        super(charset, MediaType.APPLICATION_JSON, MediaType.ALL);
+        super(MediaType.APPLICATION_JSON, MediaType.ALL);
         this.mapper = mapper;
     }
 

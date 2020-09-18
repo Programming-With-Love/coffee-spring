@@ -10,7 +10,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import site.zido.coffee.security.configurers.DefaultRestSecurityConfigureAdapter;
+import site.zido.coffee.security.configurers.RestSecurityConfigureAdapter;
 import site.zido.coffee.security.configurers.PhoneCodeLoginConfigurer;
 import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
 import site.zido.demo.entity.Admin;
@@ -30,7 +30,7 @@ import java.util.UUID;
  */
 @EnableWebSecurity(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class AuthConfig extends DefaultRestSecurityConfigureAdapter {
+public class AuthConfig extends RestSecurityConfigureAdapter {
     private static final String PHONE_PATTERN = "^1[123456789][\\d]{9}";
     private static final RequestMatcher adminMatcher =
             new RequestHeaderRequestMatcher("role", "admin");

@@ -118,7 +118,9 @@ public class CoffeeSecurityProperties {
 
     public static class AuthorizationPhoneCodeProperties {
         private String keyPrefix;
-        private long timeout;
+        private Long timeout = (long) 60;
+        private String processUrl;
+        private String codeProcessUrl;
 
         public String getKeyPrefix() {
             return keyPrefix;
@@ -128,12 +130,28 @@ public class CoffeeSecurityProperties {
             this.keyPrefix = keyPrefix;
         }
 
-        public long getTimeout() {
+        public Long getTimeout() {
             return timeout;
         }
 
-        public void setTimeout(long timeout) {
+        public void setTimeout(Long timeout) {
             this.timeout = timeout;
+        }
+
+        public String getProcessUrl() {
+            return processUrl;
+        }
+
+        public void setProcessUrl(String processUrl) {
+            this.processUrl = processUrl;
+        }
+
+        public String getCodeProcessUrl() {
+            return codeProcessUrl;
+        }
+
+        public void setCodeProcessUrl(String codeProcessUrl) {
+            this.codeProcessUrl = codeProcessUrl;
         }
     }
 }

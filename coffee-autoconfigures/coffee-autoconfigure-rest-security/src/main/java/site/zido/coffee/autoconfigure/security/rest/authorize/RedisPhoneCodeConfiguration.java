@@ -28,7 +28,9 @@ public class RedisPhoneCodeConfiguration {
                                          @Autowired @Qualifier(TEMPLATE_BEAN_NAME) StringRedisTemplate template) {
         SpringRedisPhoneCodeCache cache = new SpringRedisPhoneCodeCache();
         cache.setKeyPrefix(properties.getPhoneCode().getKeyPrefix());
-        cache.setTimeout(properties.getPhoneCode().getTimeout(), TimeUnit.SECONDS);
+        if (properties.getPhoneCode().getTimeout() != null) {
+            cache.setTimeout(properties.getPhoneCode().getTimeout(), TimeUnit.SECONDS);
+        }
         cache.setTemplate(template);
         return cache;
     }

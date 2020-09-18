@@ -6,12 +6,19 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import site.zido.coffee.security.authentication.phone.*;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * @author zido
@@ -109,6 +116,12 @@ public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
         if (codeGenerator != null) {
             getAuthenticationFilter().setCodeGenerator(codeGenerator);
         }
+        Field field = HttpSecurity.class.getDeclaredField("comparator");
+        field.setAccessible(true);
+        Object comparator = field.get(http);
+        Method registerBeforeMethod = comparator.getClass().getDeclaredMethod("registerBefore", Class.class, Class.class);
+        registerBeforeMethod.setAccessible(true);
+        registerBeforeMethod.invoke(comparator, getAuthenticationFilter().getClass(), UsernamePasswordAuthenticationFilter.class);
         super.configure(http);
     }
 

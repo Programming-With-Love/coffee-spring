@@ -43,12 +43,13 @@ public class SecurityTest {
     @Test
     public void testAnonymous() throws Exception {
         mvc.perform(get("/hello").accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().is(401));
+                .andExpect(status().is(401))
+                .andExpect(content().string(""));
     }
 
     @Test
     public void testAuthenticated() throws Exception {
-        mvc.perform(post("/users/sessions")
+        mvc.perform(post("/login")
                 .param("username", "user")
                 .param("password", "user"))
                 .andExpect(status().isOk())
@@ -58,15 +59,16 @@ public class SecurityTest {
                     String authorization = response.getHeader("Authorization");
                     this.mvc.perform(get("/hello")
                             .header("Authorization", authorization)
-                            .accept(MediaType.TEXT_PLAIN))
+                            .accept(MediaType.APPLICATION_JSON))
                             .andExpect(status().isOk())
-                            .andExpect(content().string("hello world : user"));
+                            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                            .andExpect(content().json("{\"result\":\"hello world : user\",\"code\":0}"));
                 });
     }
 
     @Test
     public void testUserRoleAccessAdminApi() throws Exception {
-        mvc.perform(post("/users/sessions")
+        mvc.perform(post("/login")
                 .param("username", "user")
                 .param("password", "user"))
                 .andExpect(status().isOk())
@@ -76,7 +78,7 @@ public class SecurityTest {
                     String authorization = response.getHeader("Authorization");
                     this.mvc.perform(get("/admin")
                             .header("Authorization", authorization)
-                            .accept(MediaType.TEXT_PLAIN))
+                            .accept(MediaType.APPLICATION_JSON))
                             .andExpect(status().isForbidden())
                             .andExpect(content().string(""));
                 });
@@ -84,7 +86,7 @@ public class SecurityTest {
 
     @Test
     public void testAdminRoleAccessUserApi() throws Exception {
-        mvc.perform(post("/users/sessions")
+        mvc.perform(post("/login")
                 .param("username", "13512341235")
                 .param("password", "xxx"))
                 .andExpect(status().isOk())
@@ -94,9 +96,9 @@ public class SecurityTest {
                     String authorization = response.getHeader("Authorization");
                     this.mvc.perform(get("/admin")
                             .header("Authorization", authorization)
-                            .accept(MediaType.TEXT_PLAIN))
+                            .accept(MediaType.APPLICATION_JSON))
                             .andExpect(status().isOk())
-                            .andExpect(content().string("hello world : 13512341235"));
+                            .andExpect(content().json("{\"result\":\"hello world : 13512341235\",\"code\":0}"));
                 });
     }
 
@@ -108,7 +110,7 @@ public class SecurityTest {
                 .param("phone", phone))
                 .andExpect(status().isOk());
         String code = getCache().getCode(phone);
-        mvc.perform(post("/phone/sessions")
+        mvc.perform(post("/users/sms/sessions")
                 .param("phone", "13512341235")
                 .param("code", code))
                 .andExpect(status().isOk())
@@ -118,7 +120,7 @@ public class SecurityTest {
                     String authorization = response.getHeader("Authorization");
                     this.mvc.perform(get("/admin")
                             .header("Authorization", authorization)
-                            .accept(MediaType.TEXT_PLAIN))
+                            .accept(MediaType.APPLICATION_JSON))
                             .andExpect(status().isOk())
                             .andExpect(content().string("hello world : 13512341235"));
                 });

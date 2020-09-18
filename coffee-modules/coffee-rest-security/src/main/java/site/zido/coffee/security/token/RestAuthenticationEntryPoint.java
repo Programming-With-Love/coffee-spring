@@ -15,26 +15,26 @@ import java.io.IOException;
  */
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private MediaType mediaType;
-    private String successBody;
+    private String content;
 
     public RestAuthenticationEntryPoint() {
     }
 
-    public RestAuthenticationEntryPoint(String successBody) {
-        this(MediaType.APPLICATION_JSON, successBody);
+    public RestAuthenticationEntryPoint(String content) {
+        this(MediaType.APPLICATION_JSON, content);
     }
 
-    public RestAuthenticationEntryPoint(MediaType mediaType, String successBody) {
+    public RestAuthenticationEntryPoint(MediaType mediaType, String content) {
         this.mediaType = mediaType;
-        this.successBody = successBody;
+        this.content = content;
     }
 
     public void setMediaType(MediaType mediaType) {
         this.mediaType = mediaType;
     }
 
-    public void setSuccessBody(String successBody) {
-        this.successBody = successBody;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     @Override
@@ -43,8 +43,8 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         if (this.mediaType != null) {
             response.setHeader("Content-Type", this.mediaType.toString());
         }
-        if (StringUtils.hasLength(successBody)) {
-            response.getWriter().write(successBody);
+        if (StringUtils.hasLength(content)) {
+            response.getWriter().write(content);
         }
     }
 }

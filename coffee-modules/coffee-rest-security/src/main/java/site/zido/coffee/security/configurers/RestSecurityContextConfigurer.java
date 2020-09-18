@@ -1,5 +1,6 @@
 package site.zido.coffee.security.configurers;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -7,6 +8,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
+import site.zido.coffee.core.utils.SpringUtils;
 import site.zido.coffee.security.token.JwtRefreshFilter;
 import site.zido.coffee.security.token.JwtSecurityContextRepository;
 
@@ -48,35 +50,35 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
     }
 
     @Override
-    public void configure(H restHttp) {
+    public void configure(H http) {
         if (configurer != null) {
-            configurer.apply();
+            configurer.apply(http);
         }
-        SecurityContextRepository securityContextRepository = restHttp
+        SecurityContextRepository securityContextRepository = http
                 .getSharedObject(SecurityContextRepository.class);
         if (securityContextRepository == null) {
             JwtSecurityContextRepository repository = new JwtSecurityContextRepository("coffee-jwt", 1000 * 60 * 60, 1000 * 60 * 10);
-            UserDetailsService userDetailsService = restHttp.getSharedObject(UserDetailsService.class);
+            UserDetailsService userDetailsService = http.getSharedObject(UserDetailsService.class);
             repository.setUserService(userDetailsService);
-            AuthenticationTrustResolver trustResolver = restHttp
+            AuthenticationTrustResolver trustResolver = http
                     .getSharedObject(AuthenticationTrustResolver.class);
             if (trustResolver != null) {
                 repository.setTrustResolver(trustResolver);
             }
             repository.setAuthHeaderName("Authorization");
             postProcess(repository);
-            restHttp.setSharedObject(SecurityContextRepository.class, repository);
+            http.setSharedObject(SecurityContextRepository.class, repository);
             securityContextRepository = repository;
         }
         SecurityContextPersistenceFilter securityContextFilter = new SecurityContextPersistenceFilter(
                 securityContextRepository);
         securityContextFilter.setForceEagerSessionCreation(false);
         securityContextFilter = postProcess(securityContextFilter);
-        restHttp.addFilter(securityContextFilter);
+        http.addFilter(securityContextFilter);
 
-        JwtRefreshFilter refreshFilter = restHttp.getSharedObject(JwtRefreshFilter.class);
+        JwtRefreshFilter refreshFilter = http.getSharedObject(JwtRefreshFilter.class);
         if (refreshFilter != null) {
-            restHttp.addFilterBefore(refreshFilter, SecurityContextPersistenceFilter.class);
+            http.addFilterBefore(refreshFilter, SecurityContextPersistenceFilter.class);
         }
     }
 
@@ -109,15 +111,12 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
             this.autoRefresh(true);
         }
 
-        private void apply() {
+        private void apply(H http) {
             if (!enable) {
                 return;
             }
             if (autoRefresh) {
-                JwtSecurityContextRepository repository = getBuilder().getSharedObject(JwtSecurityContextRepository.class);
-                if (repository == null) {
-                    repository = new JwtSecurityContextRepository(secret, expiration, renewInMs);
-                }
+                JwtSecurityContextRepository repository = new JwtSecurityContextRepository(secret, expiration, renewInMs);
                 if (header != null) {
                     repository.setAuthHeaderName(header);
                 }
@@ -130,12 +129,12 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
                 if (trustResolver != null) {
                     repository.setTrustResolver(trustResolver);
                 }
-                if (userService != null) {
+                if (userService != null
+                        || (userService = SpringUtils.getBeanOrNull(http.getSharedObject(ApplicationContext.class), UserDetailsService.class)) != null
+                        || (userService = getBuilder().getSharedObject(UserDetailsService.class)) != null) {
                     repository.setUserService(userService);
-                } else {
-                    repository.setUserService(getBuilder().getSharedObject(UserDetailsService.class));
                 }
-                getBuilder().setSharedObject(JwtSecurityContextRepository.class, postProcess(repository));
+                getBuilder().setSharedObject(SecurityContextRepository.class, postProcess(repository));
             }
 
             if (refresh) {
@@ -152,8 +151,6 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
                 }
                 if (userService != null) {
                     refreshFilter.setUserService(userService);
-                } else {
-                    refreshFilter.setUserService(getBuilder().getSharedObject(UserDetailsService.class));
                 }
                 if (authoritiesMapper != null) {
                     refreshFilter.setAuthoritiesMapper(authoritiesMapper);
