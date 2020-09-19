@@ -280,8 +280,6 @@ public class MemoryPhoneCodeCache implements PhoneCodeCache {
 }
 ```
 
-如果安全需要自定义配置，你需要继承RestSecurityConfigurationAdapter
-而不是Spring security的WebSecurityConfigurerAdapter。并且需要将spring security的@EnableWebSecurity注解换成@EnableRestSecurity
-
-RestSecurityConfigurationAdapter去除了其他rest不需要的配置，新增了适合rest风格的自动配置
-
+本质上，coffee-security模块是提供一系列工具给用户自定义，并通过自动配置，实现默认的约定，并不改变spring security的任何现有使用方式。
+如果需要自定义配置，你应该考虑需要继承RestSecurityConfigurationAdapter，
+它在Spring security的WebSecurityConfigurerAdapter基础上加入了一些restful相关配置。
