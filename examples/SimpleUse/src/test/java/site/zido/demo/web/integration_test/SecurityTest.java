@@ -6,15 +6,16 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.ReflectionUtils;
+import site.zido.coffee.autoconfigure.security.rest.SpringBootRestSecurityConfiguration;
 import site.zido.coffee.security.authentication.phone.PhoneCodeCache;
 import site.zido.demo.DemoApplication;
-import site.zido.demo.config.AuthConfig;
 
 import java.lang.reflect.Method;
 
@@ -29,13 +30,14 @@ public class SecurityTest {
     @Autowired
     private MockMvc mvc;
     @Autowired
-    private AuthConfig config;
+    private ApplicationContext context;
 
     private PhoneCodeCache getCache() {
-        Method getHttp = ReflectionUtils.findMethod(AuthConfig.class, "getHttp");
+        Method getHttp = ReflectionUtils.findMethod(SpringBootRestSecurityConfiguration.DefaultRestSecurityConfigurerAdapter.class, "getHttp");
         Assert.assertNotNull(getHttp);
         ReflectionUtils.makeAccessible(getHttp);
-        HttpSecurity http = (HttpSecurity) ReflectionUtils.invokeMethod(getHttp, config);
+        SpringBootRestSecurityConfiguration.DefaultRestSecurityConfigurerAdapter configure = context.getBean(SpringBootRestSecurityConfiguration.DefaultRestSecurityConfigurerAdapter.class);
+        HttpSecurity http = (HttpSecurity) ReflectionUtils.invokeMethod(getHttp, configure);
         Assert.assertNotNull(http);
         return http.getSharedObject(PhoneCodeCache.class);
     }
@@ -49,7 +51,7 @@ public class SecurityTest {
 
     @Test
     public void testAuthenticated() throws Exception {
-        mvc.perform(post("/login")
+        mvc.perform(post("/users/sessions")
                 .param("username", "user")
                 .param("password", "user"))
                 .andExpect(status().isOk())
@@ -68,7 +70,7 @@ public class SecurityTest {
 
     @Test
     public void testUserRoleAccessAdminApi() throws Exception {
-        mvc.perform(post("/login")
+        mvc.perform(post("/users/sessions")
                 .param("username", "user")
                 .param("password", "user"))
                 .andExpect(status().isOk())
@@ -86,7 +88,7 @@ public class SecurityTest {
 
     @Test
     public void testAdminRoleAccessUserApi() throws Exception {
-        mvc.perform(post("/login")
+        mvc.perform(post("/users/sessions")
                 .param("username", "13512341235")
                 .param("password", "xxx"))
                 .andExpect(status().isOk())
@@ -122,7 +124,7 @@ public class SecurityTest {
                             .header("Authorization", authorization)
                             .accept(MediaType.APPLICATION_JSON))
                             .andExpect(status().isOk())
-                            .andExpect(content().string("hello world : 13512341235"));
+                            .andExpect(content().json("{\"result\":\"hello world : 13512341235\",\"code\":0}"));
                 });
     }
 

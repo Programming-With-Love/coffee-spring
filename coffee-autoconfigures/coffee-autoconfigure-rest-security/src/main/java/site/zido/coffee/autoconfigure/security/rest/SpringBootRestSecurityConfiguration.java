@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.util.StringUtils;
 import site.zido.coffee.core.utils.RandomUtils;
+import site.zido.coffee.security.authentication.RestAuthenticationFailureHandler;
+import site.zido.coffee.security.authentication.RestAuthenticationSuccessHandler;
 import site.zido.coffee.security.configurers.PhoneCodeLoginConfigurer;
 import site.zido.coffee.security.configurers.RestSecurityConfigureAdapter;
 import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
@@ -25,10 +27,10 @@ public class SpringBootRestSecurityConfiguration {
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
     @EnableConfigurationProperties(CoffeeSecurityProperties.class)
-    static class SecurityConfigurerAdapter extends RestSecurityConfigureAdapter {
+    public static class DefaultRestSecurityConfigurerAdapter extends RestSecurityConfigureAdapter {
         private final CoffeeSecurityProperties properties;
 
-        public SecurityConfigurerAdapter(CoffeeSecurityProperties properties) {
+        public DefaultRestSecurityConfigurerAdapter(CoffeeSecurityProperties properties) {
             super(false);
             this.properties = properties;
         }
@@ -43,7 +45,10 @@ public class SpringBootRestSecurityConfiguration {
                     //帐号密码登录
                     .formLogin();
             if (properties.getPhoneCodeEnable()) {
-                PhoneCodeLoginConfigurer<HttpSecurity> phoneCodeConfigure = http.apply(new PhoneCodeLoginConfigurer<>());
+                PhoneCodeLoginConfigurer<HttpSecurity> phoneCodeConfigure
+                        = http.apply(new PhoneCodeLoginConfigurer<>())
+                        .successHandler(new RestAuthenticationSuccessHandler())
+                        .failureHandler(new RestAuthenticationFailureHandler());
                 if (StringUtils.hasText(properties.getPhoneCode().getKeyPrefix())) {
                     phoneCodeConfigure.codeCachePrefix(properties.getPhoneCode().getKeyPrefix());
                 }

@@ -11,10 +11,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractAu
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import site.zido.coffee.core.utils.SpringUtils;
 import site.zido.coffee.security.authentication.phone.*;
 
 import java.lang.reflect.Field;
@@ -87,6 +86,10 @@ public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
 
             @Override
             public void sendCode(String phone, String code) {
+                System.out.println("**********控制台输出验证码*************");
+                System.out.println("→手机号：" + phone);
+                System.out.println("→验证码：" + code);
+                System.out.println("**********↑↑↑↑↑↑↑↑↑↑↑↑↑↑*************");
                 logger.info("phone:{},code:{}", phone, code);
             }
         };
@@ -107,8 +110,11 @@ public class PhoneCodeLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
         if (mapper != null) {
             provider.setAuthoritiesMapper(mapper);
         }
-        UserDetailsService userDetailsService = http.getSharedObject(UserDetailsService.class);
-        provider.setUserDetailsService(userDetailsService);
+        UserDetailsService userService;
+        if ((userService = SpringUtils.getBeanOrNull(http.getSharedObject(ApplicationContext.class), UserDetailsService.class)) != null
+                || (userService = getBuilder().getSharedObject(UserDetailsService.class)) != null) {
+            provider.setUserDetailsService(userService);
+        }
         postProcess(provider);
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder.authenticationProvider(provider);
