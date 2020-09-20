@@ -22,7 +22,7 @@ import java.io.IOException;
  */
 public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private RequestMatcher codeRequestMatcher = new AntPathRequestMatcher("/phone/code", "POST");
+    private RequestMatcher codeRequestMatcher = new AntPathRequestMatcher("/users/sms/code", "POST");
     private PhoneValidator phoneValidator = new PhoneValidator();
     private PhoneCodeService phoneCodeService;
     private CodeGenerator codeGenerator = new CustomCodeGenerator(CustomCodeGenerator.Mode.NUMBER);

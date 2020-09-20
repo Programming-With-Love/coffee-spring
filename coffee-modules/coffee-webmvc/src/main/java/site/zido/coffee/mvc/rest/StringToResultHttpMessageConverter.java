@@ -11,7 +11,6 @@ import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * 为string类型返回值定制的消息处理器，配合补充{@link GlobalResultHandler}。

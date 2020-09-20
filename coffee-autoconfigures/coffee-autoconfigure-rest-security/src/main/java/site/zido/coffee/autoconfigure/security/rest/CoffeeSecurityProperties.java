@@ -117,7 +117,7 @@ public class CoffeeSecurityProperties {
     }
 
     public static class AuthorizationPhoneCodeProperties {
-        private String keyPrefix;
+        private String keyPrefix = "spring:security:coffee:";
         private Long timeout = (long) 60;
         private String processUrl;
         private String codeProcessUrl;

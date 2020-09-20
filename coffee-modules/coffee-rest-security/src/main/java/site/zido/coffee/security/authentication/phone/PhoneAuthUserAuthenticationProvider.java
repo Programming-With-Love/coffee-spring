@@ -27,6 +27,7 @@ public class PhoneAuthUserAuthenticationProvider extends AbstractUserDetailsAuth
     protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
     private CodeValidator codeValidator = new CustomCodeValidator();
     private PhoneCodeCache phoneCodeCache;
+    private String keyPrefix = "";
 
     @Override
     protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
@@ -71,7 +72,7 @@ public class PhoneAuthUserAuthenticationProvider extends AbstractUserDetailsAuth
         }
         String principal = (authentication.getPrincipal() == null) ? "NONE_PROVIDED"
                 : authentication.getName();
-        if (!codeValidator.validate(phoneCodeCache.getCode(principal),
+        if (!codeValidator.validate(phoneCodeCache.getCode(getKey(principal)),
                 authentication.getCredentials().toString())) {
             throw new BadCredentialsException(messages.getMessage(
                     "AbstractUserDetailsAuthenticationProvider.badCredentials",
@@ -89,5 +90,13 @@ public class PhoneAuthUserAuthenticationProvider extends AbstractUserDetailsAuth
 
     public void setPhoneCodeCache(PhoneCodeCache phoneCodeCache) {
         this.phoneCodeCache = phoneCodeCache;
+    }
+
+    protected String getKey(String key) {
+        return keyPrefix + key;
+    }
+
+    public void setKeyPrefix(String keyPrefix) {
+        this.keyPrefix = keyPrefix;
     }
 }

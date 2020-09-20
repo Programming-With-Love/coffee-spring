@@ -107,7 +107,7 @@ public class SecurityTest {
     @Test
     public void testPhoneCodeLogin() throws Exception {
         String phone = "13512341235";
-        mvc.perform(post("/phone/code").
+        mvc.perform(post("/users/sms/code").
                 contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("phone", phone))
                 .andExpect(status().isOk());

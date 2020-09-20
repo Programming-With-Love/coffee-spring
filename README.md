@@ -283,3 +283,22 @@ public class MemoryPhoneCodeCache implements PhoneCodeCache {
 本质上，coffee-security模块是提供一系列工具给用户自定义，并通过自动配置，实现默认的约定，并不改变spring security的任何现有使用方式。
 如果需要自定义配置，你应该考虑需要继承RestSecurityConfigurationAdapter，
 它在Spring security的WebSecurityConfigurerAdapter基础上加入了一些restful相关配置。
+
+同时，除spring-security原配置属性外，为你的props增加了以下配置属性：
+
+|属性名|属性取值|默认值|说明|
+|------|------|----|----|
+|spring.security.secure-store-type|session、jwt、token|jwt|使用何种方式进行存储认证信息|
+|spring.security.jwt.refresh-support|true/false|false|是否支持refresh-token调用接口刷新|
+|spring.security.jwt.refresh-header|string|Refresh-Token|refresh header名，用于前后端接口交互|
+|spring.security.jwt.refresh-secret|string|随机|refresh-token加密密钥，如果不设置会采用secret所设置的密钥|
+|spring.security.jwt.auto-refresh|true/false|true|是否支持自动刷新token，这种方式会由服务端选择，在合适的时候向response写入新的token，前端予以存储|
+|spring.security.jwt.renew-in-ms|long|十分钟|自动刷新token时，重新生成的间隔毫秒数|
+|spring.security.jwt.expiration|long|一小时|token过期时间|
+|spring.security.jwt.secret|string|随机|token密钥，默认随机生成，注意，这种情况下，重启服务器会需要重新登录，所以推荐手动设置|
+|spring.security.jwt.header|string|Authorization|token header名|
+|spring.security.phone-code-enable|true/false|true|是否支持手机号验证码登录|
+|spring.security.phone-code.key-prefix|string|spring:security:coffee:|验证码被存入缓存时的key前缀|
+|spring.security.phone-code.timeout|long|60秒|过期时间，单位为秒|
+|spring.security.phone-code.process-url|string|"/users/sms/sessions"|登录接口url|
+|spring.security.phone-code.code-process-url|string|"/users/sms/code"|验证码接口url|

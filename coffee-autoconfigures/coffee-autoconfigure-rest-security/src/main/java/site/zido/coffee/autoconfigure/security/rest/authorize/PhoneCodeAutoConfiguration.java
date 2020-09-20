@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 import site.zido.coffee.autoconfigure.security.rest.CoffeeSecurityProperties;
 import site.zido.coffee.security.authentication.phone.MemoryPhoneCodeCache;
 import site.zido.coffee.security.authentication.phone.PhoneCodeCache;
@@ -19,16 +20,15 @@ public class PhoneCodeAutoConfiguration {
         return new MemoryPhoneCodeCache() {
             @Override
             public void put(String phone, String code) {
-                super.put(getKey(phone), code);
+                super.put(phone, code);
             }
 
             @Override
             public String getCode(String phone) {
-                return super.getCode(getKey(phone));
-            }
-
-            private String getKey(String key) {
-                return properties.getPhoneCode().getKeyPrefix() + key;
+                if (StringUtils.hasText(properties.getPhoneCode().getKeyPrefix())) {
+                    phone = properties.getPhoneCode().getKeyPrefix() + phone;
+                }
+                return super.getCode(phone);
             }
 
             @Override

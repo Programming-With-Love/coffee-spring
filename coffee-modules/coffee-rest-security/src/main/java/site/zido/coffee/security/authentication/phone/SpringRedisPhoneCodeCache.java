@@ -50,7 +50,7 @@ public class SpringRedisPhoneCodeCache implements PhoneCodeCache, InitializingBe
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         Assert.notNull(template, "redis template cannot be null");
     }
 }
