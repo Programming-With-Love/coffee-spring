@@ -3,7 +3,7 @@ package site.zido.coffee.core.utils;
 /**
  * BeanUtils exception.
  *
- * @author johnniang
+ * @author zido
  */
 public class BeanUtilsException extends RuntimeException {
 

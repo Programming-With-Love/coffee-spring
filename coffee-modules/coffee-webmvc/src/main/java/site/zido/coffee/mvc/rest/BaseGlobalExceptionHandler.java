@@ -1,22 +1,25 @@
 package site.zido.coffee.mvc.rest;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import site.zido.coffee.core.message.CoffeeMessageSource;
 import site.zido.coffee.mvc.CommonErrorCode;
 import site.zido.coffee.mvc.exceptions.CommonBusinessException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Path;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -26,20 +29,20 @@ import java.util.Set;
  *
  * @author zido
  */
-public abstract class BaseGlobalExceptionHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseGlobalExceptionHandler.class);
-    private static final String HANDLE_EXCEPTION_TEMPLATE = "handle %s,url:%s,caused by:";
-    private HttpResponseBodyFactory factory;
+public abstract class BaseGlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    private final HttpResponseBodyFactory factory;
+    private final MessageSourceAccessor messages = CoffeeMessageSource.getAccessor();
 
     protected BaseGlobalExceptionHandler(HttpResponseBodyFactory factory) {
         Assert.notNull(factory, "http response body factory cannot be null");
         this.factory = factory;
     }
 
-    protected Object handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
+    protected ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException e, WebRequest request) {
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
         Iterator<ConstraintViolation<?>> iterator = constraintViolations.iterator();
-        if (iterator.hasNext()) {
+        List<String> errors = new ArrayList<>();
+        while (iterator.hasNext()) {
             ConstraintViolation<?> next = iterator.next();
             Path propertyPath = next.getPropertyPath();
             String name = "unknown";
@@ -49,51 +52,76 @@ public abstract class BaseGlobalExceptionHandler {
             }
             //参数错误提示
             String message = "[" + name + "] " + next.getMessage();
-            return factory.error(CommonErrorCode.INVALID_PARAMETERS, message, null);
+            errors.add(message);
         }
-        return factory.error(CommonErrorCode.INVALID_PARAMETERS, null, null);
+        return handleExceptionInternal(
+                e,
+                factory.error(CommonErrorCode.VALIDATION_FAILED,
+                        messages.getMessage("ValidationFailed", "Validation Failed"),
+                        errors),
+                new HttpHeaders(),
+                HttpStatus.BAD_REQUEST,
+                request
+        );
     }
 
-    protected Object handleConstraintViolationException(HttpMessageNotReadableException e, HttpServletRequest request) {
-        return factory.error(CommonErrorCode.INVALID_PARAMETERS, e.getMessage(), null);
-    }
-
-    protected Object handleBindException(BindException e, HttpServletRequest request) {
-        BindingResult bindingResult = e.getBindingResult();
-        return parseBindingResult(bindingResult);
-    }
-
-    protected Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
-        return parseBindingResult(e.getBindingResult());
-    }
-
-    protected Object handleRuntimeException(RuntimeException e, HttpServletRequest request) {
-        logWithTemplate(e.getClass().getName(), request, e);
-        return factory.error(CommonErrorCode.UNKNOWN, e.getMessage(), null);
-    }
-
-    protected Object handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request, HttpServletResponse response) {
-        LOGGER.warn("business error:" + e.getMessage());
-        response.setStatus(e.getHttpStatus());
-        return factory.error(e.getCode(), e.getMsg(), null);
-    }
-
-    private Object parseBindingResult(BindingResult bindingResult) {
-        List<FieldError> errors = bindingResult.getFieldErrors();
-        if (errors.size() > 0) {
-            //仅获取第一个异常
-            FieldError next = errors.get(0);
-            String name = next.getField();
-            String message = next.getDefaultMessage();
+    protected ResponseEntity<Object> handleBindException(BindException e, WebRequest request) {
+        List<String> errors = new ArrayList<>();
+        for (FieldError error : e.getFieldErrors()) {
+            String name = error.getField();
+            String message = error.getDefaultMessage();
             message = "[" + name + "] " + message;
-            return factory.error(CommonErrorCode.INVALID_PARAMETERS, message, null);
+            errors.add(message);
         }
-        return factory.error(CommonErrorCode.INVALID_PARAMETERS, null, null);
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        HttpHeaders headers = new HttpHeaders();
+        return handleExceptionInternal(
+                e,
+                factory.error(CommonErrorCode.VALIDATION_FAILED, null, errors),
+                headers,
+                status,
+                request
+        );
     }
 
-    private void logWithTemplate(String exceptionName, HttpServletRequest request, Throwable e) {
-        LOGGER.error(
-                String.format(HANDLE_EXCEPTION_TEMPLATE, exceptionName, request.getRequestURI()),
-                e);
+    protected Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e, WebRequest request) {
+        List<String> errors = new ArrayList<>();
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+            String name = error.getField();
+            String message = error.getDefaultMessage();
+            message = "[" + name + "] " + message;
+            errors.add(message);
+        }
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        HttpHeaders headers = new HttpHeaders();
+        return handleExceptionInternal(
+                e,
+                factory.error(CommonErrorCode.VALIDATION_FAILED, null, errors),
+                headers,
+                status,
+                request
+        );
+    }
+
+    protected ResponseEntity<Object> handleCommonBusinessException(CommonBusinessException e, WebRequest request, HttpServletResponse response) {
+        logger.warn("business error:" + e.getMessage());
+        response.setStatus(e.getHttpStatus());
+        HttpStatus status = HttpStatus.valueOf(e.getHttpStatus());
+        HttpHeaders headers = new HttpHeaders();
+        return handleExceptionInternal(
+                e,
+                factory.error(e.getCode(), e.getMsg(), null),
+                headers,
+                status,
+                request
+        );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        if (body == null) {
+            body = factory.error(ex);
+        }
+        return super.handleExceptionInternal(ex, body, headers, status, request);
     }
 }

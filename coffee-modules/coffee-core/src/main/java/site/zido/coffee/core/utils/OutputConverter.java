@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
  *
  * @param <DTO>    the implementation class type
  * @param <DOMAIN> domain type
- * @author johnniang
+ * @author zido
  */
 public interface OutputConverter<DTO extends OutputConverter<DTO, DOMAIN>, DOMAIN> {
 

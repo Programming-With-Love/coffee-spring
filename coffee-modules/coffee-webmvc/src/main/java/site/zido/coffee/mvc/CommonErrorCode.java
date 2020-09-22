@@ -9,14 +9,14 @@ public class CommonErrorCode {
     /**
      * 未知异常错误码
      */
-    public static final int UNKNOWN = 0;
+    public static final int UNKNOWN = 1;
     /**
      * 参数异常错误码
      */
-    public static final int INVALID_PARAMETERS = 1;
+    public static final int VALIDATION_FAILED = 2;
     /**
      * 被限制访问的异常错误码
      */
-    public static final int LIMIT = 2;
+    public static final int LIMIT = 3;
 }
 

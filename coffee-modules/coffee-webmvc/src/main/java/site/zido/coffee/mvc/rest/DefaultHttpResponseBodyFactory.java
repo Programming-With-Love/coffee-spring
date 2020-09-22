@@ -1,5 +1,9 @@
 package site.zido.coffee.mvc.rest;
 
+import org.springframework.http.ResponseEntity;
+
+import java.util.Collection;
+
 /**
  * 默认rest响应体实现类
  *
@@ -17,7 +21,7 @@ public class DefaultHttpResponseBodyFactory implements HttpResponseBodyFactory {
     }
 
     @Override
-    public Object error(int code, String message, Object data) {
-        return Result.error(code, message, data);
+    public Object error(int code, String message, Collection<?> errors) {
+        return Result.error(code, message, errors);
     }
 }

@@ -1,16 +1,15 @@
 package site.zido.coffee.mvc.rest;
 
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import site.zido.coffee.mvc.exceptions.CommonBusinessException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 
@@ -20,6 +19,7 @@ import javax.validation.ConstraintViolationException;
  * @author zido
  */
 @RestControllerAdvice
+@Order
 public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
     public GlobalExceptionAdvice(HttpResponseBodyFactory factory) {
         super(factory);
@@ -32,16 +32,14 @@ public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
      * @return result
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "参数非法")
     @Override
-    public Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    public Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e, WebRequest request) {
         return super.handleMethodArgumentNotValidException(e, request);
     }
 
     @ExceptionHandler(value = BindException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "参数非法")
     @Override
-    protected Object handleBindException(BindException e, HttpServletRequest request) {
+    protected ResponseEntity<Object> handleBindException(BindException e, WebRequest request) {
         return super.handleBindException(e, request);
     }
 
@@ -52,28 +50,14 @@ public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
      * @return result
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "参数非法")
     @Override
-    public Object handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
-        return super.handleConstraintViolationException(e, request);
-    }
-
-    /**
-     * parameter参数校验异常处理
-     *
-     * @param e 校验异常
-     * @return result
-     */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "参数非法")
-    @Override
-    public Object handleConstraintViolationException(HttpMessageNotReadableException e, HttpServletRequest request) {
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException e, WebRequest request) {
         return super.handleConstraintViolationException(e, request);
     }
 
     @ExceptionHandler(CommonBusinessException.class)
     @Override
-    protected Object handleCommonBusinessException(CommonBusinessException e, HttpServletRequest request, HttpServletResponse response) {
+    protected ResponseEntity<Object> handleCommonBusinessException(CommonBusinessException e, WebRequest request, HttpServletResponse response) {
         return super.handleCommonBusinessException(e, request, response);
     }
 

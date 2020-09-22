@@ -1,8 +1,11 @@
 package site.zido.coffee.mvc.rest;
 
 
+import org.springframework.http.ResponseEntity;
 import site.zido.coffee.mvc.CommonErrorCode;
 import site.zido.coffee.mvc.exceptions.CommonBusinessException;
+
+import java.util.Collection;
 
 /**
  * http 相应结果生成工厂
@@ -31,10 +34,10 @@ public interface HttpResponseBodyFactory {
      *
      * @param code    code
      * @param message message
-     * @param data    响应数据
+     * @param errors 异常详细信息，可选
      * @return object
      */
-    Object error(int code, String message, Object data);
+    Object error(int code, String message, Collection<?> errors);
 
     /**
      * 失败
@@ -50,15 +53,14 @@ public interface HttpResponseBodyFactory {
     /**
      * 失败
      *
-     * @param t    ex
-     * @param data 响应数据
+     * @param t ex
      * @return object
      */
-    default Object error(Throwable t, Object data) {
+    default Object error(Throwable t) {
         if (t instanceof CommonBusinessException) {
             CommonBusinessException cbe = (CommonBusinessException) t;
-            return error(cbe.getCode(), cbe.getMsg(), data);
+            return error(cbe.getCode(), cbe.getMsg(), null);
         }
-        return error(CommonErrorCode.UNKNOWN, t.getMessage(), data);
+        return error(CommonErrorCode.UNKNOWN, t.getMessage(), null);
     }
 }
