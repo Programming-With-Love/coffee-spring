@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
  */
 @RestControllerAdvice
 public class GlobalResultHandler implements ResponseBodyAdvice<Object> {
+    public static final String ORIGINAL_RESPONSE = "ORIGINAL_RESPONSE";
     private final HttpResponseBodyFactory factory;
 
     public GlobalResultHandler(HttpResponseBodyFactory factory) {
@@ -35,6 +36,7 @@ public class GlobalResultHandler implements ResponseBodyAdvice<Object> {
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
+        //TODO 跳过/error错误处理，这与errorController冲突
         OriginalResponse methodAnnotation = returnType.getMethodAnnotation(OriginalResponse.class);
         if (methodAnnotation != null || returnType.getDeclaringClass().getAnnotation(OriginalResponse.class) != null) {
             return body;

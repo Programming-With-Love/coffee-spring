@@ -7,7 +7,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -128,5 +133,68 @@ public class BeanUtils {
         }
 
         return emptyNames;
+    }
+
+    public static Object mapToObject(Map<String, Object> map, Class<?> beanClass) {
+        if (map == null)
+            return null;
+
+        Object obj;
+        try {
+            obj = beanClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new BeanUtilsException("cannot instant class: " + beanClass.getName(), e);
+        }
+
+        BeanInfo beanInfo;
+        try {
+            beanInfo = Introspector.getBeanInfo(obj.getClass());
+        } catch (IntrospectionException e) {
+            throw new BeanUtilsException("cannot get bean info", e);
+        }
+        PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+        for (PropertyDescriptor property : propertyDescriptors) {
+            Method setter = property.getWriteMethod();
+            if (setter != null) {
+                try {
+                    setter.invoke(obj, map.get(property.getName()));
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new BeanUtilsException("cannot invoke method " + obj.getClass().getName() + "#" + setter.getName(), e);
+                }
+            }
+        }
+
+        return obj;
+    }
+
+    public static Map<String, Object> objectToMap(Object obj) {
+        if (obj == null)
+            return null;
+
+        Map<String, Object> map = new HashMap<>();
+
+        BeanInfo beanInfo;
+        try {
+            beanInfo = Introspector.getBeanInfo(obj.getClass());
+        } catch (IntrospectionException e) {
+            throw new BeanUtilsException("cannot get bean info", e);
+        }
+        PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+        for (PropertyDescriptor property : propertyDescriptors) {
+            String key = property.getName();
+            if (key.compareToIgnoreCase("class") == 0) {
+                continue;
+            }
+            Method getter = property.getReadMethod();
+            Object value;
+            try {
+                value = getter != null ? getter.invoke(obj) : null;
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new BeanUtilsException("cannot invoke method " + obj.getClass().getName() + "#" + getter.getName(), e);
+            }
+            map.put(key, value);
+        }
+
+        return map;
     }
 }

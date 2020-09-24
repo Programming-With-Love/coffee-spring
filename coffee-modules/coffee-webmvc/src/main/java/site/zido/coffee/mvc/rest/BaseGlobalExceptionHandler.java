@@ -1,6 +1,5 @@
 package site.zido.coffee.mvc.rest;
 
-
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -65,18 +64,17 @@ public abstract class BaseGlobalExceptionHandler extends ResponseEntityException
         );
     }
 
-    protected ResponseEntity<Object> handleBindException(BindException e, WebRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<String> errors = new ArrayList<>();
-        for (FieldError error : e.getFieldErrors()) {
+        for (FieldError error : ex.getFieldErrors()) {
             String name = error.getField();
             String message = error.getDefaultMessage();
             message = "[" + name + "] " + message;
             errors.add(message);
         }
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        HttpHeaders headers = new HttpHeaders();
         return handleExceptionInternal(
-                e,
+                ex,
                 factory.error(CommonErrorCode.VALIDATION_FAILED, null, errors),
                 headers,
                 status,
@@ -84,18 +82,23 @@ public abstract class BaseGlobalExceptionHandler extends ResponseEntityException
         );
     }
 
-    protected Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e, WebRequest request) {
+    /**
+     * dto参数校验异常处理
+     *
+     * @param ex 校验异常
+     * @return result
+     */
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<String> errors = new ArrayList<>();
-        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             String name = error.getField();
             String message = error.getDefaultMessage();
             message = "[" + name + "] " + message;
             errors.add(message);
         }
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        HttpHeaders headers = new HttpHeaders();
         return handleExceptionInternal(
-                e,
+                ex,
                 factory.error(CommonErrorCode.VALIDATION_FAILED, null, errors),
                 headers,
                 status,

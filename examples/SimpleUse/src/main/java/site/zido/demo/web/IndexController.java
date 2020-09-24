@@ -42,4 +42,9 @@ public class IndexController {
     public String admin(@AuthenticationPrincipal UserDetails user) {
         return "hello world : " + user.getUsername();
     }
+
+    @GetMapping("/runtime-err")
+    public String throwNewRuntimeError() {
+        throw new RuntimeException();
+    }
 }

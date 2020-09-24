@@ -1,11 +1,11 @@
 package site.zido.coffee.mvc.rest;
 
-
-import org.springframework.http.ResponseEntity;
+import site.zido.coffee.core.utils.BeanUtils;
 import site.zido.coffee.mvc.CommonErrorCode;
 import site.zido.coffee.mvc.exceptions.CommonBusinessException;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * http 相应结果生成工厂
@@ -34,7 +34,7 @@ public interface HttpResponseBodyFactory {
      *
      * @param code    code
      * @param message message
-     * @param errors 异常详细信息，可选
+     * @param errors  异常详细信息，可选
      * @return object
      */
     Object error(int code, String message, Collection<?> errors);
@@ -48,6 +48,11 @@ public interface HttpResponseBodyFactory {
      */
     default Object error(int code, String message) {
         return error(code, message, null);
+    }
+
+    default Map<String, Object> errorToMap(int code, String message, Collection<?> errors) {
+        Object error = error(code, message, errors);
+        return BeanUtils.objectToMap(error);
     }
 
     /**
