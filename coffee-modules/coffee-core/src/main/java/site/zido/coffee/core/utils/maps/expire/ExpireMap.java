@@ -3,11 +3,9 @@ package site.zido.coffee.core.utils.maps.expire;
 import net.jcip.annotations.ThreadSafe;
 import site.zido.coffee.core.utils.DebounceExecutor;
 
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 
 /**
  * 线程安全的缓存容器，过期时间单位为毫秒
@@ -40,7 +38,7 @@ public class ExpireMap<K, V> {
      * 存储存储过的需要过期的Key，用于索引SortedSet
      */
     private final ConcurrentHashMap<K, SortedKey<K>> cache = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<K, V> valContainer = new ConcurrentHashMap<>();
+    private final HashMap<K, V> valContainer = new HashMap<>();
 
     private final DebounceExecutor executor;
 
@@ -75,6 +73,18 @@ public class ExpireMap<K, V> {
         return (diff = expireTime - System.currentTimeMillis()) > 0 ? diff : 0;
     }
 
+    private boolean expired(SortedKey<K> v) {
+        if (v == null) {
+            return true;
+        }
+        if (v.expireTime != -1 && v.expireTime - System.currentTimeMillis() <= 0) {
+            sortedKeys.remove(v);
+            valContainer.remove(v.key);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 放入缓存
      *
@@ -84,23 +94,29 @@ public class ExpireMap<K, V> {
      */
     public void set(K key, V val, long timeout) {
         tickReleaseMemory();
-        if (timeout < 0) {
-            cache.put(key, new SortedKey<>(key, -1L));
-            return;
-        }
-        if (timeout == 0) {
-            return;
-        }
-        long expireTime = timeout + System.currentTimeMillis();
-        cache.compute(key, (k, v) -> {
+        cache.compute(key, put(key, val, timeout));
+    }
+
+    private BiFunction<K, SortedKey<K>, SortedKey<K>> put(K key, V val, long timeout) {
+        return (k, v) -> {
             if (v != null) {
                 sortedKeys.remove(v);
             }
-            v = new SortedKey<>(key, expireTime);
+            if (timeout < 0) {
+                valContainer.put(k, val);
+                return new SortedKey<>(key, -1L);
+            }
+            //如果timeout == 0 代表删除
+            if (timeout == 0) {
+                valContainer.remove(k);
+                return null;
+            }
+            long expireTime = timeout + System.currentTimeMillis();
+            v = new SortedKey<>(k, expireTime);
             sortedKeys.add(v);
-            valContainer.put(key, val);
+            valContainer.put(k, val);
             return v;
-        });
+        };
     }
 
     /**
@@ -114,20 +130,20 @@ public class ExpireMap<K, V> {
     }
 
     /**
-     * 如果缓存中没有，则设置，否则返回
+     * 如果缓存中没有，则设置成功，否则失败
      *
      * @param key key
      * @param val value
      * @return 过期时间
      */
     public boolean setNx(K key, V val, long timeout) {
+        tickReleaseMemory();
         boolean[] success = new boolean[]{false};
-        SortedKey<K> sortedKey = cache.computeIfAbsent(key, (k) -> {
-            final long expireTime = timeout + System.currentTimeMillis();
-            SortedKey<K> v = new SortedKey<>(key, expireTime);
-            sortedKeys.add(v);
-            valContainer.put(key, val);
-            success[0] = true;
+        cache.compute(key, (k, v) -> {
+            if (expired(v)) {
+                v = put(k, val, timeout).apply(k, v);
+                success[0] = true;
+            }
             return v;
         });
         return success[0];
@@ -141,18 +157,17 @@ public class ExpireMap<K, V> {
      */
     public V get(K key) {
         tickReleaseMemory();
-        long crt = System.currentTimeMillis();
-        SortedKey<K> compute = cache.compute(key, (k, v) -> {
-            if (v == null
-                    || (v.expireTime != -1 && v.expireTime - crt <= 0)) {
-                return null;
+        Object[] result = new Object[]{null};
+        cache.compute(key, (k, v) -> {
+            if (expired(v)) {
+                result[0] = null;
+            } else {
+                result[0] = valContainer.get(k);
             }
             return v;
         });
-        if (compute != null) {
-            return valContainer.get(compute.key);
-        }
-        return null;
+        //noinspection unchecked
+        return (V) result[0];
     }
 
     /**

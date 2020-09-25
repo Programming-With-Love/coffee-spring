@@ -37,7 +37,7 @@ public class LimiterControllerTest {
                 .andExpect(status().isOk());
         MvcResult mvcResult = mvc.perform(get("/limit"))
                 .andReturn();
-        if (System.currentTimeMillis() - startTime < 55 * 1000) {
+        if (System.currentTimeMillis() - startTime < 5 * 1000) {
             Assertions.assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), mvcResult.getResponse().getStatus());
             String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
             ObjectMapper mapper = new ObjectMapper();
@@ -51,6 +51,11 @@ public class LimiterControllerTest {
             Assertions.assertTrue(matcher.matches(), "返回响应信息错误");
             int lastTime = Integer.parseInt(matcher.group(1));
             Assertions.assertTrue(lastTime < 60, "剩余时间应小于60秒");
+            Thread.sleep(6 * 1000);
+            mvc.perform(get("/limit"))
+                    .andExpect(status().isOk());
+            mvc.perform(get("/limit"))
+                    .andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
         } else {
             Assertions.fail("未能在60秒内完成请求，测试失败");
         }
@@ -64,7 +69,7 @@ public class LimiterControllerTest {
                 .andExpect(status().isOk());
         MvcResult mvcResult = mvc.perform(get("/limit/sms").param("phone", phone))
                 .andReturn();
-        if (System.currentTimeMillis() - startTime < 55 * 1000) {
+        if (System.currentTimeMillis() - startTime < 5 * 1000) {
             Assertions.assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), mvcResult.getResponse().getStatus());
             String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
             ObjectMapper mapper = new ObjectMapper();
@@ -78,6 +83,11 @@ public class LimiterControllerTest {
             Assertions.assertTrue(matcher.matches(), "返回响应信息错误");
             int lastTime = Integer.parseInt(matcher.group(1));
             Assertions.assertTrue(lastTime < 60, "剩余时间应小于60秒");
+            Thread.sleep(6 * 1000);
+            mvc.perform(get("/limit/sms").param("phone", phone))
+                    .andExpect(status().isOk());
+            mvc.perform(get("/limit/sms").param("phone", phone))
+                    .andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
         } else {
             Assertions.fail("未能在60秒内完成请求，测试失败");
         }
@@ -91,7 +101,7 @@ public class LimiterControllerTest {
                 .andExpect(status().isOk());
         MvcResult mvcResult = mvc.perform(get("/limit/{phone}/sms", phone))
                 .andReturn();
-        if (System.currentTimeMillis() - startTime < 55 * 1000) {
+        if (System.currentTimeMillis() - startTime < 5 * 1000) {
             Assertions.assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), mvcResult.getResponse().getStatus());
             String content = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
             ObjectMapper mapper = new ObjectMapper();
@@ -105,6 +115,11 @@ public class LimiterControllerTest {
             Assertions.assertTrue(matcher.matches(), "返回响应信息错误");
             int lastTime = Integer.parseInt(matcher.group(1));
             Assertions.assertTrue(lastTime < 60, "剩余时间应小于60秒");
+            Thread.sleep(6 * 1000);
+            mvc.perform(get("/limit/{phone}/sms", phone))
+                    .andExpect(status().isOk());
+            mvc.perform(get("/limit/{phone}/sms", phone))
+                    .andExpect(status().is(HttpStatus.TOO_MANY_REQUESTS.value()));
         } else {
             Assertions.fail("未能在60秒内完成请求，测试失败");
         }
@@ -128,7 +143,7 @@ public class LimiterControllerTest {
                 try {
                     long startTime = System.currentTimeMillis();
                     runningLatch.await();
-                    if (System.currentTimeMillis() - startTime < 60 * 1000) {
+                    if (System.currentTimeMillis() - startTime < 6 * 1000) {
                         mvc.perform(get("/limit/sms").param("phone", phone))
                                 .andDo(result -> {
                                     if (result.getResponse().getStatus() == 200) {

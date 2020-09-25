@@ -15,7 +15,7 @@ import site.zido.coffee.extra.limiter.Limiter;
 public class LimiterController {
 
     @RequestMapping
-    @Limiter
+    @Limiter(timeout = 5)
     public String limit() {
         return "limit content";
     }
@@ -27,7 +27,7 @@ public class LimiterController {
      * @return content
      */
     @RequestMapping("/sms")
-    @Limiter(key = "'content:' + #phone")
+    @Limiter(key = "'content:' + #phone", timeout = 5)
     public String limit(String phone) {
         return "limit content";
     }
@@ -39,7 +39,7 @@ public class LimiterController {
      * @return content
      */
     @RequestMapping("/{phone}/sms")
-    @Limiter(key = "'content:path:' + #phone")
+    @Limiter(key = "'content:path:' + #phone", timeout = 5)
     public String inlineLimit(@PathVariable String phone) {
         return limit("inline");
     }
