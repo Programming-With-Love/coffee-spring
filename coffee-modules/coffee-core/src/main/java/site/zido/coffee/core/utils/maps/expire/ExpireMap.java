@@ -120,17 +120,17 @@ public class ExpireMap<K, V> {
      * @param val value
      * @return 过期时间
      */
-    public long setNx(K key, V val, long timeout) {
-        SortedKey<K> sortedKey = cache.compute(key, (k, v) -> {
-            if (v == null) {
-                long expireTime = timeout + System.currentTimeMillis();
-                v = new SortedKey<>(key, expireTime);
-                sortedKeys.add(v);
-                valContainer.put(key, val);
-            }
+    public boolean setNx(K key, V val, long timeout) {
+        boolean[] success = new boolean[]{false};
+        SortedKey<K> sortedKey = cache.computeIfAbsent(key, (k) -> {
+            final long expireTime = timeout + System.currentTimeMillis();
+            SortedKey<K> v = new SortedKey<>(key, expireTime);
+            sortedKeys.add(v);
+            valContainer.put(key, val);
+            success[0] = true;
             return v;
         });
-        return returnExpireTime(sortedKey.expireTime);
+        return success[0];
     }
 
     /**

@@ -3,4 +3,4 @@
  *
  * @author zido
  */
-package site.zido.demo.web.integration_test;
+package site.zido.demo.api.integration_test;

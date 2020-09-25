@@ -24,15 +24,14 @@ public class MemoryFrequencyLimiter implements FrequencyLimiter {
     public long tryGet(String key, long timeout) {
         key = getKey(key);
 
+        if (expireMap.setNx(key, PRESENT, timeout)) {
+            return 0;
+        }
         long ttl = expireMap.ttl(key);
         if (ttl == -1) {
             throw new IllegalStateException(String.format("key:%s永久存在，无法获取执行", key));
         }
-        if (ttl > 0) {
-            return ttl;
-        }
-        expireMap.set(key, PRESENT, timeout);
-        return 0;
+        return ttl;
     }
 
     protected String getKey(String key) {
