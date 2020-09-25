@@ -3,7 +3,10 @@ package site.zido.coffee.core.utils.maps.expire;
 import net.jcip.annotations.ThreadSafe;
 import site.zido.coffee.core.utils.DebounceExecutor;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
@@ -38,7 +41,7 @@ public class ExpireMap<K, V> {
      * 存储存储过的需要过期的Key，用于索引SortedSet
      */
     private final ConcurrentHashMap<K, SortedKey<K>> cache = new ConcurrentHashMap<>();
-    private final HashMap<K, V> valContainer = new HashMap<>();
+    private final ConcurrentHashMap<K, V> valContainer = new ConcurrentHashMap<>();
 
     private final DebounceExecutor executor;
 
