@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.zido.coffee.extra.limiter.Limiter;
 
 /**
  * 一些简单接口使用
@@ -27,7 +28,7 @@ public class IndexController {
     }
 
     @RequestMapping("/limit")
-//    @Limiter(key = "'content' + #name")
+    @Limiter(key = "'content' + #name")
     public String limit(String name) {
         return "limit content";
     }

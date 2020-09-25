@@ -5,8 +5,8 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.WebRequest;
@@ -21,9 +21,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static site.zido.coffee.mvc.rest.GlobalResultHandler.ORIGINAL_RESPONSE;
+import static site.zido.coffee.mvc.rest.BaseGlobalExceptionHandler.parseBindingResult;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CoffeeErrorAttributes implements ErrorAttributes, HandlerExceptionResolver, Ordered {
@@ -46,32 +49,31 @@ public class CoffeeErrorAttributes implements ErrorAttributes, HandlerExceptionR
     @Override
     public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
         Integer status = getAttribute(webRequest, "javax.servlet.error.status_code");
-        if (status == null) {
-            return factory.errorToMap(CommonErrorCode.UNKNOWN,
-                    messages.getMessage("UNKNOWN_ERROR", "未知异常"),
-                    null);
-        }
+        int code = CommonErrorCode.UNKNOWN;
+        String message = null;
+
         Throwable error = getError(webRequest);
         if (error != null) {
             while (error instanceof ServletException && error.getCause() != null) {
                 error = error.getCause();
             }
         }
-        List<String> errors = null;
+        List<Object> errors = new ArrayList<>();
         if (error instanceof BindingResult) {
-            errors = parseBindingResult((BindingResult) error);
+            errors.addAll(parseBindingResult((BindingResult) error));
         }
         if (error instanceof MethodArgumentNotValidException) {
-            errors = parseBindingResult(((MethodArgumentNotValidException) error).getBindingResult());
+            errors.addAll(parseBindingResult(((MethodArgumentNotValidException) error).getBindingResult()));
         }
-        if (errors != null) {
-            return factory.errorToMap(CommonErrorCode.VALIDATION_FAILED,
-                    messages.getMessage("VALIDATION_FAILED", "数据校验错误"),
-                    errors);
+        if (!errors.isEmpty()) {
+            code = CommonErrorCode.VALIDATION_FAILED;
+            message = messages.getMessage("VALIDATION_FAILED", "数据校验错误");
         }
         if (error != null) {
             Map<String, Object> detail = new HashMap<>();
-            detail.put("message", error.getMessage());
+            detail.put("message", StringUtils.hasText(error.getMessage())
+                    ? error.getMessage()
+                    : messages.getMessage("UNKNOWN_ERROR", "未知异常"));
             while (error instanceof ServletException && error.getCause() != null) {
                 error = error.getCause();
             }
@@ -81,19 +83,29 @@ public class CoffeeErrorAttributes implements ErrorAttributes, HandlerExceptionR
             if (includeStackTrace) {
                 detail.put("trace", getStackTrace(error));
             }
-            return factory.errorToMap(CommonErrorCode.UNKNOWN,
-                    error.getMessage(), Collections.singleton(detail));
-        }
-        String message;
-        try {
-            message = HttpStatus.valueOf(status).getReasonPhrase();
-        } catch (Exception ex) {
-            message = messages.getMessage("UNKNOWN_ERROR", "未知异常") + "(Http Status " + status + ")";
+            message = error.getMessage();
+            errors.add(detail);
         }
 
-        return factory.errorToMap(CommonErrorCode.UNKNOWN,
+        if (status == null) {
+            code = CommonErrorCode.UNKNOWN;
+            message = messages.getMessage("UNKNOWN_ERROR", "未知异常");
+        } else if (HttpStatus.NOT_FOUND.value() == status) {
+            Map<String, Object> detail = new HashMap<>();
+            detail.put("path", getAttribute(webRequest, "javax.servlet.error.request_uri"));
+            errors.add(detail);
+        }
+
+        if (message == null) {
+            try {
+                message = HttpStatus.valueOf(status).getReasonPhrase();
+            } catch (Exception ex) {
+                message = messages.getMessage("UNKNOWN_ERROR", "未知异常");
+            }
+        }
+        return factory.errorToMap(code,
                 message,
-                null);
+                errors);
     }
 
     private String getStackTrace(Throwable error) {
@@ -101,17 +113,6 @@ public class CoffeeErrorAttributes implements ErrorAttributes, HandlerExceptionR
         error.printStackTrace(new PrintWriter(stackTrace));
         stackTrace.flush();
         return stackTrace.toString();
-    }
-
-    private List<String> parseBindingResult(BindingResult result) {
-        List<String> errors = new ArrayList<>();
-        for (FieldError error : result.getFieldErrors()) {
-            String name = error.getField();
-            String message = error.getDefaultMessage();
-            message = "[" + name + "] " + message;
-            errors.add(message);
-        }
-        return errors;
     }
 
     @Override

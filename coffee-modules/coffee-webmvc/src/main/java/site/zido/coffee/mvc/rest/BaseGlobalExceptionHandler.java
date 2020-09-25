@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
@@ -66,6 +67,16 @@ public abstract class BaseGlobalExceptionHandler extends ResponseEntityException
 
     @Override
     protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        return handleExceptionInternal(
+                ex,
+                factory.error(CommonErrorCode.VALIDATION_FAILED, null, parseBindingResult(ex)),
+                headers,
+                status,
+                request
+        );
+    }
+
+    public static List<String> parseBindingResult(BindingResult ex) {
         List<String> errors = new ArrayList<>();
         for (FieldError error : ex.getFieldErrors()) {
             String name = error.getField();
@@ -73,13 +84,7 @@ public abstract class BaseGlobalExceptionHandler extends ResponseEntityException
             message = "[" + name + "] " + message;
             errors.add(message);
         }
-        return handleExceptionInternal(
-                ex,
-                factory.error(CommonErrorCode.VALIDATION_FAILED, null, errors),
-                headers,
-                status,
-                request
-        );
+        return errors;
     }
 
     /**
