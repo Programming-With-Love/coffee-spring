@@ -1,23 +1,26 @@
 package site.zido.coffee.core.utils.maps.expire;
 
-import net.jcip.annotations.ThreadSafe;
-import site.zido.coffee.core.utils.DebounceExecutor;
-
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
+
+import net.jcip.annotations.ThreadSafe;
 
 /**
  * 线程安全的缓存容器，过期时间单位为毫秒
  *
  * <ul>
- *     <li>类redis指令</li>
- *     <li>内存</li>
- *     <li>线程安全</li>
- *     <li>过期删除</li>
+ * <li>类redis指令</li>
+ * <li>内存</li>
+ * <li>线程安全</li>
+ * <li>过期删除</li>
  * </ul>
  *
  * @param <K>
@@ -26,12 +29,7 @@ import java.util.function.BiFunction;
 @ThreadSafe
 public class ExpireMap<K, V> {
 
-    /**
-     * 内存释放延迟时间
-     * <p>
-     * 默认1s
-     */
-    private static final long DEFAULT_RELEASE_FACTOR = 1000;
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
      * 计算是否过期
@@ -40,17 +38,20 @@ public class ExpireMap<K, V> {
     /**
      * 存储存储过的需要过期的Key，用于索引SortedSet
      */
-    private final ConcurrentHashMap<K, SortedKey<K>> cache = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<K, V> valContainer = new ConcurrentHashMap<>();
+    private final HashMap<K, SortedKey<K>> cache = new HashMap<>();
+    private final HashMap<K, V> valContainer = new HashMap<>();
 
-    private final DebounceExecutor executor;
+    private final long releaseIntervalTime;
+
+    private final AtomicLong lastRelease;
 
     public ExpireMap() {
-        this(DEFAULT_RELEASE_FACTOR);
+        this(1, TimeUnit.SECONDS);
     }
 
-    public ExpireMap(long releaseFactor) {
-        executor = new DebounceExecutor(this::releaseMemory, releaseFactor);
+    public ExpireMap(long releaseIntervalTime, TimeUnit unit) {
+        this.releaseIntervalTime = unit.toMillis(releaseIntervalTime);
+        lastRelease = new AtomicLong(System.currentTimeMillis());
     }
 
     /**
@@ -62,8 +63,13 @@ public class ExpireMap<K, V> {
     public long ttl(K key) {
         tickReleaseMemory();
         SortedKey<K> val;
-        if ((val = cache.get(key)) == null) {
-            return 0;
+        lock.readLock().lock();
+        try {
+            if ((val = cache.get(key)) == null) {
+                return 0;
+            }
+        } finally {
+            lock.readLock().unlock();
         }
         return returnExpireTime(val.expireTime);
     }
@@ -97,7 +103,12 @@ public class ExpireMap<K, V> {
      */
     public void set(K key, V val, long timeout) {
         tickReleaseMemory();
-        cache.compute(key, put(key, val, timeout));
+        lock.writeLock().lock();
+        try {
+            cache.compute(key, put(key, val, timeout));
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     private BiFunction<K, SortedKey<K>, SortedKey<K>> put(K key, V val, long timeout) {
@@ -109,7 +120,7 @@ public class ExpireMap<K, V> {
                 valContainer.put(k, val);
                 return new SortedKey<>(key, -1L);
             }
-            //如果timeout == 0 代表删除
+            // 如果timeout == 0 代表删除
             if (timeout == 0) {
                 valContainer.remove(k);
                 return null;
@@ -141,14 +152,19 @@ public class ExpireMap<K, V> {
      */
     public boolean setNx(K key, V val, long timeout) {
         tickReleaseMemory();
-        boolean[] success = new boolean[]{false};
-        cache.compute(key, (k, v) -> {
-            if (expired(v)) {
-                v = put(k, val, timeout).apply(k, v);
-                success[0] = true;
-            }
-            return v;
-        });
+        lock.writeLock().lock();
+        boolean[] success = new boolean[] { false };
+        try {
+            cache.compute(key, (k, v) -> {
+                if (expired(v)) {
+                    v = put(k, val, timeout).apply(k, v);
+                    success[0] = true;
+                }
+                return v;
+            });
+        } finally {
+            lock.writeLock().unlock();
+        }
         return success[0];
     }
 
@@ -158,18 +174,23 @@ public class ExpireMap<K, V> {
      * @param key key
      * @return value
      */
+    @SuppressWarnings("unchecked")
     public V get(K key) {
         tickReleaseMemory();
-        Object[] result = new Object[]{null};
-        cache.compute(key, (k, v) -> {
-            if (expired(v)) {
-                result[0] = null;
-            } else {
-                result[0] = valContainer.get(k);
-            }
-            return v;
-        });
-        //noinspection unchecked
+        Object[] result = new Object[] { null };
+        lock.readLock().lock();
+        try {
+            cache.compute(key, (k, v) -> {
+                if (expired(v)) {
+                    result[0] = null;
+                } else {
+                    result[0] = valContainer.get(k);
+                }
+                return v;
+            });
+        } finally {
+            lock.readLock().unlock();
+        }
         return (V) result[0];
     }
 
@@ -179,10 +200,21 @@ public class ExpireMap<K, V> {
      * 防止每次执行都会使用内存释放从而导致性能下降
      */
     public void tickReleaseMemory() {
-        executor.run();
+        long crt = System.currentTimeMillis();
+        if (crt - lastRelease.get() > releaseIntervalTime) {
+            lock.writeLock().lock();
+            try {
+                if (crt - lastRelease.get() > releaseIntervalTime) {
+                    releaseMemory();
+                }
+                lastRelease.set(System.currentTimeMillis());
+            } finally {
+                lock.writeLock().unlock();
+            }
+        }
     }
 
-    public void releaseMemory() {
+    private void releaseMemory() {
         long crt = System.currentTimeMillis();
         Iterator<SortedKey<K>> iter = sortedKeys.iterator();
         while (iter.hasNext()) {
@@ -213,18 +245,19 @@ public class ExpireMap<K, V> {
         }
 
         @Override
-        public int compareTo(SortedKey o) {
+        public int compareTo(SortedKey<K> o) {
             return Long.compare(o.expireTime, expireTime);
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             SortedKey<K> sortedKey = (SortedKey<K>) o;
-            return Objects.equals(key, sortedKey.key) &&
-                    Objects.equals(expireTime, sortedKey.expireTime);
+            return Objects.equals(key, sortedKey.key) && Objects.equals(expireTime, sortedKey.expireTime);
         }
 
         @Override
