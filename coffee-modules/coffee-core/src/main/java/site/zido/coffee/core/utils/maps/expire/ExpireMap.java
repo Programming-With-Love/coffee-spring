@@ -29,7 +29,7 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 public class ExpireMap<K, V> {
 
-    private ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
      * 计算是否过期
