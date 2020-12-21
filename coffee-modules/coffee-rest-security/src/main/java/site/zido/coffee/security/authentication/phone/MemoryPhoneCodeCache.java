@@ -2,12 +2,14 @@ package site.zido.coffee.security.authentication.phone;
 
 import site.zido.coffee.core.utils.maps.expire.ExpireMap;
 
+import java.util.concurrent.TimeUnit;
+
 public class MemoryPhoneCodeCache implements PhoneCodeCache {
     private final ExpireMap<String, String> expireMap;
     private long timeout = 60;
 
     public MemoryPhoneCodeCache() {
-        this(new ExpireMap<>(1000));
+        this(new ExpireMap<>(1, TimeUnit.MINUTES));
     }
 
     public MemoryPhoneCodeCache(ExpireMap<String, String> expireMap) {
