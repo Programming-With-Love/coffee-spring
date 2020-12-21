@@ -35,7 +35,8 @@ public class RestAccessDeniedHandlerImpl implements AccessDeniedHandler {
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response,
+            AccessDeniedException accessDeniedException) throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         if (this.mediaType != null) {
             response.setHeader("Content-Type", this.mediaType.toString());

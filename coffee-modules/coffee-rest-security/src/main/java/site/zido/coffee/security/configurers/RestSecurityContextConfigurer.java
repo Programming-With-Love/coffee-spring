@@ -18,19 +18,18 @@ import site.zido.coffee.security.token.JwtSecurityContextRepository;
  * 目前支持：
  *
  * <ul>
- *     <li>
- *         jwt token:通过{@link #jwt()}启用，默认情况下为有效期为一小时
- *          <ul>
- *            <li>每10分钟尝试一次续期(默认)</li>
- *            <li>客户端续期</li>
- *          </ul>
- *     </li>
+ * <li>jwt token:通过{@link #jwt()}启用，默认情况下为有效期为一小时
+ * <ul>
+ * <li>每10分钟尝试一次续期(默认)</li>
+ * <li>客户端续期</li>
+ * </ul>
+ * </li>
  * </ul>
  *
  * @author zido
  */
-public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> extends
-        AbstractHttpConfigurer<RestSecurityContextConfigurer<H>, H> {
+public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>>
+        extends AbstractHttpConfigurer<RestSecurityContextConfigurer<H>, H> {
 
     private JwtSecurityConfigurer configurer;
 
@@ -39,8 +38,7 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
 
     public RestSecurityContextConfigurer<H> securityContextRepository(
             JwtSecurityContextRepository securityContextRepository) {
-        getBuilder().setSharedObject(JwtSecurityContextRepository.class,
-                securityContextRepository);
+        getBuilder().setSharedObject(JwtSecurityContextRepository.class, securityContextRepository);
         return this;
     }
 
@@ -54,14 +52,13 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
         if (configurer != null) {
             configurer.apply(http);
         }
-        SecurityContextRepository securityContextRepository = http
-                .getSharedObject(SecurityContextRepository.class);
+        SecurityContextRepository securityContextRepository = http.getSharedObject(SecurityContextRepository.class);
         if (securityContextRepository == null) {
-            JwtSecurityContextRepository repository = new JwtSecurityContextRepository("coffee-jwt", 1000 * 60 * 60, 1000 * 60 * 10);
+            JwtSecurityContextRepository repository = new JwtSecurityContextRepository("coffee-jwt", 1000 * 60 * 60,
+                    1000 * 60 * 10);
             UserDetailsService userDetailsService = http.getSharedObject(UserDetailsService.class);
             repository.setUserService(userDetailsService);
-            AuthenticationTrustResolver trustResolver = http
-                    .getSharedObject(AuthenticationTrustResolver.class);
+            AuthenticationTrustResolver trustResolver = http.getSharedObject(AuthenticationTrustResolver.class);
             if (trustResolver != null) {
                 repository.setTrustResolver(trustResolver);
             }
@@ -116,7 +113,8 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
                 return;
             }
             if (autoRefresh) {
-                JwtSecurityContextRepository repository = new JwtSecurityContextRepository(secret, expiration, renewInMs);
+                JwtSecurityContextRepository repository = new JwtSecurityContextRepository(secret, expiration,
+                        renewInMs);
                 if (header != null) {
                     repository.setAuthHeaderName(header);
                 }
@@ -130,7 +128,8 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>> ext
                     repository.setTrustResolver(trustResolver);
                 }
                 if (userService != null
-                        || (userService = SpringUtils.getBeanOrNull(http.getSharedObject(ApplicationContext.class), UserDetailsService.class)) != null
+                        || (userService = SpringUtils.getBeanOrNull(http.getSharedObject(ApplicationContext.class),
+                                UserDetailsService.class)) != null
                         || (userService = getBuilder().getSharedObject(UserDetailsService.class)) != null) {
                     repository.setUserService(userService);
                 }

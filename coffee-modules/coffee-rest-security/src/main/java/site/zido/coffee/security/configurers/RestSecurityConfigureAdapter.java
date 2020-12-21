@@ -24,21 +24,16 @@ public class RestSecurityConfigureAdapter extends WebSecurityConfigurerAdapter {
     }
 
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-                .addFilter(new WebAsyncManagerIntegrationFilter())
-                .exceptionHandling(handling ->
-                        handling.accessDeniedHandler(new RestAccessDeniedHandlerImpl())
-                )
-                .exceptionHandling(handling -> handling.authenticationEntryPoint(new RestAuthenticationEntryPoint()))
-                .headers().and()
-                .apply(new RestSecurityContextConfigurer<>()).and()
-                .formLogin(form ->
-                        form.successHandler(new RestAuthenticationSuccessHandler())
-                                .failureHandler(new RestAuthenticationFailureHandler())
-                                .loginProcessingUrl("/users/sessions")
-                )
-                .anonymous().and()
-                .servletApi().and()
-                .logout();
+        if (!disableDefaults) {
+            http.csrf(AbstractHttpConfigurer::disable).addFilter(new WebAsyncManagerIntegrationFilter())
+                    .exceptionHandling(handling -> handling.accessDeniedHandler(new RestAccessDeniedHandlerImpl()))
+                    .exceptionHandling(
+                            handling -> handling.authenticationEntryPoint(new RestAuthenticationEntryPoint()))
+                    .headers().and().apply(new RestSecurityContextConfigurer<>()).and()
+                    .formLogin(form -> form.successHandler(new RestAuthenticationSuccessHandler())
+                            .failureHandler(new RestAuthenticationFailureHandler())
+                            .loginProcessingUrl("/users/sessions"))
+                    .anonymous().and().servletApi().and().logout();
+        }
     }
 }

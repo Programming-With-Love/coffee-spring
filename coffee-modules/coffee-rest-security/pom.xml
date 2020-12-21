@@ -18,6 +18,11 @@
         </dependency>
         <dependency>
             <groupId>site.zido</groupId>
+            <artifactId>coffee-extra</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>site.zido</groupId>
             <artifactId>coffee-webmvc</artifactId>
         </dependency>
         <dependency>

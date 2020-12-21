@@ -19,8 +19,8 @@ import java.util.LinkedHashMap;
 /**
  * @author zido
  */
-public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> extends
-        AbstractHttpConfigurer<RestExceptionHandlingConfigurer<H>, H> {
+public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>>
+        extends AbstractHttpConfigurer<RestExceptionHandlingConfigurer<H>, H> {
     private AuthenticationEntryPoint authenticationEntryPoint;
 
     private AccessDeniedHandler accessDeniedHandler;
@@ -32,14 +32,13 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
     public RestExceptionHandlingConfigurer() {
     }
 
-    public RestExceptionHandlingConfigurer<H> accessDeniedHandler(
-            AccessDeniedHandler accessDeniedHandler) {
+    public RestExceptionHandlingConfigurer<H> accessDeniedHandler(AccessDeniedHandler accessDeniedHandler) {
         this.accessDeniedHandler = accessDeniedHandler;
         return this;
     }
 
-    public RestExceptionHandlingConfigurer<H> defaultAccessDeniedHandlerFor(
-            AccessDeniedHandler deniedHandler, RequestMatcher preferredMatcher) {
+    public RestExceptionHandlingConfigurer<H> defaultAccessDeniedHandlerFor(AccessDeniedHandler deniedHandler,
+            RequestMatcher preferredMatcher) {
         this.defaultDeniedHandlerMappings.put(preferredMatcher, deniedHandler);
         return this;
     }
@@ -50,8 +49,8 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
         return this;
     }
 
-    public RestExceptionHandlingConfigurer<H> defaultAuthenticationEntryPointFor(
-            AuthenticationEntryPoint entryPoint, RequestMatcher preferredMatcher) {
+    public RestExceptionHandlingConfigurer<H> defaultAuthenticationEntryPointFor(AuthenticationEntryPoint entryPoint,
+            RequestMatcher preferredMatcher) {
         this.defaultEntryPointMappings.put(preferredMatcher, entryPoint);
         return this;
     }
@@ -67,8 +66,8 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
     @Override
     public void configure(H http) {
         AuthenticationEntryPoint entryPoint = getAuthenticationEntryPoint(http);
-        ExceptionTranslationFilter exceptionTranslationFilter = new ExceptionTranslationFilter(
-                entryPoint, getRequestCache(http));
+        ExceptionTranslationFilter exceptionTranslationFilter = new ExceptionTranslationFilter(entryPoint,
+                getRequestCache(http));
         AccessDeniedHandler deniedHandler = getAccessDeniedHandler(http);
         exceptionTranslationFilter.setAccessDeniedHandler(deniedHandler);
         exceptionTranslationFilter = postProcess(exceptionTranslationFilter);
@@ -98,8 +97,7 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
         if (this.defaultDeniedHandlerMappings.size() == 1) {
             return this.defaultDeniedHandlerMappings.values().iterator().next();
         }
-        return new RequestMatcherDelegatingAccessDeniedHandler(
-                this.defaultDeniedHandlerMappings,
+        return new RequestMatcherDelegatingAccessDeniedHandler(this.defaultDeniedHandlerMappings,
                 new RestAccessDeniedHandlerImpl());
     }
 
@@ -112,16 +110,15 @@ public class RestExceptionHandlingConfigurer<H extends HttpSecurityBuilder<H>> e
         }
         DelegatingAuthenticationEntryPoint entryPoint = new DelegatingAuthenticationEntryPoint(
                 this.defaultEntryPointMappings);
-        entryPoint.setDefaultEntryPoint(this.defaultEntryPointMappings.values().iterator()
-                .next());
+        entryPoint.setDefaultEntryPoint(this.defaultEntryPointMappings.values().iterator().next());
         return entryPoint;
     }
 
     /**
      * Gets the {@link RequestCache} to use. If one is defined using
      * {@link #requestCache(org.springframework.security.web.savedrequest.RequestCache)},
-     * then it is used. Otherwise, an attempt to find a {@link RequestCache} shared object
-     * is made. If that fails, an {@link HttpSessionRequestCache} is used
+     * then it is used. Otherwise, an attempt to find a {@link RequestCache} shared
+     * object is made. If that fails, an {@link HttpSessionRequestCache} is used
      *
      * @param http the {@link HttpSecurity} to attempt to fined the shared object
      * @return the {@link RequestCache} to use

@@ -91,10 +91,6 @@ public class LimiterInterceptor extends AbstractLimiterInvoker implements Method
         return context;
     }
 
-    private ExpressionKey createKey(AnnotatedElementKey elementKey, String expression) {
-        return new ExpressionKey(elementKey, expression);
-    }
-
     public LimiterOperationSource getLimiterOperationSource() {
         return limiterOperationSource;
     }
