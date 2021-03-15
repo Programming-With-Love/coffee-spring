@@ -1,15 +1,14 @@
 package site.zido.demo.config;
 
+import ai.grakn.redismock.RedisServer;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import redis.embedded.RedisServer;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.net.ServerSocket;
 
 /**
  * 配置一个内存redis链接
@@ -19,18 +18,16 @@ import java.net.ServerSocket;
 @Configuration
 public class RedisConfiguration implements InitializingBean {
 
-    private RedisServer server;
+    private static RedisServer redisServer = null;
     private int port;
 
     public RedisConfiguration() throws IOException {
-        ServerSocket serverSocket = new ServerSocket(0);
-        port = serverSocket.getLocalPort();
-        serverSocket.close();
-        server = new RedisServer(port);
+        redisServer = RedisServer.newRedisServer();
     }
 
-    public void startServer() {
-        server.start();
+    public void startServer() throws IOException {
+        redisServer.start();
+        port = redisServer.getBindPort();
     }
 
     @Bean
@@ -45,6 +42,6 @@ public class RedisConfiguration implements InitializingBean {
 
     @PreDestroy
     public void destroyServer() {
-        server.stop();
+        redisServer.stop();
     }
 }

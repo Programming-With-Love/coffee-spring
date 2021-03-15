@@ -15,7 +15,7 @@ public class RestSecurityConfigureAdapter extends WebSecurityConfigurerAdapter {
     private boolean disableDefaults = false;
 
     public RestSecurityConfigureAdapter(boolean disableDefaults) {
-        super(true);
+        super(disableDefaults);
         this.disableDefaults = disableDefaults;
     }
 

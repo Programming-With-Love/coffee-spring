@@ -1,5 +1,6 @@
 package site.zido.coffee.autoconfigure.security.rest;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
@@ -19,7 +20,8 @@ import site.zido.coffee.security.configurers.RestSecurityConfigureAdapter;
 import site.zido.coffee.security.configurers.RestSecurityContextConfigurer;
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
+@ConditionalOnClass({RestSecurityConfigureAdapter.class, WebSecurityConfigurerAdapter.class})
+@ConditionalOnMissingBean({RestSecurityConfigureAdapter.class, WebSecurityConfigurerAdapter.class})
 @ConditionalOnWebApplication(type = Type.SERVLET)
 public class SpringBootRestSecurityConfiguration {
 
@@ -57,7 +59,7 @@ public class SpringBootRestSecurityConfiguration {
                 } else {
                     phoneCodeConfigure.loginProcessingUrl("/users/sms/sessions");
                 }
-                if(StringUtils.hasText(properties.getPhoneCode().getCodeProcessUrl())){
+                if (StringUtils.hasText(properties.getPhoneCode().getCodeProcessUrl())) {
                     phoneCodeConfigure.codeProcessingUrl(properties.getPhoneCode().getCodeProcessUrl());
                 }
             }
@@ -74,12 +76,9 @@ public class SpringBootRestSecurityConfiguration {
                     //自定义jwt的超时时间
                     RestSecurityContextConfigurer<HttpSecurity>.JwtSecurityConfigurer jwt
                             = http.apply(new RestSecurityContextConfigurer<>()).jwt();
+                    String secret = properties.getJwt().getSecret();
                     if (properties.getJwt().getAutoRefresh()) {
                         jwt.autoRefresh(true);
-                        String secret = properties.getJwt().getSecret();
-                        if (secret == null) {
-                            secret = RandomUtils.ascii(12);
-                        }
                         jwt.secret(secret);
                         jwt.refreshSecret(secret);
                     } else {

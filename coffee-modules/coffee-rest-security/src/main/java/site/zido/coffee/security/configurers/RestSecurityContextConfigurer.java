@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
+import site.zido.coffee.core.utils.RandomUtils;
 import site.zido.coffee.core.utils.SpringUtils;
 import site.zido.coffee.security.token.JwtRefreshFilter;
 import site.zido.coffee.security.token.JwtSecurityContextRepository;
@@ -85,15 +86,15 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>>
 
     public class JwtSecurityConfigurer {
         private boolean enable = false;
-        private boolean refresh = false;
+        private boolean refresh = true;
         private String refreshHeader = "Refresh-Token";
         private String refreshSecret;
-        private boolean autoRefresh = true;
+        private boolean autoRefresh = false;
         private String secret;
         private String header = "Authorization";
         private long renewInMs = 10 * 60 * 1000;
         private long expiration = 3600 * 1000;
-        private String keyPrefix;
+        private String keyPrefix = "coffee:jwt:";
         private long timeout;
         private String issue;
         private String refreshUrl;
@@ -112,6 +113,9 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>>
             if (!enable) {
                 return;
             }
+            if (this.secret == null) {
+                this.secret = RandomUtils.ascii(12);
+            }
             if (autoRefresh) {
                 JwtSecurityContextRepository repository = new JwtSecurityContextRepository(secret, expiration,
                         renewInMs);
@@ -129,7 +133,7 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>>
                 }
                 if (userService != null
                         || (userService = SpringUtils.getBeanOrNull(http.getSharedObject(ApplicationContext.class),
-                                UserDetailsService.class)) != null
+                        UserDetailsService.class)) != null
                         || (userService = getBuilder().getSharedObject(UserDetailsService.class)) != null) {
                     repository.setUserService(userService);
                 }
@@ -163,6 +167,8 @@ public class RestSecurityContextConfigurer<H extends HttpSecurityBuilder<H>>
                     refreshFilter.setRefreshSecret(refreshSecret);
                 } else if (secret != null) {
                     refreshFilter.setRefreshSecret(secret);
+                } else {
+                    throw new IllegalStateException("请至少设置jwt加解密密钥secret");
                 }
                 refreshFilter.setRefreshTokenExpirationInMs(refreshExpiration);
                 getBuilder().setSharedObject(JwtRefreshFilter.class, postProcess(refreshFilter));

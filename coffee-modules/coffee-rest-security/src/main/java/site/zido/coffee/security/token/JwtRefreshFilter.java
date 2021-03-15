@@ -59,6 +59,7 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
 
             }
             filterChain.doFilter(request, response);
+            return;
 //            String token = response.getHeader(authHeaderName);
         }
         if ((postOnly && !"POST".equalsIgnoreCase(request.getMethod()))) {

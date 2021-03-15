@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Date;
 
 /**
  * 用户
@@ -42,13 +43,16 @@ public class User {
 
     private Boolean enabled = true;
 
+    private Date createTime = new Date();
+
     @Builder(builderMethodName = "registerBuilder")
-    private User(String username, String phone, Integer sex, String password, String card, Boolean vip) {
+    private User(String username, String phone, Integer sex, String password, String card, Boolean vip, Date createTime) {
         this.username = username;
         this.phone = phone;
         this.sex = sex;
         this.password = password;
         this.card = card;
         this.vip = vip;
+        this.createTime = createTime;
     }
 }

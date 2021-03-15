@@ -49,9 +49,9 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.kstyrc</groupId>
-            <artifactId>embedded-redis</artifactId>
-            <version>0.6</version>
+            <groupId>ai.grakn</groupId>
+            <artifactId>redis-mock</artifactId>
+            <version>0.1.6</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

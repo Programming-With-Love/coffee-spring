@@ -51,6 +51,7 @@ public class AuthConfig extends RestSecurityConfigureAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        super.configure(http);
         http
                 //权限管理将管理所有的请求
                 .authorizeRequests().anyRequest().permitAll()
