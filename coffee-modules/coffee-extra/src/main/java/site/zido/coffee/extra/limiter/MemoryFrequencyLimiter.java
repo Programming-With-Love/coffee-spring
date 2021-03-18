@@ -9,7 +9,7 @@ import site.zido.coffee.core.utils.maps.expire.ExpireMap;
  */
 public class MemoryFrequencyLimiter implements FrequencyLimiter {
     private static final Object PRESENT = new Object();
-    private final ExpireMap<String, Object> expireMap = new ExpireMap<>();
+    private ExpireMap<String, Object> expireMap = new ExpireMap<>();
     private String prefix = "";
 
     public MemoryFrequencyLimiter() {
@@ -36,5 +36,9 @@ public class MemoryFrequencyLimiter implements FrequencyLimiter {
 
     protected String getKey(String key) {
         return prefix + key;
+    }
+
+    public void setExpireMap(ExpireMap<String, Object> expireMap) {
+        this.expireMap = expireMap;
     }
 }
