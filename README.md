@@ -3,7 +3,7 @@
 </p>
 <p align="center">
   <img alt="Travis Build Status" src="https://travis-ci.org/zidoshare/coffee-spring.svg?branch=master">
-  <img alt="Travis Build Status" src="https://github.com/zidoshare/coffee-spring/workflows/Java%20CI%20with%20Maven/badge.svg">
+  <img alt="GitHub Build Status" src="https://github.com/zidoshare/coffee-spring/workflows/Java%20CI%20with%20Maven/badge.svg">
   <a href="https://github.com/zidoshare/coffee-spring/blob/master/LICENSE"><img alt="MIT LICENCE" src="https://img.shields.io/cocoapods/l/Kingfisher.svg?style=flat"></a>
 </p>
 <p align="center">
