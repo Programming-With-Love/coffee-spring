@@ -3,7 +3,7 @@ jdk:
   - oraclejdk8
 dist: trusty
 script:
-  - mvn -B package -Ptest --file pom.xml
+  - mvn test -Ptest --file pom.xml
 cache:
   directories:
     - $HOME/.m2
