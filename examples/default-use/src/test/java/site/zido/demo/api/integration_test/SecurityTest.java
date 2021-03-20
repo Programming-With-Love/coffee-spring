@@ -1,8 +1,8 @@
 package site.zido.demo.api.integration_test;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.ReflectionUtils;
 import site.zido.coffee.autoconfigure.security.rest.SpringBootRestSecurityConfiguration;
@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DemoApplication.class)
 @AutoConfigureMockMvc
 public class SecurityTest {
@@ -34,11 +34,11 @@ public class SecurityTest {
 
     private PhoneCodeCache getCache() {
         Method getHttp = ReflectionUtils.findMethod(SpringBootRestSecurityConfiguration.DefaultRestSecurityConfigurerAdapter.class, "getHttp");
-        Assert.assertNotNull(getHttp);
+        Assertions.assertNotNull(getHttp);
         ReflectionUtils.makeAccessible(getHttp);
         SpringBootRestSecurityConfiguration.DefaultRestSecurityConfigurerAdapter configure = context.getBean(SpringBootRestSecurityConfiguration.DefaultRestSecurityConfigurerAdapter.class);
         HttpSecurity http = (HttpSecurity) ReflectionUtils.invokeMethod(getHttp, configure);
-        Assert.assertNotNull(http);
+        Assertions.assertNotNull(http);
         return http.getSharedObject(PhoneCodeCache.class);
     }
 

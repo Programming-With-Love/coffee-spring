@@ -2,6 +2,7 @@ package site.zido.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
  * @author zido
  */
 @Configuration
+@EnableWebSecurity(debug = true)
 public class AuthConfig {
     /**
      * 创建几个内存用户，正常使用时，需要自定义userDetailsService

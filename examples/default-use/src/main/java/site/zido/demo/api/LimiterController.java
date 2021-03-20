@@ -1,5 +1,7 @@
 package site.zido.demo.api;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +15,7 @@ import site.zido.coffee.extra.limiter.Limiter;
  */
 @RequestMapping("/limit")
 @RestController
+@EnableCaching
 public class LimiterController {
 
     @RequestMapping

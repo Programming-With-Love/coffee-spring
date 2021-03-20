@@ -14,11 +14,6 @@ import site.zido.coffee.security.token.RestAuthenticationEntryPoint;
 public class RestSecurityConfigureAdapter extends WebSecurityConfigurerAdapter {
     private boolean disableDefaults = false;
 
-    public RestSecurityConfigureAdapter(boolean disableDefaults) {
-        super(disableDefaults);
-        this.disableDefaults = disableDefaults;
-    }
-
     public RestSecurityConfigureAdapter() {
         super(true);
     }
@@ -26,9 +21,8 @@ public class RestSecurityConfigureAdapter extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         if (!disableDefaults) {
             http.csrf(AbstractHttpConfigurer::disable).addFilter(new WebAsyncManagerIntegrationFilter())
-                    .exceptionHandling(handling -> handling.accessDeniedHandler(new RestAccessDeniedHandlerImpl()))
-                    .exceptionHandling(
-                            handling -> handling.authenticationEntryPoint(new RestAuthenticationEntryPoint()))
+                    .exceptionHandling(handling -> handling.accessDeniedHandler(new RestAccessDeniedHandlerImpl())
+                            .authenticationEntryPoint(new RestAuthenticationEntryPoint()))
                     .headers().and().apply(new RestSecurityContextConfigurer<>()).and()
                     .formLogin(form -> form.successHandler(new RestAuthenticationSuccessHandler())
                             .failureHandler(new RestAuthenticationFailureHandler())

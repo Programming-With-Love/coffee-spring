@@ -33,7 +33,6 @@ public class SpringBootRestSecurityConfiguration {
         private final CoffeeSecurityProperties properties;
 
         public DefaultRestSecurityConfigurerAdapter(CoffeeSecurityProperties properties) {
-            super(false);
             this.properties = properties;
         }
 

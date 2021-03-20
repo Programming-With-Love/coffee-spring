@@ -1,8 +1,9 @@
 package site.zido.coffee.core.common.utils;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import site.zido.coffee.core.utils.SystemClock;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SystemClockTest {
     @Test
@@ -10,6 +11,6 @@ public class SystemClockTest {
         long now = SystemClock.now();
         Thread.sleep(20);
         long last = SystemClock.now();
-        Assert.assertNotEquals(now, last);
+        assertThat(last).isNotEqualTo(now);
     }
 }
