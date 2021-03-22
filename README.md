@@ -9,7 +9,7 @@
 <p align="center">
   <img alt="LANGUAGE JAVA" src="https://img.shields.io/badge/language-java-orange.svg">
   <img alt="JDK 1.8+" src="https://img.shields.io/badge/JDK-1.8+-green.svg">
-  <img alt="Spring Boot" src="https://img.shields.io/badge/Spring%20Boot-2.2.11.RELEASE-blue.svg">
+  <img alt="Spring Boot" src="https://img.shields.io/badge/Spring%20Boot-2.3.9.RELEASE-blue.svg">
 </p>
 
 > spring 5.x / spring boot 2.x的restful启动器，节省一杯咖啡的时间，更多的约定，更快的开发
