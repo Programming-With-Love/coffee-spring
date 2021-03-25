@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static site.zido.coffee.core.constants.Patterns.PHONE_PATTERN;
+
 /**
  * @author zido
  */
@@ -40,7 +42,7 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
         HttpServletRequest request = (HttpServletRequest) req;
         String phone = obtainPhone(request);
         if (requireCreateCode(request)) {
-            if (phone == null || !phoneValidator.isValid(phone, null)) {
+            if (phone == null || !phone.matches(PHONE_PATTERN)) {
                 throw new BadCredentialsException(messages.getMessage(
                         "AbstractUserDetailsAuthenticationProvider.badCredentials",
                         "Bad phone"));
@@ -86,7 +88,7 @@ public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingF
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         String phone = obtainPhone(request);
         if (phone == null) {
             phone = "";

@@ -23,18 +23,6 @@ public class GlobalExceptionAdvice extends BaseGlobalExceptionHandler {
         super(factory);
     }
 
-    /**
-     * parameter参数校验异常处理
-     *
-     * @param e 校验异常
-     * @return result
-     */
-    @ExceptionHandler(value = ConstraintViolationException.class)
-    @Override
-    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException e, WebRequest request) {
-        return super.handleConstraintViolationException(e, request);
-    }
-
     @ExceptionHandler(CommonBusinessException.class)
     @Override
     protected ResponseEntity<Object> handleCommonBusinessException(CommonBusinessException e, WebRequest request, HttpServletResponse response) {

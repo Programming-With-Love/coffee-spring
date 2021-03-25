@@ -30,39 +30,12 @@ import java.util.Set;
  * @author zido
  */
 public abstract class BaseGlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    private final HttpResponseBodyFactory factory;
-    private final MessageSourceAccessor messages = CoffeeMessageSource.getAccessor();
+    protected final HttpResponseBodyFactory factory;
+    protected final MessageSourceAccessor messages = CoffeeMessageSource.getAccessor();
 
     protected BaseGlobalExceptionHandler(HttpResponseBodyFactory factory) {
         Assert.notNull(factory, "http response body factory cannot be null");
         this.factory = factory;
-    }
-
-    protected ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException e, WebRequest request) {
-        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
-        Iterator<ConstraintViolation<?>> iterator = constraintViolations.iterator();
-        List<String> errors = new ArrayList<>();
-        while (iterator.hasNext()) {
-            ConstraintViolation<?> next = iterator.next();
-            Path propertyPath = next.getPropertyPath();
-            String name = "unknown";
-            //获取参数名
-            for (Path.Node node : propertyPath) {
-                name = node.getName();
-            }
-            //参数错误提示
-            String message = "[" + name + "] " + next.getMessage();
-            errors.add(message);
-        }
-        return handleExceptionInternal(
-                e,
-                factory.error(CommonErrorCode.VALIDATION_FAILED,
-                        messages.getMessage("ValidationFailed", "Validation Failed"),
-                        errors),
-                new HttpHeaders(),
-                HttpStatus.BAD_REQUEST,
-                request
-        );
     }
 
     @Override
