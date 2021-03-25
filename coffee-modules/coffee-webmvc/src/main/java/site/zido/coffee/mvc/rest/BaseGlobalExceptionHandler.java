@@ -16,13 +16,8 @@ import site.zido.coffee.mvc.CommonErrorCode;
 import site.zido.coffee.mvc.exceptions.CommonBusinessException;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 统一异常处理

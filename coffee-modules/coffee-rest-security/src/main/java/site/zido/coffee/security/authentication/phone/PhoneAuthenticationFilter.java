@@ -7,7 +7,6 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import site.zido.coffee.core.validations.PhoneValidator;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -25,7 +24,6 @@ import static site.zido.coffee.core.constants.Patterns.PHONE_PATTERN;
 public class PhoneAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private RequestMatcher codeRequestMatcher = new AntPathRequestMatcher("/users/sms/code", "POST");
-    private PhoneValidator phoneValidator = new PhoneValidator();
     private PhoneCodeService phoneCodeService;
     private CodeGenerator codeGenerator = new CustomCodeGenerator(CustomCodeGenerator.Mode.NUMBER);
     private PhoneCodeCache cache;
